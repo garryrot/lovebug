@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+<PapyrusProject 
+	xmlns="PapyrusProject.xsd"
+    Flags="TESV_Papyrus_Flags.flg"
+    Game="sse"
+    Output="Data/Scripts"
+    Optimize="false"
+    Release="false"
+    Anonymize="true"
+    Final="false">
+    <Imports>
+        <Import>.\Dependencies</Import>
+        <Import>C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Source\Scripts</Import>
+        <Import>C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source</Import>
+    </Imports>
+    <Folders>
+        <Folder>.\Data\Source\Scripts</Folder>
+    </Folders>
+</PapyrusProject>

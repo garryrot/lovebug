@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "lovebug",
+  "version-string": "0.0.0",
+  "port-version": 0,
+  "description": "Lovebug",
+  "homepage": "https://github.com/garryrot/lovebug",
+  "license": "Apache-2.0",
+  "dependencies": [
+    "commonlibsse-ng",
+    "bethesda-skyrim-scripts"
+  ]
+}
