@@ -3,7 +3,7 @@ use std::{
     sync::Mutex,
 };
 
-use tracing::{Level, info};
+use tracing::{debug, error, info, Level};
 
 use crate::settings::ModSettings;
 
@@ -12,12 +12,22 @@ mod ffi {
     extern "Rust" {
         fn lb_init_logging(logPath: String) -> bool;
         fn lb_init_logging_stdout() -> bool;
+        fn lb_log_debug(message: String);
         fn lb_log_info(message: String);
+        fn lb_log_error(message: String);
     }
+}
+
+pub fn lb_log_debug(message: String) {
+    debug!(message);
 }
 
 pub fn lb_log_info(message: String) {
     info!(message);
+}
+
+pub fn lb_log_error(message: String) {
+    error!(message);
 }
 
 pub fn lb_init_logging_stdout() -> bool {

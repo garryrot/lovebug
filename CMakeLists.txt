@@ -23,7 +23,7 @@ configure_file(
          
 set(sources
         src/Plugin.cpp
-        rust/src/Tasks.cpp
+        rust/src/Bridge.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
 source_group(

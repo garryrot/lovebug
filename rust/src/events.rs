@@ -1,7 +1,7 @@
-use tracing::info;
-use crate::LB;
+use tracing::{debug, info};
+use crate::{ffi, LB};
 
-use crate::ffi::SKSEModEvent;
+use crate::ffi::*;
 
 #[derive(Debug)]
 pub enum LovebugEvent {
@@ -27,38 +27,24 @@ impl SKSEModEvent {
     }
 }
 
-
-/// Return type Vec cause cxx crate does not support Option
-/// and Result enforces try catch with some weird template
-/// I don't wanna get into
-pub fn lb_qry_nxt_evt() -> Vec<SKSEModEvent> {
-    let mut receiver = None;
-    if let Ok(mut guard) = LB.state.lock() {
-        if let Some(tk) = guard.take() {
-            let evt_receiver = tk.events.clone();
-            guard.replace(tk);
-            receiver = Some(evt_receiver);
+pub fn start_event_thread( receiver: crossbeam_channel::Receiver<LovebugEvent> ) {
+    std::thread::spawn( move || {
+        fn send_mod_event(event: SKSEModEvent) {
+            AddTask_SKSEModEvent(
+                |context| {
+                    let form = ffi::GetFormById(0x12C5, "Lovebug.esp");
+                    unsafe { SendEvent(form, context); }
+                },
+                event
+            );
         }
-    }
-    match receiver {
-        Some(receiver) => {
-            if let Some(evt) = get_next_events_blocking(&receiver) {
-                return vec![evt];
+    
+        while let Ok(evt) = receiver.recv() {
+            info!("got event: {:?}", evt);
+            match evt {
+                LovebugEvent::Foo => send_mod_event( SKSEModEvent::new("event_foo", "str_arg", 0.0) ),
+                LovebugEvent::Bar => send_mod_event( SKSEModEvent::new("event_bar", "str_arg", 0.0) )
             }
-            vec![]
         }
-        None => vec![],
-    }
-}
-
-pub fn get_next_events_blocking(connection_events: &crossbeam_channel::Receiver<LovebugEvent>) -> Option<SKSEModEvent> {
-    if let Ok(result) = connection_events.recv() {
-        info!("Sending SKSE Event: {:?}", result);
-        let event = match result {
-            LovebugEvent::Foo => SKSEModEvent { event_name: "Lovebug_Foo".to_string(), str_arg: "".into(), num_arg: 0.0 },
-            LovebugEvent::Bar => SKSEModEvent { event_name: "Lovebug_Bar".to_string(), str_arg: "".into(), num_arg: 0.0 },
-        };
-        return Some(event);
-    }
-    None
+    });
 }

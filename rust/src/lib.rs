@@ -1,11 +1,8 @@
 
-use std::sync::{Arc, Mutex};
-use events::LovebugEvent;
+use std::{sync::{Arc, Mutex}, thread, time::Duration};
+use events::{start_event_thread, LovebugEvent};
 use lazy_static::lazy_static;
 use tracing::{debug, error};
-
-use crate::events::lb_qry_nxt_evt;
-use futures::channel::oneshot;
 
 mod events;
 mod logging;
@@ -13,7 +10,7 @@ mod settings;
 
 #[derive(Debug)]
 pub struct Lovebug {
-    events: crossbeam_channel::Receiver<LovebugEvent>
+    event_sender: crossbeam_channel::Sender<LovebugEvent>
 }
 
 impl Lovebug {
@@ -22,7 +19,6 @@ impl Lovebug {
         F: FnOnce(&mut Lovebug) -> R,
         R: std::fmt::Debug
     {
-        let a : Box<str>;
         if let Ok(mut guard) = LB.state.try_lock() {
             match guard.take() {
                 Some(mut tk) => {
@@ -45,7 +41,7 @@ pub struct LbApi {
     pub state: Arc<Mutex<Option<Lovebug>>>,
 }
 
-pub struct TaskContext(i32); // (oneshot::Sender<ffi::Ret>);
+pub struct TaskContext(i32);
 
 lazy_static! {
     static ref LB: LbApi = {
@@ -68,49 +64,47 @@ mod ffi {
 
     extern "Rust" {
         type TaskContext;
-        fn lb_qry_nxt_evt() -> Vec<SKSEModEvent>;
-        fn api_loaded() -> bool;
+        fn lb_init() -> bool;
+    }
+
+    #[namespace = "RE"]
+    unsafe extern "C++" {
+        include!("PCH.h");
+        type TESForm;
     }
     
     unsafe extern "C++" {
-        include!("Tasks.h");
-
-        fn shim_TaskInterface_AddTask(
-            done: fn( ctx: SKSEModEvent, event_name: &str ),
-            ctx: SKSEModEvent,
-            event_name: &str,
-        );
+        include!("Bridge.h");
+        fn AddTask_SKSEModEvent(done: fn( ctx: SKSEModEvent ), ctx: SKSEModEvent);
+        fn GetFormById(id: i32, esp: &str) -> *mut TESForm;
+        unsafe fn SendEvent(form: *mut TESForm, event: SKSEModEvent);
     }
 }
 
-mod task_interface {    
-    use futures::channel::oneshot;
-    use tracing::info;
-    use crate::*;
-
-    use self::ffi::SKSEModEvent;
-
-    pub async fn add_task_async() {
-        let (tx, rx) = oneshot::channel();
-        let context = SKSEModEvent {
-            event_name: "asdf".to_owned(),
-            str_arg: "asdf".to_owned(),
-            num_arg: 0.0
+pub fn lb_init() -> bool {
+    if let Ok(mut guard) = LB.state.try_lock() {
+        let (event_sender, recv) = crossbeam_channel::unbounded();
+           start_event_thread(recv);
+        let lb = Lovebug {
+            event_sender
         };
-        let event_name = "asdf";
-
-        ffi::shim_TaskInterface_AddTask(
-            |context, event_name| {
-                let evt = SKSEModEvent::new("event_name", "str_arg", 1.0);
-                info!("moep");
-            },
-            context,
-            event_name
-        );
-        rx.await.unwrap()
+        guard.replace(lb);
+    } else {
+        error!("init failed");
     }
-}
 
-pub fn api_loaded() -> bool {
+    thread::spawn(|| {
+        loop {
+            thread::sleep(Duration::from_secs(30));
+            debug!("loop");
+            if let Ok(mut guard) = LB.state.try_lock() {
+                if let Some(inner) = &mut *guard {
+                    inner.event_sender.send(LovebugEvent::Foo).unwrap();
+                }
+            } else {
+                error!("init failed");
+            }
+        }
+    });
     true
 }
