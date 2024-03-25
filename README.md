@@ -1,6 +1,11 @@
 # Lovebug
 
-## Features
+Amorous event processor for Skyrim SE/AE/VR.
+
+Lovebug is a middleware/framework for capturing in-game events (animations or other generic events) 
+and generating actions for endpoints like bluetooth toy controllers.
+
+## Features  
 
 ## 1. Installation
 
