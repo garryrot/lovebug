@@ -1,3 +1,3 @@
 ScriptName Lb_Native Hidden
 
-Bool Function Init() Global Native
+Bool Function Lb_BazBar() Global Native

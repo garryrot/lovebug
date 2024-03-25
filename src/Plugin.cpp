@@ -17,12 +17,13 @@ using namespace REL;
 #define DllExport __declspec(dllexport)
 #define SFT StaticFunctionTag*
 
-bool Init(SFT) { 
+bool Impl_Lb_BazBar(SFT) {
+    return lb_bazbar();
 }
  
-constexpr std::string_view PapyrusClass = "Lovebug";
+constexpr std::string_view PapyrusClass = "Lb_Native";
 bool RegisterPapyrusCalls(IVirtualMachine* vm) {
-    // vm->RegisterFunction("Init", PapyrusClass, init);
+    vm->RegisterFunction("Lb_BazBar", PapyrusClass, Impl_Lb_BazBar);
     return true;
 }
 

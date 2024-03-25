@@ -65,6 +65,7 @@ mod ffi {
     extern "Rust" {
         type TaskContext;
         fn lb_init() -> bool;
+        fn lb_bazbar() -> bool;
     }
 
     #[namespace = "RE"]
@@ -79,6 +80,10 @@ mod ffi {
         fn GetFormById(id: i32, esp: &str) -> *mut TESForm;
         unsafe fn SendEvent(form: *mut TESForm, event: SKSEModEvent);
     }
+}
+
+pub fn lb_bazbar() -> bool {
+    true
 }
 
 pub fn lb_init() -> bool {
