@@ -1,0 +1,49 @@
+[
+    {
+        "Event": {
+            "enable": true,
+            "event_start": {
+                "form_id": 16894718,
+                "name": "VibrateEffectStart"
+            },
+            "event_stop": {
+                "form_id": 16894718,
+                "name": "VibrateEffectStop"
+            },
+            "action": {
+                "Scalar": [
+                    100,
+                    [
+                        "Vibrate",
+                        "Constrict"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "Scene": {
+            "enable": false,
+            "description": "Default scene",
+            "framework": "All",
+            "scene_id": "Any",
+            "scene_fragment_id": "Any",
+            "tags": {
+                "Or": [
+                    "Anal",
+                    "Vaginal"
+                ]
+            },
+            "action": {
+                "Scalar": [
+                    100,
+                    [
+                        "Vibrate",
+                        "Constrict",
+                        "Oscillate"
+                    ]
+                ]
+            }
+        }
+    }
+]

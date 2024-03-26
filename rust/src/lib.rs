@@ -1,4 +1,3 @@
-
 use std::{sync::{Arc, Mutex}, thread, time::Duration};
 use events::{start_event_thread, LovebugEvent};
 use lazy_static::lazy_static;
@@ -7,6 +6,7 @@ use tracing::{debug, error};
 mod events;
 mod logging;
 mod settings;
+mod config;
 
 #[derive(Debug)]
 pub struct Lovebug {

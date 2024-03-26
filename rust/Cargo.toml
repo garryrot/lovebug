@@ -8,15 +8,16 @@ name = "lovebug"
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]
+config = { path = "./config" }
 anyhow = "1.0.68"
 cxx = "1.0.95"
-serde = { version = "1.0.164", features = ["derive"] }
-serde_json = "1.0.99"
 tracing = "0.1.37"
 tracing-subscriber = "0.3.16"
 crossbeam-channel = " 0.5.1"
 lazy_static = "1.4.0"
 futures = "0.3.30"
+serde = "1.0.197"
+serde_json = "1.0.115"
 
 [build-dependencies]
 cxx-build = "1.0"
