@@ -1,0 +1,127 @@
+[
+  {
+    "Event": {
+      "enable": true,
+      "description": "Milk Mod: Feeding Stage",
+      "event_start": {
+        "form": "All",
+        "event": "MilkQuest.FeedingStage",
+        "conditions": []
+      },
+      "event_stop": {
+        "form": "All",
+        "event": "MilkQuest.MilkingStage",
+        "conditions": []
+      },
+      "action": {
+        "Scalar": [
+          10,
+          [
+            "Vibrate",
+            "Inflate"
+          ]
+        ]
+      },
+      "body_parts": {
+        "Tags": [
+          "Anal"
+        ]
+      }
+    }
+  },
+  {
+    "Event": {
+      "enable": true,
+      "description": "Milk Mod: Milking Stage",
+      "event_start": {
+        "form": "All",
+        "event": "MilkQuest.MilkingStage",
+        "conditions": []
+      },
+      "event_stop": {
+        "form": "All",
+        "event": "MilkQuest.FuckMachineStage",
+        "conditions": []
+      },
+      "action": {
+        "Scalar": [
+          20,
+          [
+            "Vibrate",
+            "Constrict",
+            "Inflate"
+          ]
+        ]
+      },
+      "body_parts": {
+        "Tags": [
+          "Anal",
+          "Nipple"
+        ]
+      }
+    }
+  },
+  {
+    "Event": {
+      "enable": true,
+      "description": "Milk Mod: Fucking Machine Stage",
+      "event_start": {
+        "form": "All",
+        "event": "MilkQuest.FuckMachineStage",
+        "conditions": []
+      },
+      "event_stop": {
+        "form": "All",
+        "event": "MilkQuest.StartMilkingMachine",
+        "conditions": []
+      },
+      "action": {
+        "Scalar": [
+          40,
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate",
+            "Inflate"
+          ]
+        ]
+      },
+      "body_parts": {
+        "Tags": [
+          "Anal",
+          "Vaginal"
+        ]
+      }
+    }
+  },
+  {
+    "Timed": {
+      "enable": true,
+      "description": "Milk Mod: Start Milking Machine",
+      "event_start": {
+        "form": "All",
+        "event": "MilkQuest.StartMilkingMachine",
+        "conditions": []
+      },
+      "duration_ms": 10000,
+      "action": {
+        "Scalar": [
+          100,
+          [
+            "Vibrate",
+            "Constrict",
+            "Inflate",
+            "Oscillate"
+          ]
+        ]
+      },
+      "body_parts": {
+        "Tags": [
+          "Anal",
+          "Vaginal",
+          "Nipple"
+        ]
+      }
+    }
+  }
+]
