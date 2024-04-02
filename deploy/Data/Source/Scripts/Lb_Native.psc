@@ -1,3 +1,3 @@
 ScriptName Lb_Native Hidden
 
-Bool Function Lb_BazBar() Global Native
+Bool Function Process_Event(String eventName, String strArg, Float numArg) Global Native

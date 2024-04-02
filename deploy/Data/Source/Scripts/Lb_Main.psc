@@ -1,7 +1,6 @@
 Scriptname Lb_Main extends Quest  
 
 Event OnInit()
-    Debug.MessageBox("OnInit")
     RegisterForModEvent("event_foo", "OnFoo")
     RegisterForModEvent("event_bar", "OnBar")
 EndEvent

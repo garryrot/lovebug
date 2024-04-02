@@ -2,17 +2,21 @@ use anyhow::Result;
 use std::fs;
 
 use serde::{Deserialize, Serialize};
+use serde_hex::{SerHex,StrictPfx};
+
+pub static TRIGGERS_DIR: &str = "Data\\SKSE\\Plugins\\Lovebug\\Triggers";
 
 // triggers/*.json
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Trigger {
-    Scene(TriggerScene),
-    Event(TriggerEvent),
+    Scene(Scene),
+    Event(Event),
+    Timed(TimedEvent)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct TriggerScene {
+pub struct Scene {
     enable: bool,
     description: String,
     framework: Framework,
@@ -31,8 +35,21 @@ pub enum SceneId {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SceneTags {
-    And(Vec<String>),
-    Or(Vec<String>),
+    Tag(String),
+    And(Vec<Box<SceneTags>>),
+    Or(Vec<Box<SceneTags>>),
+}
+
+impl SceneTags {
+    pub fn tag(name: &str) -> Box<SceneTags> {
+        Box::new(SceneTags::Tag(name.into()))
+    }
+    pub fn and(items: Vec<Box<SceneTags>>) -> Box<SceneTags> {
+        Box::new(SceneTags::And(items))
+    }
+    pub fn or(items: Vec<Box<SceneTags>>) -> Box<SceneTags> {
+        Box::new(SceneTags::Or(items))
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -44,18 +61,46 @@ pub enum Framework {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct TriggerEvent {
+pub struct Event {
     enable: bool,
+    description: String,
     event_start: EventTrigger,
     event_stop: EventTrigger,
-    action: Action,
+    action: Vec<Action>,
+    body_parts: BodyParts
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TimedEvent {
+    enable: bool,
+    description: String,
+    event_start: EventTrigger,
+    duration_ms: u32,
+    action: Vec<Action>,
+    body_parts: BodyParts
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventTrigger {
+    form: Form,
+    event: String,
+    conditions: Vec<EventCondition>,
+}
 
-    form_id: i32,
-    name: String,
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EventCondition {
+    StrArgEquals(String),
+    NumArgEquals(f32),
+    NumArgGreaterEquals(f32),
+    NumArgSmallerEquals(f32),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Form {
+    All,
+    Player,
+    #[serde(with = "SerHex::<StrictPfx>")]
+    FormId(u32)
 }
 
 // actions/*.json
@@ -69,11 +114,17 @@ pub enum Action {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum BodyParts {
+    All,
+    Tags(Vec<String>)
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ScalarActuators {
-    Vibrate,
-    Oscillate,
-    Inflate,
     Constrict,
+    Inflate,
+    Oscillate,
+    Vibrate,
 }
 
 // parse
@@ -96,28 +147,128 @@ mod tests {
     #[test]
     fn create_default_config() {
         let default_config = vec![
-            Trigger::Event(TriggerEvent {
+            Trigger::Event(Event {
                 enable: true,
+                description: "Milk Mod: Feeding Stage".into(),
                 event_start: EventTrigger {
-                    form_id: 0x0101CAFE,
-                    name: "VibrateEffectStart".into(),
+                    form: Form::All,
+                    event: "MilkQuest.FeedingStage".into(),
+                    conditions: vec![],
                 },
                 event_stop: EventTrigger {
-                    form_id: 0x0101CAFE,
-                    name: "VibrateEffectStop".into(),
+                    form: Form::All,
+                    event: "MilkQuest.MilkingStage".into(),
+                    conditions: vec![],
+                },
+                action: vec![
+                    Action::Scalar(
+                        10, 
+                        vec![ScalarActuators::Vibrate, ScalarActuators::Inflate],
+                    )],
+                body_parts: BodyParts::Tags(
+                    vec![
+                        "Anal".into()
+                    ]
+                )
+            }),
+            Trigger::Event(Event {
+                enable: true,
+                description: "Milk Mod: Milking Stage".into(),
+                event_start: EventTrigger {
+                    form: Form::All,
+                    event: "MilkQuest.MilkingStage".into(),
+                    conditions: vec![],
+                },
+                event_stop: EventTrigger {
+                    form: Form::All,
+                    event: "MilkQuest.FuckMachineStage".into(),
+                    conditions: vec![],
                 },
                 action: Action::Scalar(
-                    100,
-                    vec![ScalarActuators::Vibrate, ScalarActuators::Constrict],
+                    20,
+                    vec![
+                        ScalarActuators::Vibrate, 
+                        ScalarActuators::Constrict,
+                        ScalarActuators::Inflate
+                    ],
                 ),
+                body_parts: BodyParts::Tags(
+                    vec![
+                        "Anal".into(),
+                        "Nipple".into()
+                    ]
+                )
             }),
-            Trigger::Scene(TriggerScene {
+            Trigger::Event(Event {
+                enable: true,
+                description: "Milk Mod: Fucking Machine Stage".into(),
+                event_start: EventTrigger {
+                    form: Form::All,
+                    event: "MilkQuest.FuckMachineStage".into(),
+                    conditions: vec![],
+                },
+                event_stop: EventTrigger {
+                    form: Form::All,
+                    event: "MilkQuest.StartMilkingMachine".into(),
+                    conditions: vec![],
+                },
+                action: Action::Scalar(
+                    40,
+                    vec![
+                        ScalarActuators::Vibrate, 
+                        ScalarActuators::Constrict,
+                        ScalarActuators::Oscillate,
+                        ScalarActuators::Inflate
+                    ],
+                ),
+                body_parts: BodyParts::Tags(
+                    vec![
+                        "Anal".into(),
+                        "Vaginal".into()
+                    ]
+                )
+            }),
+            Trigger::Timed(TimedEvent {
+                enable: true,
+                description: "Milk Mod: Start Milking Machine".into(),
+                event_start: EventTrigger {
+                    form: Form::All,
+                    event: "MilkQuest.StartMilkingMachine".into(),
+                    conditions: vec![],
+                },
+                duration_ms: 10_000,
+                action: Action::Scalar(
+                    100,
+                    vec![
+                        ScalarActuators::Vibrate, 
+                        ScalarActuators::Constrict,
+                        ScalarActuators::Inflate,
+                        ScalarActuators::Oscillate
+                    ],
+                ),
+                body_parts: BodyParts::Tags(
+                    vec![
+                        "Anal".into(),
+                        "Vaginal".into(),
+                        "Nipple".into()
+                    ]
+                )
+            }),
+
+            Trigger::Scene(Scene {
                 enable: false,
                 description: "Default scene".into(),
                 framework: Framework::All,
                 scene_id: SceneId::Any,
                 scene_fragment_id: SceneId::Any,
-                tags: SceneTags::Or(vec!["Anal".into(), "Vaginal".into()]),
+                tags: SceneTags::Or(vec![
+                    SceneTags::tag("Anal"),
+                    SceneTags::tag("Vaginal"),
+                    SceneTags::and(vec![
+                        SceneTags::tag("Foo"),
+                        SceneTags::tag("Bar")
+                    ]),
+                ]),
                 action: Action::Scalar(
                     100,
                     vec![

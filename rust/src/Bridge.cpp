@@ -21,3 +21,14 @@ void SendEvent(RE::TESForm* form, SKSEModEvent event) noexcept {
 RE::TESForm* GetFormById(int form_id, rust::Str esp) noexcept {
     return RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(form_id, (std::string) esp);
 }
+
+SKSEModEvent CloneInto(const SKSE::ModCallbackEvent* event) noexcept {
+    return {(std::string) event->eventName, (std::string) event->strArg, event->numArg};
+}
+
+// RE::TESForm* GetSender(const SKSE::ModCallbackEvent* event) noexcept {
+//     if (event != NULL) {
+//         return event->sender;
+//     }
+//     return NULL;
+// }
