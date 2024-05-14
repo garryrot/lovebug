@@ -184,14 +184,14 @@ mod tests {
                     event: "MilkQuest.FuckMachineStage".into(),
                     conditions: vec![],
                 },
-                action: Action::Scalar(
+                action: vec![Action::Scalar(
                     20,
                     vec![
                         ScalarActuators::Vibrate, 
                         ScalarActuators::Constrict,
                         ScalarActuators::Inflate
                     ],
-                ),
+                )],
                 body_parts: BodyParts::Tags(
                     vec![
                         "Anal".into(),
@@ -212,7 +212,7 @@ mod tests {
                     event: "MilkQuest.StartMilkingMachine".into(),
                     conditions: vec![],
                 },
-                action: Action::Scalar(
+                action: vec![Action::Scalar(
                     40,
                     vec![
                         ScalarActuators::Vibrate, 
@@ -220,7 +220,7 @@ mod tests {
                         ScalarActuators::Oscillate,
                         ScalarActuators::Inflate
                     ],
-                ),
+                )],
                 body_parts: BodyParts::Tags(
                     vec![
                         "Anal".into(),
@@ -237,7 +237,7 @@ mod tests {
                     conditions: vec![],
                 },
                 duration_ms: 10_000,
-                action: Action::Scalar(
+                action: vec![Action::Scalar(
                     100,
                     vec![
                         ScalarActuators::Vibrate, 
@@ -245,7 +245,7 @@ mod tests {
                         ScalarActuators::Inflate,
                         ScalarActuators::Oscillate
                     ],
-                ),
+                )],
                 body_parts: BodyParts::Tags(
                     vec![
                         "Anal".into(),

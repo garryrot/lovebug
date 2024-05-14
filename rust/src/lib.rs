@@ -2,11 +2,7 @@ use ::config::{read_triggers, TRIGGERS_DIR};
 use events::{start_event_thread, LovebugEvent};
 use ffi::{ModCallbackEvent, TESForm};
 use lazy_static::lazy_static;
-use std::{
-    sync::{Arc, Mutex},
-    thread,
-    time::Duration,
-};
+use std::sync::{Arc, Mutex};
 use tracing::{debug, error, warn};
 
 use crate::ffi::CloneInto;
