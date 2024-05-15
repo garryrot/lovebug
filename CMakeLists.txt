@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 23)                      # TODO is 23 really required?
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
+set(GameVersion "Skyrim")
+
 include(GNUInstallDirs)
 include(ExternalProject)
 
@@ -31,35 +33,30 @@ source_group(
 ## Rust library
 ########################################################################################################################
 
-set(CARGO_MANIFEST ${CMAKE_SOURCE_DIR}/rust/Cargo.toml)
-set(CARGO_TARGET_DIR ${CMAKE_SOURCE_DIR}/rust/target)
-set(RUST_SOURCE_DIR ${CMAKE_SOURCE_DIR}/rust/src)
-set(RUST_SOURCE_FILES ${RUST_SOURCE_DIR}/lib.rs ${RUST_SOURCE_DIR}/settings.rs ${RUST_SOURCE_DIR}/logging.rs ${RUST_SOURCE_DIR}/events.rs)
-set(RUST_BRIDGE_CPP ${CARGO_TARGET_DIR}/cxxbridge/lbug/src/lib.rs.cc ${CARGO_TARGET_DIR}/cxxbridge/lbug/src/logging.rs.cc)
-set(RUST_LIBRARY ${CARGO_TARGET_DIR}/release/${CMAKE_STATIC_LIBRARY_PREFIX}lovebug${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(RUST_LIBRARY ${CMAKE_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_LIBRARY_PREFIX}lovebug${CMAKE_STATIC_LIBRARY_SUFFIX})
 
+set(RUST_CXX_BRIDGE_CPP ${CMAKE_SOURCE_DIR}/rust/target/cxxbridge/lbug/src/lib.rs.cc 
+                        ${CMAKE_SOURCE_DIR}/rust/target/cxxbridge/lbug/src/logging.rs.cc)
 add_custom_command(
     OUTPUT ${RUST_BRIDGE_CPP} ${RUST_LIBRARY}
-    COMMAND cargo build --manifest-path ${CARGO_MANIFEST} --release
-    DEPENDS ${RUST_SOURCE_FILES}
+    COMMAND cargo build --manifest-path ${CMAKE_SOURCE_DIR}/rust/Cargo.toml --release
+    DEPENDS ${CMAKE_SOURCE_DIR}/rust/src/config.rs
+            ${CMAKE_SOURCE_DIR}/rust/src/events.rs
+            ${CMAKE_SOURCE_DIR}/rust/src/lib.rs
+            ${CMAKE_SOURCE_DIR}/rust/src/logging.rs
+            ${CMAKE_SOURCE_DIR}/rust/src/settings.rs
     USES_TERMINAL
     COMMENT "Running cargo..."
 )
-
-# TODO Required? What does it do?
-add_compile_definitions(SKYRIM)
-
-set(CommonLibPath "extern/CommonLibSSE-NG")
-set(CommonLibName "CommonLibSSE")
-add_subdirectory(${CommonLibPath} ${CommonLibName} EXCLUDE_FROM_ALL)
-
-# TODO Required? What does it do?
-set(GameVersion "Skyrim")
 
 
 ########################################################################################################################
 ## Configure target DLL
 ########################################################################################################################
+
+# TODO Required? What does it do?
+add_compile_definitions(SKYRIM)
+add_subdirectory("extern/CommonLibSSE-NG" "CommonLibSSE" EXCLUDE_FROM_ALL)
 
 include(extern/CommonLibSSE-NG/cmake/CommonLibSSE.cmake)
 add_commonlibsse_plugin(
@@ -67,11 +64,11 @@ add_commonlibsse_plugin(
         SOURCES 
         ${headers}
         ${sources}
-        ${RUST_BRIDGE_CPP})
+        ${RUST_CXX_BRIDGE_CPP})
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
-        ${CARGO_TARGET_DIR}/cxxbridge
+        ${CMAKE_SOURCE_DIR}/rust/target/cxxbridge
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/rust/src>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:src>)     
@@ -82,13 +79,19 @@ target_include_directories(${PROJECT_NAME}
 
 # libraries that are required for linking with the rust library 
 # statically this list was created by trial- and error
-set(STATIC_LINK_LIBS ws2_32.lib bcrypt.lib userenv.lib Advapi32.lib crypt32.lib secur32.lib Setupapi.lib ntdll.lib ncrypt.lib)
-
 target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
         ${RUST_LIBRARY}
-        ${STATIC_LINK_LIBS})
+        ws2_32.lib 
+        bcrypt.lib 
+        userenv.lib 
+        Advapi32.lib 
+        crypt32.lib 
+        secur32.lib 
+        Setupapi.lib 
+        ntdll.lib 
+        ncrypt.lib)
 
 target_precompile_headers(
         ${PROJECT_NAME}
