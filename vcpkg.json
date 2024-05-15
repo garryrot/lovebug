@@ -7,9 +7,9 @@
   "homepage": "https://github.com/garryrot/lovebug",
   "license": "Apache-2.0",
   "dependencies": [
-    "commonlibsse-ng",
     "bethesda-skyrim-scripts",
-    "directxtk", 
-    "catch2"
+    "spdlog",
+    "directxtk",
+    "rapidcsv"
   ]
 }

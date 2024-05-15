@@ -15,9 +15,8 @@ configure_file(
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc
         @ONLY)
 
-# TODO: Does this remove catch2 req ???
-# set(BUILD_TESTS OFF)
-         
+set(BUILD_TESTS OFF)
+        
 set(sources
         src/Plugin.cpp
         rust/src/Bridge.cpp
