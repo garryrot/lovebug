@@ -8,6 +8,8 @@
   "license": "Apache-2.0",
   "dependencies": [
     "commonlibsse-ng",
-    "bethesda-skyrim-scripts"
+    "bethesda-skyrim-scripts",
+    "directxtk", 
+    "catch2"
   ]
 }

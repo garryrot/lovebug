@@ -18,13 +18,19 @@ There should really be no need for you to do this, unless you:
 
 1. Test VCPKG_ROOT is set in your build terminal. This should return the path:
 
-```
+```sh
 echo %VCPKG_ROOT%
 ```
 
-2. Build the project
+2. Init submodules
 
-```ps
+```sh
+git submodule update --init --recursive
+```
+
+3. Build the project
+
+```sh
 cmake --preset build
 cmake --build --preset build --config Release
 ```

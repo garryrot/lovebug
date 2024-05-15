@@ -1,15 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
-message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
-
-########################################################################################################################
-## Define project
-########################################################################################################################
-project(
-        Lovebug
-        VERSION 0.0.1
-        DESCRIPTION ""
-        LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
+project( Lovebug 
+         VERSION 0.0.1 
+         DESCRIPTION "" 
+         LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)                      # TODO is 23 really required?
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
@@ -20,6 +14,9 @@ configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc
         @ONLY)
+
+# TODO: Does this remove catch2 req ???
+# set(BUILD_TESTS OFF)
          
 set(sources
         src/Plugin.cpp
@@ -50,19 +47,23 @@ add_custom_command(
     COMMENT "Running cargo..."
 )
 
+
+add_compile_definitions(SKYRIM)
+set(CommonLibPath "extern/CommonLibSSE-NG")
+set(CommonLibName "CommonLibSSE")
+add_subdirectory(${CommonLibPath} ${CommonLibName} EXCLUDE_FROM_ALL)
+set(GameVersion "Skyrim")
+
 ########################################################################################################################
 ## Configure target DLL
 ########################################################################################################################
 
-find_package(CommonLibSSE CONFIG REQUIRED)
-
-add_commonlibsse_plugin(
-        ${PROJECT_NAME} 
-        SOURCES 
-        ${headers}
+add_library(
+        ${PROJECT_NAME}
+        SHARED
         ${sources}
-        ${RUST_BRIDGE_CPP})
-add_library("${PROJECT_NAME}::${PROJECT_NAME}" ALIAS "${PROJECT_NAME}")
+        ${RUST_BRIDGE_CPP}
+        ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
@@ -70,22 +71,21 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/rust/src>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:src>)
+        
 
 ########################################################################################################################
 ## Link rust library
 ########################################################################################################################
 
-# libraries that are required for linking with the rust library statically
-# this list was created by trial- and error and might need to be extended
-# or adapted in the future if any of the rust dependencies changes the system calls it uses. 
-# If the linker complains about weird symbols missing and those symbols are windows system libraries,
-# you might want to add that library here
-
+# libraries that are required for linking with the rust library 
+# statically this list was created by trial- and error
 set(STATIC_LINK_LIBS ws2_32.lib bcrypt.lib userenv.lib Advapi32.lib crypt32.lib secur32.lib Setupapi.lib ntdll.lib ncrypt.lib)
+
 target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
         ${RUST_LIBRARY}
+        CommonLibSSE::CommonLibSSE
         ${STATIC_LINK_LIBS})
 
 target_precompile_headers(
@@ -93,6 +93,7 @@ target_precompile_headers(
         PRIVATE
         src/PCH.h)
 
+# TODO remove?
 install(TARGETS ${PROJECT_NAME}
         DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
