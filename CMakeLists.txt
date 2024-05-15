@@ -47,31 +47,35 @@ add_custom_command(
     COMMENT "Running cargo..."
 )
 
-
+# TODO Required? What does it do?
 add_compile_definitions(SKYRIM)
+
 set(CommonLibPath "extern/CommonLibSSE-NG")
 set(CommonLibName "CommonLibSSE")
 add_subdirectory(${CommonLibPath} ${CommonLibName} EXCLUDE_FROM_ALL)
+
+# TODO Required? What does it do?
 set(GameVersion "Skyrim")
+
 
 ########################################################################################################################
 ## Configure target DLL
 ########################################################################################################################
 
-add_library(
-        ${PROJECT_NAME}
-        SHARED
+include(extern/CommonLibSSE-NG/cmake/CommonLibSSE.cmake)
+add_commonlibsse_plugin(
+        ${PROJECT_NAME} 
+        SOURCES 
+        ${headers}
         ${sources}
-        ${RUST_BRIDGE_CPP}
-        ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+        ${RUST_BRIDGE_CPP})
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
         ${CARGO_TARGET_DIR}/cxxbridge
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/rust/src>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:src>)
-        
+        $<INSTALL_INTERFACE:src>)     
 
 ########################################################################################################################
 ## Link rust library
@@ -85,7 +89,6 @@ target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
         ${RUST_LIBRARY}
-        CommonLibSSE::CommonLibSSE
         ${STATIC_LINK_LIBS})
 
 target_precompile_headers(
