@@ -12,7 +12,9 @@ There should really be no need for you to do this, unless you:
  1. [Rust](https://www.rust-lang.org/tools/install) - executables like `cargo` should be present in your PATH
  2. [Visual Studio 2022](https://visualstudio.microsoft.com/de/) with a C++ compiler
  3. [CMake](https://cmake.org/download/) - make sure that its added to your PATH environment variable
- 4. [VCPKG](https://github.com/microsoft/vcpkg) - set environment variable VCPKG_ROOT to the vcpkg installation folder
+ 4. [VCPKG](https://github.com/microsoft/vcpkg) 
+    - Set environment variable VCPKG_ROOT to the vcpkg installation folder
+    - Version must be 2023-02-16 or later, otherwise youll get `xbox` error
 
 ## Step-By-Step
 

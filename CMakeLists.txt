@@ -1,113 +1,76 @@
 cmake_minimum_required(VERSION 3.21)
-project( Lovebug 
-         VERSION 0.0.1 
-         DESCRIPTION "" 
-         LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)                      # TODO is 23 really required?
+
+project(Lovebug 
+        VERSION 0.0.1 
+        DESCRIPTION "Enter some description"
+        LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)   
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
-set(GameVersion "Skyrim")
+set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/SKSE/Plugins/)
 
-include(GNUInstallDirs)
-include(ExternalProject)
-
-configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-        @ONLY)
+set(RUST_PKG_NAME "lbug")
+set(RUST_LIB_NAME "lovebug")
 
 set(BUILD_TESTS OFF)
-        
-set(sources
-        src/Plugin.cpp
-        rust/src/Bridge.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+include(extern/CommonLibSSE-NG/cmake/CommonLibSSE.cmake)
+add_subdirectory(extern/CommonLibSSE-NG CommonLibSSE EXCLUDE_FROM_ALL)
 
-source_group(
-        TREE ${CMAKE_CURRENT_SOURCE_DIR}
-        FILES
-        ${sources})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in 
+               ${CMAKE_CURRENT_BINARY_DIR}/version.rc @ONLY)
 
-########################################################################################################################
-## Rust library
-########################################################################################################################
+# Rust
 
-set(RUST_LIBRARY ${CMAKE_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_LIBRARY_PREFIX}lovebug${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(RUST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_LIBRARY_PREFIX}${RUST_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(RUST_CXX_BRIDGE ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/lib.rs.cc 
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/logging.rs.cc)
 
-set(RUST_CXX_BRIDGE_CPP ${CMAKE_SOURCE_DIR}/rust/target/cxxbridge/lbug/src/lib.rs.cc 
-                        ${CMAKE_SOURCE_DIR}/rust/target/cxxbridge/lbug/src/logging.rs.cc)
 add_custom_command(
-    OUTPUT ${RUST_BRIDGE_CPP} ${RUST_LIBRARY}
-    COMMAND cargo build --manifest-path ${CMAKE_SOURCE_DIR}/rust/Cargo.toml --release
-    DEPENDS ${CMAKE_SOURCE_DIR}/rust/src/config.rs
-            ${CMAKE_SOURCE_DIR}/rust/src/events.rs
-            ${CMAKE_SOURCE_DIR}/rust/src/lib.rs
-            ${CMAKE_SOURCE_DIR}/rust/src/logging.rs
-            ${CMAKE_SOURCE_DIR}/rust/src/settings.rs
+    OUTPUT ${RUST_CXX_BRIDGE} ${RUST_LIBRARY}
+    COMMAND cargo build --manifest-path ${CMAKE_CURRENT_SOURCE_DIR}/rust/Cargo.toml --release
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/config.rs
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/events.rs
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/lib.rs
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/logging.rs
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/settings.rs
     USES_TERMINAL
     COMMENT "Running cargo..."
 )
 
+# Plugin
 
-########################################################################################################################
-## Configure target DLL
-########################################################################################################################
-
-# TODO Required? What does it do?
-add_compile_definitions(SKYRIM)
-add_subdirectory("extern/CommonLibSSE-NG" "CommonLibSSE" EXCLUDE_FROM_ALL)
-
-include(extern/CommonLibSSE-NG/cmake/CommonLibSSE.cmake)
-add_commonlibsse_plugin(
+# this does add_library
+add_commonlibsse_plugin(  
         ${PROJECT_NAME} 
         SOURCES 
-        ${headers}
-        ${sources}
-        ${RUST_CXX_BRIDGE_CPP})
+        src/Plugin.cpp
+        rust/src/Bridge.cpp
+        ${RUST_CXX_BRIDGE}
+        ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
-target_include_directories(${PROJECT_NAME}
+target_include_directories(
+        ${PROJECT_NAME}
         PRIVATE
-        ${CMAKE_SOURCE_DIR}/rust/target/cxxbridge
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/rust/src>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:src>)     
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/rust/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge)     
 
-########################################################################################################################
-## Link rust library
-########################################################################################################################
-
-# libraries that are required for linking with the rust library 
-# statically this list was created by trial- and error
 target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
         ${RUST_LIBRARY}
-        ws2_32.lib 
-        bcrypt.lib 
-        userenv.lib 
-        Advapi32.lib 
-        crypt32.lib 
-        secur32.lib 
-        Setupapi.lib 
-        ntdll.lib 
-        ncrypt.lib)
+        wsock32 ws2_32 bcrypt ntdll userenv)
 
-target_precompile_headers(
-        ${PROJECT_NAME}
-        PRIVATE
-        src/PCH.h)
+target_precompile_headers(${PROJECT_NAME} PRIVATE src/PCH.h)
 
-# TODO remove?
-install(TARGETS ${PROJECT_NAME}
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+# Copy dll to SKSE/Plugins
 
-########################################################################################################################
-## Copy build result to deploy/data directory
-########################################################################################################################
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${DLL_OUTPUT_DIR}")
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/SKSE/Plugins/")
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/SKSE/Plugins/")
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${DLL_OUTPUT_DIR}")
