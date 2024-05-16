@@ -11,9 +11,6 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
 set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/SKSE/Plugins/)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in 
-               ${CMAKE_CURRENT_BINARY_DIR}/version.rc @ONLY)
-
 # Rust
 
 set(RUST_PKG_NAME "lbug")
@@ -40,6 +37,10 @@ add_custom_command(
 set(BUILD_TESTS OFF)
 include(extern/CommonLibSSE-NG/cmake/CommonLibSSE.cmake)
 add_subdirectory(extern/CommonLibSSE-NG CommonLibSSE EXCLUDE_FROM_ALL)
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in 
+        ${CMAKE_CURRENT_BINARY_DIR}/version.rc 
+        @ONLY)
 
 add_commonlibsse_plugin(  
         ${PROJECT_NAME} 
@@ -67,7 +68,7 @@ target_link_libraries(
         ${RUST_LIBRARY}
         wsock32 ws2_32 bcrypt ntdll userenv)
 
-# Copy dll to SKSE/Plugins
+# Copy dll to output dir
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
