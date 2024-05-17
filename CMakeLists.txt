@@ -36,7 +36,7 @@ add_custom_command(
 
 set(BUILD_TESTS OFF)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/CommonLibF4 CommonLibF4) # EXCLUDE_FROM_ALL?
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/CommonLibF4 CommonLibF4 EXCLUDE_FROM_ALL)
 
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/Version.h.in
