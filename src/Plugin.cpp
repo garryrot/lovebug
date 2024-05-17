@@ -2,7 +2,7 @@
 
 #include <thread>
 #include <chrono>
-#include <stdlib.h> //for using the function sleep
+#include <codecvt>
 
 #include "lbug/src/logging.rs.h"
 #include "lbug/src/lib.rs.h"
@@ -11,10 +11,6 @@
 
 using namespace RE;
 using namespace RE::BSScript;
-// using namespace SKSE::log;
-// using namespace SKSE::stl;
-// using namespace SKSE;
-// using namespace REL;
 
 #define DllExport __declspec(dllexport)
 
@@ -32,7 +28,6 @@ bool RegisterPapyrusCalls(IVirtualMachine *vm)
 }
 
 /*
-
 void InitializePapyrus()
 {
     lb_log_debug("Initializing Papyrus binding...");
@@ -61,17 +56,21 @@ void InitializeMessaging()
         lb_log_info("Failed registering message interface");
     }
 }
+*/
 
-std::string GetLogFile()
-{
-    auto path = log_directory();
-    if (!path)
-    {
-        report_and_fail("Unable to lookup SKSE logs directory.");
+std::string GetLogFile() {
+	auto path = F4SE::log::log_directory();
+    if (!path) {
+        return "";
     }
-    return std::format("{}\\{}.log", path->string(), PluginDeclaration::GetSingleton()->GetName());
+    std::optional<std::string> utf8Path = unicode_to_utf8(path->wstring());
+    if (!utf8Path.has_value()) {
+        return "";
+    }
+    return std::format("{}\\{}.log", utf8Path.value(), Version::PROJECT.data());
 }
 
+/*
 SKSEPluginLoad(const LoadInterface *skse)
 {
     // lb_init_logging(::rust::String(GetLogFile()));
@@ -87,12 +86,20 @@ SKSEPluginLoad(const LoadInterface *skse)
     lb_log_info(std::format("{} has finished loading.", plugin->GetName()));
     return true;
 }
-
 */
+
+std::string unicode_to_utf8(std::wstring in) {
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::string converted_str = converter.to_bytes( in );
+    return converted_str;
+}
+
+// TODO: Port to SSE
 
 extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a_f4se, F4SE::PluginInfo* a_info)
 {
-    lb_init_logging(::rust::String("c:\\temp\\experiment.log"));
+    lb_init_logging(GetLogFile());
 
 	a_info->infoVersion = F4SE::PluginInfo::kVersion;
 	a_info->name = Version::PROJECT.data();
