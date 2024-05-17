@@ -1,11 +1,11 @@
 use ::config::{read_triggers, TRIGGERS_DIR};
 use events::{start_event_thread, LovebugEvent};
-use ffi::{ModCallbackEvent, TESForm};
+// use ffi::{ModCallbackEvent, TESForm};
 use lazy_static::lazy_static;
 use std::sync::{Arc, Mutex};
 use tracing::{debug, error, warn};
 
-use crate::ffi::CloneInto;
+// use crate::ffi::CloneInto;
 
 mod config;
 mod events;
@@ -71,16 +71,16 @@ mod ffi {
     #[namespace = "RE"]
     unsafe extern "C++" {
         include!("PCH.h");
-        type TESForm;
-        fn GetFormID(self: &TESForm) -> u32;
-        fn GetRawFormID(self: &TESForm) -> u32;
-        fn GetLocalFormID(self: &TESForm) -> u32;
+        // type TESForm;
+        // fn GetFormID(self: &TESForm) -> u32;
+        // fn GetRawFormID(self: &TESForm) -> u32;
+        // fn GetLocalFormID(self: &TESForm) -> u32;
     }
 
     #[namespace = "SKSE"]
     unsafe extern "C++" {
         include!("PCH.h");
-        type ModCallbackEvent;
+        // type ModCallbackEvent;
     }
 
     extern "Rust" {
@@ -92,15 +92,15 @@ mod ffi {
             num_arg: &f32,
             // sender: *const TESForm,
         ) -> bool;
-        unsafe fn lb_process_event(form: *const ModCallbackEvent, sender: *const TESForm);
+        // unsafe fn lb_process_event(form: *const ModCallbackEvent, sender: *const TESForm);
     }
 
     unsafe extern "C++" {
         include!("Bridge.h");
-        fn AddTask_SKSEModEvent(done: fn(ctx: SKSEModEvent), ctx: SKSEModEvent);
-        fn GetFormById(id: i32, esp: &str) -> *mut TESForm;
-        unsafe fn SendEvent(form: *mut TESForm, event: SKSEModEvent);
-        unsafe fn CloneInto(event: *const ModCallbackEvent) -> SKSEModEvent;
+        // fn AddTask_SKSEModEvent(done: fn(ctx: SKSEModEvent), ctx: SKSEModEvent);
+        // fn GetFormById(id: i32, esp: &str) -> *mut TESForm;
+        // unsafe fn SendEvent(form: *mut TESForm, event: SKSEModEvent);
+        // unsafe fn CloneInto(event: *const ModCallbackEvent) -> SKSEModEvent;
     }
 }
 
@@ -131,15 +131,15 @@ unsafe fn lb_process_event_bridge(
     false
 }
 
-unsafe fn lb_process_event(event: *const ModCallbackEvent, sender: *const TESForm) {
-    if let Some(sender) = sender.as_ref() {
-        let form_id = sender.GetFormID();
+// unsafe fn lb_process_event(event: *const ModCallbackEvent, sender: *const TESForm) {
+//     if let Some(sender) = sender.as_ref() {
+//         let form_id = sender.GetFormID();
 
-        let mod_event = CloneInto(event);
-        warn!(
-            "Event {:#010x} {} str={} num={}",
-            form_id, mod_event.event_name, mod_event.str_arg, mod_event.num_arg
-        );
-        // warn!("{:#010x} (editor id)", local_id);
-    }
-}
+//         let mod_event = CloneInto(event);
+//         warn!(
+//             "Event {:#010x} {} str={} num={}",
+//             form_id, mod_event.event_name, mod_event.str_arg, mod_event.num_arg
+//         );
+//         // warn!("{:#010x} (editor id)", local_id);
+//     }
+// }

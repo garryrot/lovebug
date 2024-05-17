@@ -7,9 +7,16 @@
   "homepage": "https://github.com/garryrot/lovebug",
   "license": "Apache-2.0",
   "dependencies": [
-    "bethesda-skyrim-scripts",
+    "args",
+    "boost-stl-interfaces",
+    "catch2",
+    "fmt",
+    "frozen",
+    "nowide",
+    "robin-hood-hashing",
+    "rsm-mmio",
     "spdlog",
-    "directxtk",
-    "rapidcsv"
+    "srell",
+    "xbyak"
   ]
 }

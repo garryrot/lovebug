@@ -4,8 +4,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 
-#include <RE/Skyrim.h>
-#include <SKSE/SKSE.h>
+#include "F4SE/F4SE.h"
+#include "RE/Fallout.h"
 
 #include <algorithm>
 #include <cctype>

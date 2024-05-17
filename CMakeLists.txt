@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.21)
 
 project(Lovebug 
         VERSION 0.0.1 
-        DESCRIPTION "Enter some description"
+        DESCRIPTION "Fallout4 amorous events processor"
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)   
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
-set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/SKSE/Plugins/)
+set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/fo4/Data/SKSE/Plugins/)
 
 # Rust
 
@@ -35,20 +35,28 @@ add_custom_command(
 # CLib Plugin
 
 set(BUILD_TESTS OFF)
-include(extern/CommonLibSSE-NG/cmake/CommonLibSSE.cmake)
-add_subdirectory(extern/CommonLibSSE-NG CommonLibSSE EXCLUDE_FROM_ALL)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/CommonLibF4 CommonLibF4) # EXCLUDE_FROM_ALL?
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/Version.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	@ONLY
+)
+
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in 
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc 
         @ONLY)
 
-add_commonlibsse_plugin(  
-        ${PROJECT_NAME} 
-        SOURCES
-        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+add_library(
+	${PROJECT_NAME}
+	SHARED
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Plugin.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Bridge.cpp
-        ${RUST_CXX_BRIDGE})
+        ${RUST_CXX_BRIDGE}
+)
 
 target_precompile_headers(
         ${PROJECT_NAME} 
@@ -58,6 +66,7 @@ target_precompile_headers(
 target_include_directories(
         ${PROJECT_NAME}
         PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/src
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge)     
@@ -65,6 +74,7 @@ target_include_directories(
 target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
+        CommonLibF4::CommonLibF4
         ${RUST_LIBRARY}
         wsock32 ws2_32 bcrypt ntdll userenv)
 

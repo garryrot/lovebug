@@ -30,13 +30,13 @@ impl SKSEModEvent {
 pub fn start_event_thread( receiver: crossbeam_channel::Receiver<LovebugEvent> ) {
     std::thread::spawn( move || {
         fn send_mod_event(event: SKSEModEvent) {
-            AddTask_SKSEModEvent(
-                |context| {
-                    let form = ffi::GetFormById(0x12C5, "Lovebug.esp");
-                    unsafe { SendEvent(form, context); }
-                },
-                event
-            );
+            // AddTask_SKSEModEvent(
+            //     |context| {
+            //         let form = ffi::GetFormById(0x12C5, "Lovebug.esp");
+            //         unsafe { SendEvent(form, context); }
+            //     },
+            //     event
+            // );
         }
     
         while let Ok(evt) = receiver.recv() {

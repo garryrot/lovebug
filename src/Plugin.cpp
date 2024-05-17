@@ -7,39 +7,19 @@
 #include "lbug/src/logging.rs.h"
 #include "lbug/src/lib.rs.h"
 
+#include "Version.h"
+
 using namespace RE;
 using namespace RE::BSScript;
-using namespace SKSE::log;
-using namespace SKSE::stl;
-using namespace SKSE;
-using namespace REL;
+// using namespace SKSE::log;
+// using namespace SKSE::stl;
+// using namespace SKSE;
+// using namespace REL;
 
 #define DllExport __declspec(dllexport)
-#define SFT StaticFunctionTag *
-
-
-class ModEventSink : public RE::BSTEventSink<SKSE::ModCallbackEvent>
-{
-public:
-    static ModEventSink *GetSingleton()
-    {
-        static ModEventSink singleton;
-        return &singleton;
-    }
-
-    RE::BSEventNotifyControl ProcessEvent(const SKSE::ModCallbackEvent *event, RE::BSTEventSource<SKSE::ModCallbackEvent> *eventSource)
-    {
-        if (event == NULL || event->sender == NULL)
-        {
-            return RE::BSEventNotifyControl::kContinue;
-        }
-        lb_process_event(event, event->sender);
-        return RE::BSEventNotifyControl::kContinue;
-    }
-};
 
 // Native Events
-bool Lb_Process_Event_Bridge(SFT, std::string eventName, std::string strArg, float numArg) // , RE::TESForm* sender
+bool Lb_Process_Event_Bridge(std::monostate, std::string eventName, std::string strArg, float numArg)
 {
     return lb_process_event_bridge(eventName, strArg, numArg);
 }
@@ -47,9 +27,11 @@ bool Lb_Process_Event_Bridge(SFT, std::string eventName, std::string strArg, flo
 constexpr std::string_view PapyrusClass = "Lb_Native";
 bool RegisterPapyrusCalls(IVirtualMachine *vm)
 {
-    vm->RegisterFunction("Process_Event", PapyrusClass, Lb_Process_Event_Bridge);
+    vm->BindNativeMethod(PapyrusClass, "Process_Event", Lb_Process_Event_Bridge, false);
     return true;
 }
+
+/*
 
 void InitializePapyrus()
 {
@@ -92,7 +74,7 @@ std::string GetLogFile()
 
 SKSEPluginLoad(const LoadInterface *skse)
 {
-    lb_init_logging(::rust::String(GetLogFile()));
+    // lb_init_logging(::rust::String(GetLogFile()));
 
     auto *plugin = PluginDeclaration::GetSingleton();
     auto version = plugin->GetVersion();
@@ -104,4 +86,35 @@ SKSEPluginLoad(const LoadInterface *skse)
 
     lb_log_info(std::format("{} has finished loading.", plugin->GetName()));
     return true;
+}
+
+*/
+
+extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a_f4se, F4SE::PluginInfo* a_info)
+{
+    lb_init_logging(::rust::String("c:\\temp\\experiment.log"));
+
+	a_info->infoVersion = F4SE::PluginInfo::kVersion;
+	a_info->name = Version::PROJECT.data();
+	a_info->version = Version::MAJOR;
+
+	if (a_f4se->IsEditor()) {
+		lb_log_error("loaded in editor");
+		return false;
+	}
+
+	const auto ver = a_f4se->RuntimeVersion();
+	if (ver < F4SE::RUNTIME_1_10_162) {
+		lb_log_error(std::format("unsupported runtime v{}", ver.string()));
+		return false;
+	}
+
+	return true;
+}
+
+extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
+{
+	F4SE::Init(a_f4se);
+	lb_log_info("plugin loaded");
+	return true;
 }
