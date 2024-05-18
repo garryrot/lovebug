@@ -1,5 +1,5 @@
 use ::config::{read_triggers, TRIGGERS_DIR};
-use events::{start_event_thread, LovebugEvent};
+use events::{start_outgoing_event_thread, LovebugEvent};
 // use ffi::{ModCallbackEvent, TESForm};
 use lazy_static::lazy_static;
 use std::sync::{Arc, Mutex};
@@ -57,13 +57,6 @@ lazy_static! {
 
 #[cxx::bridge]
 mod ffi {
-    #[derive(Debug)]
-    pub struct SKSEModEvent {
-        pub event_name: String,
-        pub str_arg: String,
-        pub num_arg: f64,
-    }
-
     pub struct Ret {
         i: i32,
     }
@@ -71,7 +64,7 @@ mod ffi {
     #[namespace = "RE"]
     unsafe extern "C++" {
         include!("PCH.h");
-        // type TESForm;
+        type TESForm;
         // fn GetFormID(self: &TESForm) -> u32;
         // fn GetRawFormID(self: &TESForm) -> u32;
         // fn GetLocalFormID(self: &TESForm) -> u32;
@@ -80,6 +73,7 @@ mod ffi {
     #[namespace = "SKSE"]
     unsafe extern "C++" {
         include!("PCH.h");
+        // Unsupported F4
         // type ModCallbackEvent;
     }
 
@@ -89,18 +83,16 @@ mod ffi {
         unsafe fn lb_process_event_bridge(
             event_name: &str,
             str_arg: &str,
-            num_arg: &f32,
-            // sender: *const TESForm,
+            num_arg: &f32
         ) -> bool;
+
+        // Unsupported F4
         // unsafe fn lb_process_event(form: *const ModCallbackEvent, sender: *const TESForm);
     }
 
     unsafe extern "C++" {
         include!("Bridge.h");
-        // fn AddTask_SKSEModEvent(done: fn(ctx: SKSEModEvent), ctx: SKSEModEvent);
-        // fn GetFormById(id: i32, esp: &str) -> *mut TESForm;
-        // unsafe fn SendEvent(form: *mut TESForm, event: SKSEModEvent);
-        // unsafe fn CloneInto(event: *const ModCallbackEvent) -> SKSEModEvent;
+        fn GetFormById(id: i32, esp: &str) -> *mut TESForm;
     }
 }
 
@@ -108,7 +100,7 @@ pub fn lb_init() -> bool {
     if let Ok(mut guard) = LB.state.try_lock() {
         let (event_sender, recv) = crossbeam_channel::unbounded();
         if let Ok(triggers) = read_triggers(TRIGGERS_DIR) {}
-        start_event_thread(recv);
+        start_outgoing_event_thread(recv);
 
         let lb = Lovebug { event_sender };
         guard.replace(lb);

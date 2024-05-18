@@ -5,7 +5,7 @@ project(Lovebug
         DESCRIPTION "Fallout4 amorous events processor"
         LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)   
+set(CMAKE_CXX_STANDARD 17) 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
@@ -18,7 +18,8 @@ set(RUST_LIB_NAME "lovebug")
 
 set(RUST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_LIBRARY_PREFIX}${RUST_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(RUST_CXX_BRIDGE ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/lib.rs.cc 
-                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/logging.rs.cc)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/logging.rs.cc
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/events.rs.cc)
 
 add_custom_command(
     OUTPUT ${RUST_CXX_BRIDGE} ${RUST_LIBRARY}
@@ -55,8 +56,12 @@ add_library(
 	${CMAKE_CURRENT_BINARY_DIR}/version.rc
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Plugin.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Bridge.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Events.cpp
         ${RUST_CXX_BRIDGE}
 )
+
+# Build with Multiple Processes
+add_compile_options( /MP )
 
 target_precompile_headers(
         ${PROJECT_NAME} 
