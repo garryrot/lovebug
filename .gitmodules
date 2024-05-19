@@ -4,4 +4,5 @@
 	branch = ng
 [submodule "extern/CommonLibF4"]
 	path = extern/CommonLibF4
-	url = https://github.com/Ryan-rsm-McKenzie/CommonLibF4
+	url = https://github.com/garryrot/CommonLibF4
+	branch = 1.10.163
