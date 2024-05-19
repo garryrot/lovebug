@@ -3,5 +3,5 @@
 #include "rust/cxx.h"
 #include "PCH.h"
 
-// struct SKSEModEvent;
+// struct ModEvent;
 RE::TESForm* GetFormById(int form_id, rust::Str esp) noexcept;
