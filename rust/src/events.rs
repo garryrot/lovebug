@@ -6,16 +6,16 @@ use crate::{
 
 #[derive(Debug)]
 pub enum LovebugEvent {
-    Foo,
+    LovebugEvent,
     Bar
 }
 
 #[cxx::bridge]
 mod ffi_event {
 
-    // Outgoing event
-    // - SendModEvent (standard signature) on SKSE
-    // - External Event on F4se
+    // Outgoing event which is consumed by
+    // - RegisterForModEvent (standard signature) on SKSE
+    // - RegisterForExternalEvent on F4SE
     #[derive(Debug)]
     pub struct SKSEModEvent {
         pub event_name: String, 
@@ -68,8 +68,8 @@ pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<Lovebu
         while let Ok(evt) = receiver.recv() {
             info!("got event: {:?}", evt);
             match evt {
-                LovebugEvent::Foo => send_mod_event( SKSEModEvent::new("event_foo", "str_arg", 0.0) ),
-                LovebugEvent::Bar => send_mod_event( SKSEModEvent::new("event_bar", "str_arg", 0.0) )
+                LovebugEvent::LovebugEvent => send_mod_event( SKSEModEvent::new("LovebugEvent", "str_arg", 42.0) ),
+                LovebugEvent::Bar => send_mod_event( SKSEModEvent::new("Bar", "str_arg", 42.0) )
             }
         }
     });

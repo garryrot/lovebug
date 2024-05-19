@@ -36,27 +36,29 @@ void InitializePapyrus()
     }
 }
 
-/*
 // Messaging
 
 void InitializeMessaging()
 {
-    if (!GetMessagingInterface()->RegisterListener([](MessagingInterface::Message *message)
-                                                   {
+    const auto messaging = F4SE::GetMessagingInterface();
+    if (!messaging || !messaging->RegisterListener([](F4SE::MessagingInterface::Message *message)
+        {
             switch (message->type) {
-                case MessagingInterface::kInputLoaded:
-                    SKSE::GetModCallbackEventSource()->AddEventSink(ModEventSink::GetSingleton());
+                case F4SE::MessagingInterface::kInputLoaded:
+                    lb_log_info("input loaded");
                     break;
-                case MessagingInterface::kDataLoaded:
-                    // All ESM/ESL/ESP plugins are loaded, forms can be used
+                case F4SE::MessagingInterface::kGameDataReady:
+                    lb_log_info("game loaded");
                     lb_init();
                     break;
-            } }))
-    {
-        lb_log_info("Failed registering message interface");
+            }
+        })) {
+        lb_log_error("Failed to get messaging interface");
+        return;
+    } else {
+        lb_log_error("Registered messaging interface");
     }
 }
-*/
 
 // TODO: Port to SSE
 std::string unicode_to_utf8(std::wstring in) {
@@ -86,7 +88,6 @@ extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::Query
 	info->name = Version::PROJECT.data();
 	info->version = Version::MAJOR;
     lb_log_info(std::format("{} {} is loading...", info->name, info->version));
-
 	if (f4se->IsEditor()) {
 		lb_log_error("loaded in editor");
 		return false;
@@ -105,6 +106,7 @@ extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadIn
 {
 	F4SE::Init(f4se);
 	lb_log_info("plugin loaded");
+    InitializeMessaging();
     InitializePapyrus();
 	return true;
 }
