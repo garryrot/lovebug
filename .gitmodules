@@ -6,3 +6,6 @@
 	path = extern/CommonLibF4
 	url = https://github.com/garryrot/CommonLibF4
 	branch = 1.10.163
+[submodule "rust/bp_scheduler"]
+	path = rust/bp_scheduler
+	url = https://github.com/garryrot/bp_scheduler

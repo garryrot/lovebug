@@ -4,6 +4,8 @@ use std::fs;
 use serde::{Deserialize, Serialize};
 use serde_hex::{SerHex,StrictPfx};
 
+use bp_scheduler::settings::actions::*;
+
 pub static TRIGGERS_DIR: &str = "Data\\SKSE\\Plugins\\Lovebug\\Triggers";
 
 // triggers/*.json
@@ -66,7 +68,7 @@ pub struct Event {
     description: String,
     event_start: EventTrigger,
     event_stop: EventTrigger,
-    action: Vec<Action>,
+    action: Vec<String>,
     body_parts: BodyParts
 }
 
@@ -76,7 +78,7 @@ pub struct TimedEvent {
     description: String,
     event_start: EventTrigger,
     duration_ms: u32,
-    action: Vec<Action>,
+    action: Vec<String>,
     body_parts: BodyParts
 }
 
@@ -103,29 +105,6 @@ pub enum Form {
     FormId(u32)
 }
 
-// actions/*.json
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Action {
-    File(String),
-    Scalar(i32, Vec<ScalarActuators>),
-    ScalarDynamic(String, Vec<ScalarActuators>),
-    Stroke(),
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum BodyParts {
-    All,
-    Tags(Vec<String>)
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum ScalarActuators {
-    Constrict,
-    Inflate,
-    Oscillate,
-    Vibrate,
-}
 
 // parse
 
@@ -161,10 +140,8 @@ mod tests {
                     conditions: vec![],
                 },
                 action: vec![
-                    Action::Scalar(
-                        10, 
-                        vec![ScalarActuators::Vibrate, ScalarActuators::Inflate],
-                    )],
+                    "milkmod.feedingstage".into()
+                ],
                 body_parts: BodyParts::Tags(
                     vec![
                         "Anal".into()
@@ -184,14 +161,9 @@ mod tests {
                     event: "MilkQuest.FuckMachineStage".into(),
                     conditions: vec![],
                 },
-                action: vec![Action::Scalar(
-                    20,
-                    vec![
-                        ScalarActuators::Vibrate, 
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Inflate
-                    ],
-                )],
+                action: vec![
+                    "milkmod.milkingstage".into()
+                ],
                 body_parts: BodyParts::Tags(
                     vec![
                         "Anal".into(),
@@ -212,15 +184,9 @@ mod tests {
                     event: "MilkQuest.StartMilkingMachine".into(),
                     conditions: vec![],
                 },
-                action: vec![Action::Scalar(
-                    40,
-                    vec![
-                        ScalarActuators::Vibrate, 
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
-                        ScalarActuators::Inflate
-                    ],
-                )],
+                action: vec![
+                    "milkmod.fuckingmachinestage".into()
+                ],
                 body_parts: BodyParts::Tags(
                     vec![
                         "Anal".into(),
@@ -237,15 +203,7 @@ mod tests {
                     conditions: vec![],
                 },
                 duration_ms: 10_000,
-                action: vec![Action::Scalar(
-                    100,
-                    vec![
-                        ScalarActuators::Vibrate, 
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Inflate,
-                        ScalarActuators::Oscillate
-                    ],
-                )],
+                action: vec![],
                 body_parts: BodyParts::Tags(
                     vec![
                         "Anal".into(),
@@ -269,14 +227,7 @@ mod tests {
                         SceneTags::tag("Bar")
                     ]),
                 ]),
-                action: Action::Scalar(
-                    100,
-                    vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
-                    ],
-                ),
+                action: Action { name: "something".into(), control: vec![] },
             }),
         ];
         let strn = serde_json::to_string_pretty(&default_config).unwrap();

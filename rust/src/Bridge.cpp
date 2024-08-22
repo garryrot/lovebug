@@ -5,7 +5,7 @@
 // Wrap TESForm
 
 RE::TESForm* GetFormById(int form_id, rust::Str esp) noexcept {
-    return NULL;// RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(form_id, (std::string) esp);
+    return NULL; // RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(form_id, (std::string) esp);
 }
 
 /*

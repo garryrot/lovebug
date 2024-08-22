@@ -9,6 +9,7 @@ crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 config = { path = "./config" }
+bp_scheduler = { path = "./bp_scheduler" }
 anyhow = "1.0.68"
 cxx = "1.0.95"
 tracing = "0.1.37"
