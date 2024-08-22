@@ -6,8 +6,6 @@ use serde_hex::{SerHex,StrictPfx};
 
 use bp_scheduler::settings::actions::*;
 
-pub static TRIGGERS_DIR: &str = "Data\\SKSE\\Plugins\\Lovebug\\Triggers";
-
 // triggers/*.json
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

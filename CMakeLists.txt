@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
-set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/fo4/Data/SKSE/Plugins/)
+set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/SKSE/Plugins/)
 
 # Rust
 
@@ -81,7 +81,7 @@ target_link_libraries(
         PRIVATE
         CommonLibF4::CommonLibF4
         ${RUST_LIBRARY}
-        wsock32 ws2_32 bcrypt ntdll userenv)
+        wsock32 ws2_32 bcrypt ntdll userenv setupapi)
 
 # Copy dll to output dir
 
