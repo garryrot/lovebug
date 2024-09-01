@@ -1,3 +1,4 @@
+use bp_scheduler::client::connection::TkConnectionEvent;
 use tracing::info;
 use crate::{
     events::ffi_event::*, 
@@ -54,7 +55,7 @@ impl ModEvent {
 ///  - RegisterForModEvent (standard signature) on SKSE
 ///  - RegisterForExternalEvent on F4SE
 /// Events can be sent by adding to the queue in the main struct
-pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<LovebugEvent> ) {
+pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<TkConnectionEvent> ) {
     std::thread::spawn( move || {
         fn send_mod_event(event: ModEvent) {
             AddTask_ModEvent(
@@ -68,10 +69,7 @@ pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<Lovebu
     
         while let Ok(evt) = receiver.recv() {
             info!("got event: {:?}", evt);
-            match evt {
-                LovebugEvent::LovebugEvent => send_mod_event( ModEvent::new("LovebugEvent", "str_arg", 42.0) ),
-                LovebugEvent::Bar => send_mod_event( ModEvent::new("Bar", "str_arg", 42.0) )
-            }
+            send_mod_event(ModEvent::new("Lb_Event", format!("{:?}", evt).as_str(), 0.0))
         }
     });
 }

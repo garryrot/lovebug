@@ -35,7 +35,7 @@ mod settings;
 #[derive(Debug)]
 pub struct Lovebug {
     client: BpClient,
-    event_sender: crossbeam_channel::Sender<LovebugEvent>,
+    triggers: Vec<Trigger>
 }
 
 impl Lovebug {
@@ -107,9 +107,6 @@ mod ffi {
             time_sec: f32
         ) -> i32;
         unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
-
-        // Unsupported F4
-        // unsafe fn lb_process_event(form: *const ModCallbackEvent, sender: *const TESForm);
     }
 
     unsafe extern "C++" {
@@ -135,16 +132,23 @@ fn get_settings() -> TkSettings {
 
 pub fn lb_init() -> bool {
     if let Ok(mut guard) = LB.state.try_lock() {
-        let (event_sender, recv) = crossbeam_channel::unbounded();
-        if let Ok(triggers) = read_triggers(TRIGGERS_DIR) {}
-        
+        let client = BpClient::connect(get_settings()).unwrap();
 
-        start_outgoing_event_thread(recv);
-
-        let lb = Lovebug {
-            client: BpClient::connect(get_settings()).unwrap(),
-            event_sender,
+        let evts = client.connection_events.clone();
+        let mut lb = Lovebug {
+            client,
+            triggers: vec![]
         };
+
+        start_outgoing_event_thread(evts);
+
+        lb.client.read_actions();
+        
+        if let Ok(triggers) = read_triggers(TRIGGERS_DIR) {
+            lb.triggers = triggers;
+        }
+
+        lb.client.scan_for_devices();
 
         guard.replace(lb);
     } else {
@@ -214,15 +218,3 @@ unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32
     false
 }
 
-// unsafe fn lb_process_event(event: *const ModCallbackEvent, sender: *const TESForm) {
-//     if let Some(sender) = sender.as_ref() {
-//         let form_id = sender.GetFormID();
-
-//         let mod_event = CloneInto(event);
-//         warn!(
-//             "Event {:#010x} {} str={} num={}",
-//             form_id, mod_event.event_name, mod_event.str_arg, mod_event.num_arg
-//         );
-//         // warn!("{:#010x} (editor id)", local_id);
-//     }
-// }

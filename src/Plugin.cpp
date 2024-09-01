@@ -51,6 +51,7 @@ int Action(std::monostate, std::string actionName, int speed, float secs)
     return lb_action(actionName, speed, secs);
 }
 
+
 constexpr std::string_view PapyrusClass = "Lb_Native";
 bool RegisterPapyrusCalls(IVirtualMachine *vm)
 {
