@@ -25,37 +25,37 @@ public:
 
     virtual RE::BSEventNotifyControl ProcessEvent(const LogEvent& event, RE::BSTEventSource<LogEvent>*) override
 	{
-        if (event.ownerModule == NULL) { // event == NULL || 
-            return RE::BSEventNotifyControl::kContinue;
-        }
-
-        // TODO: only when this contains papyrus
-        const char* module = event.ownerModule.c_str();
-
         BSFixedString temp = NULL;
         event.errorMsg.GetErrorMsg(temp);
         std::string message = (std::string) temp;
 
         if (message.find("plug start to vibrate") != std::string::npos) {
-            // lb_log_info("FOUND MATCH");
+            lb_log_info("FOUND MATCH");
         }
 
-        lb_log_debug(std::format("{} {}", module, message));
+        lb_log_debug(std::format("{}", message));
 
         return RE::BSEventNotifyControl::kContinue;
 	}
 };
 
-// Native Events
+// Native Methods
+
 bool ProcessEventBridge(std::monostate, std::string eventName, std::string strArg, float numArg)
 {
     return lb_process_event_bridge(eventName, strArg, numArg);
+}
+
+int Action(std::monostate, std::string actionName, int speed, float secs) 
+{
+    return lb_action(actionName, speed, secs);
 }
 
 constexpr std::string_view PapyrusClass = "Lb_Native";
 bool RegisterPapyrusCalls(IVirtualMachine *vm)
 {
     vm->BindNativeMethod(PapyrusClass, "Process_Event", ProcessEventBridge, false);
+    vm->BindNativeMethod(PapyrusClass, "Action", Action, false);
     return true;
 }
 

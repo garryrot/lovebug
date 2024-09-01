@@ -101,12 +101,11 @@ mod ffi {
     extern "Rust" {
         type TaskContext;
         fn lb_init() -> bool;
-        // fn lb_action(
-        //     action: &str,
-        //     speed: i32,
-        //     time_sec: f32,
-        //     body_parts: &CxxVector<CxxString>,
-        // ) -> i32;
+        fn lb_action(
+            action: &str,
+            speed: i32,
+            time_sec: f32
+        ) -> i32;
         unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
 
         // Unsupported F4
@@ -138,6 +137,7 @@ pub fn lb_init() -> bool {
     if let Ok(mut guard) = LB.state.try_lock() {
         let (event_sender, recv) = crossbeam_channel::unbounded();
         if let Ok(triggers) = read_triggers(TRIGGERS_DIR) {}
+        
 
         start_outgoing_event_thread(recv);
 
@@ -154,6 +154,26 @@ pub fn lb_init() -> bool {
 }
 
 pub fn lb_action(
+    action_name: &str,
+    speed: i32,
+    time_secs: f32
+) -> i32 {
+    info!(action_name, speed, time_secs);
+    Lovebug::run_static(
+        |lb| {
+            lb.client.dispatch_name(
+                action_name,
+                vec![],
+                Speed::new(speed.into()),
+                get_duration_from_secs(time_secs),
+            )
+        },
+        -1,
+    );
+    -1
+}
+
+pub fn lb_action_body_parts(
     action_name: &str,
     speed: i32,
     time_secs: f32,
