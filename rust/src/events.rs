@@ -60,7 +60,7 @@ pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<TkConn
         fn send_mod_event(event: ModEvent) {
             AddTask_ModEvent(
                 |context| {
-                    let form = ffi::GetFormById(0x12C5, "Lovebug.esp");
+                    let form = ffi::GetFormById(0x0F99, "Lovebug.esp"); // TODO: Is getting form even required?
                     unsafe { SendEvent(form, context); }
                 },
                 event
@@ -69,7 +69,14 @@ pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<TkConn
     
         while let Ok(evt) = receiver.recv() {
             info!("got event: {:?}", evt);
-            send_mod_event(ModEvent::new("Lb_Event", format!("{:?}", evt).as_str(), 0.0))
+
+            let name = match evt {
+                TkConnectionEvent::DeviceAdded(device, _) => format!("Connected({})", device.name()),
+                TkConnectionEvent::DeviceRemoved(device) => format!("Disconnected({})", device.name()),
+                TkConnectionEvent::BatteryLevel(device, battery) => format!("Battery({}, {})", device.name(), battery.unwrap_or(0.0)),
+                _ => "".into()
+            };
+            send_mod_event(ModEvent::new("LbEvent", name.as_str(), 0.0))           
         }
     });
 }

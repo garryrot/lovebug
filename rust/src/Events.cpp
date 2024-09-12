@@ -10,11 +10,16 @@ void AddTask_ModEvent(rust::Fn<void(ModEvent)> done, ModEvent ctx) noexcept {
     std::function<void()> task = std::move([done, ctx]() mutable {
         (*done)(ctx);
     });
+
     F4SE::GetTaskInterface()->AddTask(task);
 }
 
 void SendEvent(RE::TESForm* _, ModEvent event) noexcept {
-    F4SE::GetPapyrusInterface()->GetExternalEventRegistrations(event.event_name.c_str(), &event, [](uint64_t handle, const char* scriptName, const char* callbackName, void* data) {
+    F4SE::GetPapyrusInterface()->GetExternalEventRegistrations(
+        event.event_name.c_str(), 
+        &event, 
+        [](uint64_t handle, const char* scriptName, const char* callbackName, void* data
+    ) {
 		ModEvent* evt = static_cast<ModEvent*>( data );
 		std::string strArg = (std::string) evt->str_arg;
 		if (auto* vm = RE::GameVM::GetSingleton()) {
