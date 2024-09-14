@@ -7,17 +7,15 @@ use bp_scheduler::{
 use cxx::{CxxString, CxxVector};
 use events::start_outgoing_event_thread;
 use lazy_static::lazy_static;
-use serde::de::IntoDeserializer;
 use std::sync::{Arc, Mutex};
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info};
 
 pub static SETTINGS_FILE: &str = "Settings.json";
 pub static SETTINGS_PATH: &str = "Data\\F4SE\\Plugins\\Lovebug";
-pub static PATTERNS_DIR: &str =  "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
-pub static ACTIONS_DIR: &str =   "Data\\F4SE\\Plugins\\Lovebug\\Actions";
-pub static TRIGGERS_DIR: &str =  "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
+pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
+pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Actions";
+pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
 
-mod config;
 mod events;
 mod logging;
 mod settings;
