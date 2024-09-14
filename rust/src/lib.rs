@@ -1,31 +1,18 @@
 use ::config::*;
- use bp_scheduler::{
-     client::{
-         client::*,
-         connection::*,
-         input::*,
-         settings::*,
-     },
-     settings::devices::BpSettings,
-     speed::Speed,
- };
-use cxx::{CxxString, CxxVector};
-use events::{start_outgoing_event_thread, LovebugEvent};
-// use ffi::{ModCallbackEvent, TESForm};
-use lazy_static::lazy_static;
-use std::{
-    sync::{Arc, Mutex},
-    time::Duration,
+use bp_scheduler::{
+    client::{client::*, connection::*, input::*, settings::*}, settings::devices::BpSettings, speed::Speed
 };
+use cxx::{CxxString, CxxVector};
+use events::start_outgoing_event_thread;
+use lazy_static::lazy_static;
+use std::sync::{Arc, Mutex};
 use tracing::{debug, error, info, warn};
 
-// use crate::ffi::CloneInto;
-
 pub static SETTINGS_FILE: &str = "Settings.json";
-pub static SETTINGS_PATH: &str = "Data\\SKSE\\Plugins\\Lovebug";
-pub static PATTERNS_DIR: &str = "Data\\SKSE\\Plugins\\Lovebug\\Patterns";
-pub static ACTIONS_DIR: &str = "Data\\SKSE\\Plugins\\Lovebug\\Actions";
-pub static TRIGGERS_DIR: &str = "Data\\SKSE\\Plugins\\Lovebug\\Triggers";
+pub static SETTINGS_PATH: &str = "Data\\F4SE\\Plugins\\Lovebug";
+pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
+pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Actions";
+pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
 
 mod config;
 mod events;
@@ -35,7 +22,7 @@ mod settings;
 #[derive(Debug)]
 pub struct Lovebug {
     client: BpClient,
-    triggers: Vec<Trigger>
+    triggers: Vec<Trigger>,
 }
 
 impl Lovebug {
@@ -58,6 +45,12 @@ impl Lovebug {
             error!("failed locking mutex");
         }
         default
+    }
+
+    fn enable_all(&mut self) {
+        for actuator in self.client.status.get_known_actuator_ids() {
+            self.client.settings.device_settings.set_enabled(&actuator, true);
+        }
     }
 }
 
@@ -101,11 +94,15 @@ mod ffi {
     extern "Rust" {
         type TaskContext;
         fn lb_init() -> bool;
-        fn lb_action(
-            action: &str,
+        fn lb_action(action: &str, speed: i32, time_sec: f32) -> i32;
+        fn lb_scene(
+            scene: &str,
+            scene_tags: &CxxVector<CxxString>,
             speed: i32,
-            time_sec: f32
+            time_sec: f32,
         ) -> i32;
+        fn lb_update(id: i32, speed: i32) -> bool;
+        fn lb_stop(id: i32) -> bool;
         unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
     }
 
@@ -116,7 +113,7 @@ mod ffi {
 }
 
 fn get_settings() -> TkSettings {
-    TkSettings::try_read_or(
+    let mut settings = TkSettings::try_read_or(
         SETTINGS_PATH,
         SETTINGS_FILE,
         TkSettings {
@@ -127,7 +124,10 @@ fn get_settings() -> TkSettings {
             pattern_path: String::from(PATTERNS_DIR),
             action_path: String::from(ACTIONS_DIR),
         },
-    )
+    );
+    settings.pattern_path = String::from(PATTERNS_DIR);
+    settings.action_path = String::from(ACTIONS_DIR);
+    settings
 }
 
 pub fn lb_init() -> bool {
@@ -137,13 +137,13 @@ pub fn lb_init() -> bool {
         let evts = client.connection_events.clone();
         let mut lb = Lovebug {
             client,
-            triggers: vec![]
+            triggers: vec![],
         };
 
         start_outgoing_event_thread(evts);
 
         lb.client.read_actions();
-        
+
         if let Ok(triggers) = read_triggers(TRIGGERS_DIR) {
             lb.triggers = triggers;
         }
@@ -157,16 +157,14 @@ pub fn lb_init() -> bool {
     true
 }
 
-pub fn lb_action(
-    action_name: &str,
-    speed: i32,
-    time_secs: f32
-) -> i32 {
+pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     info!(action_name, speed, time_secs);
     Lovebug::run_static(
         |lb| {
+
+            lb.enable_all(); // TODO: Remove
             lb.client.dispatch_name(
-                action_name,
+                vec![action_name.into()],
                 vec![],
                 Speed::new(speed.into()),
                 get_duration_from_secs(time_secs),
@@ -177,28 +175,87 @@ pub fn lb_action(
     -1
 }
 
-pub fn lb_action_body_parts(
-    action_name: &str,
-    speed: i32,
-    time_secs: f32,
-    body_parts: &CxxVector<CxxString>,
-) -> i32 {
-    let body_parts_2 = read_input_string(body_parts);
-
+pub fn lb_scene(scene: &str, scene_tags: &CxxVector<CxxString>, speed: i32, time_secs: f32) -> i32 {
+    info!(scene, speed, time_secs);
     Lovebug::run_static(
         |lb| {
-            lb.client.dispatch_name(
-                action_name,
-                body_parts_2,
-                Speed::new(speed.into()),
-                get_duration_from_secs(time_secs),
-            )
+            lb.client.settings.try_write(SETTINGS_PATH, SETTINGS_FILE);
+
+            let tags = read_input_string(scene_tags);
+            let triggers: Vec<Trigger> = vec![Trigger::Scene(Scene {
+                enabled: true,
+                description: "Default Vibrate".into(),
+                framework: Framework::All,
+                scene_id: SceneId::Any,
+                tags: SceneTags::Any,
+                actions: vec![
+                    "vibrate".into(),
+                    "linear.stroke".into(),
+                    "constrict".into(),
+                    "oscillate.stroke".into(),
+                ],
+            })];
+
+            for trigger in triggers {
+                if let Trigger::Scene(trigger_scene) = trigger {
+                    if trigger_scene.enabled
+                        && trigger_scene.scene_id.matches(scene)
+                        && trigger_scene.tags.matches(&tags)
+                    {
+                        lb.enable_all(); // TODO: Remove
+                        return lb.client.dispatch_name(
+                            trigger_scene.actions,
+                            vec![],
+                            Speed::new(speed.into()),
+                            get_duration_from_secs(time_secs),
+                        );
+                    }
+                }
+            }
+            -1
         },
         -1,
-    );
-
-    -1
+    )
 }
+
+pub fn lb_update(handle: i32, speed: i32) -> bool {
+    info!(handle, speed);
+    Lovebug::run_static(
+        |lb| lb.client.update(handle, Speed::new(speed.into())),
+        false,
+    )
+}
+
+pub fn lb_stop(handle: i32) -> bool {
+    info!(handle);
+    Lovebug::run_static(
+        |lb| lb.client.stop(handle),
+        false,
+    )
+}
+
+// pub fn lb_action_body_parts(
+//     action_name: &str,
+//     speed: i32,
+//     time_secs: f32,
+//     body_parts: &CxxVector<CxxString>,
+// ) -> i32 {
+//     let body_parts_2 = read_input_string(body_parts);
+
+//     Lovebug::run_static(
+//         |lb| {
+//             lb.client.dispatch_name(
+//                 vec![action_name.into()],
+//                 body_parts_2,
+//                 Speed::new(speed.into()),
+//                 get_duration_from_secs(time_secs),
+//             )
+//         },
+//         -1,
+//     );
+
+//     -1
+// }
 
 unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32) -> bool {
     info!("lb_process_event_bridge");
@@ -217,4 +274,3 @@ unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32
 
     false
 }
-

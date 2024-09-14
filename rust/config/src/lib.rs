@@ -17,13 +17,12 @@ pub enum Trigger {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Scene {
-    enable: bool,
-    description: String,
-    framework: Framework,
-    scene_id: SceneId,
-    scene_fragment_id: SceneId,
-    tags: SceneTags,
-    action: Action,
+    pub enabled: bool,
+    pub description: String,
+    pub framework: Framework,
+    pub scene_id: SceneId,
+    pub tags: SceneTags,
+    pub actions: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -33,8 +32,19 @@ pub enum SceneId {
     Contains(String),
 }
 
+impl SceneId {
+    pub fn matches(&self, scene_name: &str) -> bool {
+        match self {
+            SceneId::Any => true,
+            SceneId::Exact(scene) => scene == scene_name,
+            SceneId::Contains(needle) => scene_name.contains(needle),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SceneTags {
+    Any,
     Tag(String),
     And(Vec<Box<SceneTags>>),
     Or(Vec<Box<SceneTags>>),
@@ -50,6 +60,14 @@ impl SceneTags {
     pub fn or(items: Vec<Box<SceneTags>>) -> Box<SceneTags> {
         Box::new(SceneTags::Or(items))
     }
+    pub fn matches( &self, tags: &Vec<String>) -> bool {
+        match self {
+            SceneTags::Any => true,
+            SceneTags::Tag(tag) => tags.contains(tag),
+            SceneTags::And(items) => items.iter().all( |x| x.matches(tags)),
+            SceneTags::Or(items) => items.iter().any( |x| x.matches(tags)),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -58,33 +76,34 @@ pub enum Framework {
     Sexlab,
     Ostim,
     Love,
+    AAF
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Event {
-    enable: bool,
-    description: String,
-    event_start: EventTrigger,
-    event_stop: EventTrigger,
-    action: Vec<String>,
-    body_parts: BodyParts
+    pub enable: bool,
+    pub description: String,
+    pub event_start: EventTrigger,
+    pub event_stop: EventTrigger,
+    pub action: Vec<String>,
+    pub body_parts: BodyParts
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TimedEvent {
-    enable: bool,
-    description: String,
-    event_start: EventTrigger,
-    duration_ms: u32,
-    action: Vec<String>,
-    body_parts: BodyParts
+    pub enable: bool,
+    pub description: String,
+    pub event_start: EventTrigger,
+    pub duration_ms: u32,
+    pub action: Vec<String>,
+    pub body_parts: BodyParts
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventTrigger {
-    form: Form,
-    event: String,
-    conditions: Vec<EventCondition>,
+    pub form: Form,
+    pub event: String,
+    pub conditions: Vec<EventCondition>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -212,11 +231,10 @@ mod tests {
             }),
 
             Trigger::Scene(Scene {
-                enable: false,
+                enabled: false,
                 description: "Default scene".into(),
                 framework: Framework::All,
                 scene_id: SceneId::Any,
-                scene_fragment_id: SceneId::Any,
                 tags: SceneTags::Or(vec![
                     SceneTags::tag("Anal"),
                     SceneTags::tag("Vaginal"),
@@ -225,7 +243,7 @@ mod tests {
                         SceneTags::tag("Bar")
                     ]),
                 ]),
-                action: Action { name: "something".into(), control: vec![] },
+                actions: vec![ "something".into() ],
             }),
         ];
         let strn = serde_json::to_string_pretty(&default_config).unwrap();

@@ -13,7 +13,7 @@ Event OnMagicEffectApply(ObjectReference akTarget, ObjectReference akCaster, Mag
         Lb_Native.Action( "vibrate", 100, 20.0 )
     EndIf
 
-    RegisterForMagicEffectApplyEvent( Game.GetPlayer() );
+    RegisterForMagicEffectApplyEvent( Game.GetPlayer() )
 EndEvent
 
 ; OnItemEquipped

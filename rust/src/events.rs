@@ -69,7 +69,6 @@ pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<TkConn
     
         while let Ok(evt) = receiver.recv() {
             info!("got event: {:?}", evt);
-
             let name = match evt {
                 TkConnectionEvent::DeviceAdded(device, _) => format!("Connected({})", device.name()),
                 TkConnectionEvent::DeviceRemoved(device) => format!("Disconnected({})", device.name()),

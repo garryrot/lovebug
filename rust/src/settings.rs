@@ -4,7 +4,7 @@ use std::{fs, path::PathBuf};
 use serde::{Deserialize, Serialize};
 use tracing::{info, Level};
 
-pub static SETTINGS_PATH: &str = "Data\\SKSE\\Plugins";
+pub static SETTINGS_PATH: &str = "Data\\F4SE\\Plugins";
 pub static SETTINGS_FILE: &str = "Lovebug.json";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

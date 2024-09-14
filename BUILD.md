@@ -1,6 +1,6 @@
 # Building Native Plugin
 
-This build generates `Lovebug.dll`, a SKSE64 plugin based on CommonLibSSE NG.
+This build generates `Lovebug.dll`, a F4SE plugin based on CommonLibF4 NG.
 
 There should really be no need for you to do this, unless you:
 

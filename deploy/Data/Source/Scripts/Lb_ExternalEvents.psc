@@ -5,5 +5,5 @@ Event OnInit()
 EndEvent
 
 Function OnDeviceEvent(String strArg, Float numArg)
-    Debug.Notification("Lovebug: " + strArg)
+    Debug.Notification("Device: " + strArg)
 EndFunction
