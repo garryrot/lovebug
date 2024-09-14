@@ -125,23 +125,31 @@ pub enum Form {
 
 // parse
 
-pub fn read_triggers(trigger_path: &str) -> Result<Vec<Trigger>> {
-    let dir: fs::ReadDir = fs::read_dir(trigger_path)?;
-    let mut all_items = vec![];
-    for entry in dir.into_iter().flatten() {
-        let content = fs::read_to_string(entry.file_name()).unwrap_or("".to_owned());
-        let mut items = serde_json::from_str(&content).unwrap_or(vec![]);
-        all_items.append(&mut items);
-    }
-    Ok(all_items)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn create_default_config() {
+        let default_config: Vec<Trigger> = vec![Trigger::Scene(Scene {
+            enabled: true,
+            description: "Default: Vibrate Everything".into(),
+            framework: Framework::All,
+            scene_id: SceneId::Any,
+            tags: SceneTags::Any,
+            actions: vec![
+                "vibrate".into(),
+                "linear.stroke".into(),
+                "constrict".into(),
+                "oscillate.stroke".into(),
+            ],
+        })];
+        let strn = serde_json::to_string_pretty(&default_config).unwrap();
+        println!("{}", strn);
+    }
+
+    #[test]
+    fn create_milkmod_config() {
         let default_config = vec![
             Trigger::Event(Event {
                 enable: true,
@@ -248,10 +256,5 @@ mod tests {
         ];
         let strn = serde_json::to_string_pretty(&default_config).unwrap();
         println!("{}", strn);
-    }
-
-    #[test]
-    fn default_triggers_can_be_read() {
-        let result = read_triggers("..\\deploy\\Data\\SKSE\\Plugins\\Lovebug\\Triggers");
     }
 }

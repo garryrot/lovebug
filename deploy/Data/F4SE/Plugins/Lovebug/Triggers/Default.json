@@ -1,0 +1,17 @@
+[
+  {
+    "Scene": {
+      "enabled": true,
+      "description": "Everything",
+      "framework": "All",
+      "scene_id": "Any",
+      "tags": "Any",
+      "actions": [
+        "vibrate",
+        "linear.stroke",
+        "constrict",
+        "oscillate.stroke"
+      ]
+    }
+  }
+]

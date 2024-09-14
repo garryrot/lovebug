@@ -1,104 +1,104 @@
 [
-    {
-      "name": "vibrate",
-      "control": [
-        {
-          "Scalar": [
-            "All",
-            {
-              "Constant": 100
-            },
-            [
-              "Vibrate"
-            ]
+  {
+    "name": "vibrate",
+    "control": [
+      {
+        "Scalar": [
+          "All",
+          {
+            "Constant": 100
+          },
+          [
+            "Vibrate"
           ]
-        }
-      ]
-    },
-    {
-      "name": "constrict",
-      "control": [
-        {
-          "Scalar": [
-            "All",
-            {
-              "Constant": 100
-            },
-            [
-              "Constrict"
-            ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "constrict",
+    "control": [
+      {
+        "Scalar": [
+          "All",
+          {
+            "Constant": 100
+          },
+          [
+            "Constrict"
           ]
-        }
-      ]
-    },
-    {
-      "name": "inflate",
-      "control": [
-        {
-          "Scalar": [
-            "All",
-            {
-              "Constant": 100
-            },
-            [
-              "Constrict"
-            ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "inflate",
+    "control": [
+      {
+        "Scalar": [
+          "All",
+          {
+            "Constant": 100
+          },
+          [
+            "Constrict"
           ]
-        }
-      ]
-    },
-    {
-      "name": "scalar",
-      "control": [
-        {
-          "Scalar": [
-            "All",
-            {
-              "Constant": 100
-            },
-            [
-              "Vibrate",
-              "Constrict",
-              "Oscillate",
-              "Inflate"
-            ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "scalar",
+    "control": [
+      {
+        "Scalar": [
+          "All",
+          {
+            "Constant": 100
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate",
+            "Inflate"
           ]
-        }
-      ]
-    },
-    {
-      "name": "linear.stroke",
-      "control": [
-        {
-          "Stroke": [
-            "All",
-            {
-              "Constant": 100
-            },
-            {
-              "min_ms": 100,
-              "max_ms": 1500,
-              "min_pos": 0.0,
-              "max_pos": 1.0
-            }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "linear.stroke",
+    "control": [
+      {
+        "Stroke": [
+          "All",
+          {
+            "Constant": 100
+          },
+          {
+            "min_ms": 100,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 1.0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "oscillate.stroke",
+    "control": [
+      {
+        "Scalar": [
+          "All",
+          {
+            "Constant": 100
+          },
+          [
+            "Oscillate"
           ]
-        }
-      ]
-    },
-    {
-      "name": "oscillate.stroke",
-      "control": [
-        {
-          "Scalar": [
-            "All",
-            {
-              "Constant": 100
-            },
-            [
-              "Oscillate"
-            ]
-          ]
-        }
-      ]
-    }
-  ]
+        ]
+      }
+    ]
+  }
+]

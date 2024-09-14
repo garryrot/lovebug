@@ -26,10 +26,9 @@ Event AAF:AAF_API.OnAnimationStart(AAF:AAF_API akSender, Var[] akArgs)
             String sceneName = akArgs[2] as String ; Animation/Scene Name
             String[] tags = Utility.VarToVarArray(akArgs[3]) as String[]         
             Debug("Lb_Native.Scene " + status + " sceneName:" + sceneName + " tags: " + tags)
-            CurrentHandle = Lb_Native.Scene(sceneName, tags, 100, 60)
+            CurrentHandle = Lb_Native.Scene(sceneName, tags, 100, -1)
         EndIf
     EndWhile
-
 EndEvent
 
 Event AAF:AAF_API.OnAnimationStop(AAF:AAF_API akSender, Var[] akArgs)
