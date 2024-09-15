@@ -1,10 +1,7 @@
-use anyhow::Result;
-use std::fs;
-
 use serde::{Deserialize, Serialize};
 use serde_hex::{SerHex,StrictPfx};
 
-use bp_scheduler::settings::actions::*;
+use bp_scheduler::config::actions::*;
 
 // triggers/*.json
 

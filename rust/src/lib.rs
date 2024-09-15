@@ -1,7 +1,7 @@
 use ::config::*;
 use bp_scheduler::{
     client::{client::*, connection::*, input::*, settings::*},
-    settings::{devices::BpSettings, read::read_config},
+    config::{devices::BpSettings, read::read_config},
     speed::Speed,
 };
 use cxx::{CxxString, CxxVector};
@@ -116,7 +116,7 @@ mod ffi {
         ) -> i32;
         fn lb_update(id: i32, speed: i32) -> bool;
         fn lb_stop(id: i32) -> bool;
-        unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
+        unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
     }
 
     unsafe extern "C++" {
@@ -134,8 +134,8 @@ fn get_settings() -> TkSettings {
             log_level: TkLogLevel::Debug,
             connection: TkConnectionType::InProcess,
             device_settings: BpSettings { devices: vec![] },
-            pattern_path: String::from(PATTERNS_DIR),
-            action_path: String::from(ACTIONS_DIR),
+            pattern_path: "".into(),
+            action_path: "".into(),
         },
     );
     settings.pattern_path = String::from(PATTERNS_DIR);
@@ -145,6 +145,8 @@ fn get_settings() -> TkSettings {
 
 pub fn lb_init() -> bool {
     if let Ok(mut guard) = LB.state.try_lock() {
+
+        // TODO can maybe moved into a background thread
         let client = BpClient::connect(get_settings()).unwrap();
 
         let evts = client.connection_events.clone();
@@ -189,7 +191,6 @@ pub fn lb_scene(scene: &str, scene_tags: &CxxVector<CxxString>, speed: i32, time
     Lovebug::run_static(
         |lb| {
             lb.client.settings.try_write(SETTINGS_PATH, SETTINGS_FILE);
-
             let tags = read_input_string(scene_tags);
 
             for trigger in lb.triggers.clone() {
@@ -227,8 +228,8 @@ pub fn lb_stop(handle: i32) -> bool {
     Lovebug::run_static(|lb| lb.client.stop(handle), false)
 }
 
-unsafe fn lb_process_event_bridge(event_name: &str, str_arg: &str, num_arg: &f32) -> bool {
-    info!("lb_process_event_bridge");
+unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bool {
+    info!("lb_event");
     let form_id = 0;
     debug!(
         "EventBridge {:#010x} {} {} {}",

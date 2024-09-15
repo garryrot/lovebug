@@ -44,7 +44,7 @@ public:
 
 bool ProcessEvent(std::monostate, std::string eventName, std::string strArg, float numArg)
 {
-    return lb_process_event_bridge(eventName, strArg, numArg);
+    return lb_process_event(eventName, strArg, numArg);
 }
 
 int Action(std::monostate, std::string actionName, int speed, float secs) 
