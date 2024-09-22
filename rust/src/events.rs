@@ -1,15 +1,11 @@
-use bp_scheduler::client::connection::TkConnectionEvent;
+use bp_scheduler::client::BpClient;
 use tracing::info;
+use buttplug::client::ButtplugClientEvent;
 use crate::{
     events::ffi_event::*, 
     ffi
 };
-
-#[derive(Debug)]
-pub enum LovebugEvent {
-    LovebugEvent,
-    Bar
-}
+use futures_util::StreamExt;
 
 #[cxx::bridge]
 mod ffi_event {
@@ -55,8 +51,10 @@ impl ModEvent {
 ///  - RegisterForModEvent (standard signature) on SKSE
 ///  - RegisterForExternalEvent on F4SE
 /// Events can be sent by adding to the queue in the main struct
-pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<TkConnectionEvent> ) {
-    std::thread::spawn( move || {
+pub fn start_outgoing_event_thread( client: &BpClient ) {
+    let mut events = client.buttplug.event_stream();
+
+    client.runtime.spawn( async move {
         fn send_mod_event(event: ModEvent) {
             AddTask_ModEvent(
                 |context| {
@@ -67,15 +65,17 @@ pub fn start_outgoing_event_thread( receiver: crossbeam_channel::Receiver<TkConn
             );
         }
     
-        while let Ok(evt) = receiver.recv() {
+        while let Some(evt) = events.next().await {
             info!("got event: {:?}", evt);
-            let name = match evt {
-                TkConnectionEvent::DeviceAdded(device, _) => format!("Connected({})", device.name()),
-                TkConnectionEvent::DeviceRemoved(device) => format!("Disconnected({})", device.name()),
-                TkConnectionEvent::BatteryLevel(device, battery) => format!("Battery({}, {})", device.name(), battery.unwrap_or(0.0)),
-                _ => "".into()
+            let str_arg = match evt {
+                ButtplugClientEvent::DeviceAdded(device) => format!("Connected({})", device.name()),
+                ButtplugClientEvent::DeviceRemoved(device) => format!("Disconnected({})", device.name()),
+                ButtplugClientEvent::Error(buttplug_error) => format!("Error({:?})", buttplug_error),
+                _ => String::new()
             };
-            send_mod_event(ModEvent::new("LbEvent", name.as_str(), 0.0))           
+            if str_arg != String::new() {
+                send_mod_event(ModEvent::new("LbEvent", str_arg.as_str(), 0.0))   
+            }
         }
     });
 }

@@ -14,78 +14,9 @@ using namespace RE::BSScript;
 
 #define DllExport __declspec(dllexport)
 
-class LogEventSink : public RE::BSTEventSink<LogEvent>
-{
-public:
-    static LogEventSink *GetSingleton()
-    {
-        static LogEventSink singleton;
-        return &singleton;
-    }
-
-    virtual RE::BSEventNotifyControl ProcessEvent(const LogEvent& event, RE::BSTEventSource<LogEvent>*) override
-	{
-        BSFixedString temp = NULL;
-        event.errorMsg.GetErrorMsg(temp);
-        std::string message = (std::string) temp;
-
-        if (message.find("plug start to vibrate") != std::string::npos) {
-            lb_log_info("FOUND MATCH");
-        }
-
-        // lb_log_debug(std::format("{}", message));
-
-        return RE::BSEventNotifyControl::kContinue;
-	}
-};
-
-
-// Native Methods
-
-bool ProcessEvent(std::monostate, std::string eventName, std::string strArg, float numArg)
-{
-    return lb_process_event(eventName, strArg, numArg);
-}
-
-int Action(std::monostate, std::string actionName, int speed, float secs) 
-{
-    return lb_action(actionName, speed, secs);
-}
-
-bool Update(std::monostate, int handle, int speed) 
-{
-    return lb_update(handle, speed);
-}
-
-bool Stop(std::monostate, int handle) 
-{
-    return lb_stop(handle);
-}
-
-int Scene(std::monostate, std::string sceneName, std::vector<std::string> tags, int speed, float secs) 
-{
-    return lb_scene(sceneName, tags, speed, secs);
-}
-
-constexpr std::string_view PapyrusClass = "Lb_Native";
-bool RegisterPapyrusCalls(IVirtualMachine *vm)
-{
-    vm->BindNativeMethod(PapyrusClass, "Process_Event", ProcessEvent, false);
-    vm->BindNativeMethod(PapyrusClass, "Action", Action, false);
-    vm->BindNativeMethod(PapyrusClass, "Update", Update, false);
-    vm->BindNativeMethod(PapyrusClass, "Stop", Stop, false);
-    vm->BindNativeMethod(PapyrusClass, "Scene", Scene, false);
-    return true;
-}
-
-void InitializePapyrus()
-{
-    lb_log_debug("Initializing Papyrus binding...");
-    if (! F4SE::GetPapyrusInterface()->Register(RegisterPapyrusCalls))
-    {
-        lb_log_error("Failed binding papyrus");
-    }
-}
+#include "Logs.cpp"
+#include "Native.cpp"
+#include "Events.cpp"
 
 // Messaging
 void InitializeMessaging()
@@ -115,26 +46,6 @@ void InitializeMessaging()
     }
 }
 
-// TODO: Port to SSE branch
-std::string GetOsStringAsUtf8(std::wstring in) {
-    using convert_type = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_type, wchar_t> converter;
-    std::string converted_str = converter.to_bytes( in );
-    return converted_str;
-}
-
-std::string GetLogFile() {
-	auto path = F4SE::log::log_directory();
-    if (!path) {
-        return "";
-    }
-    std::optional<std::string> utf8Path = GetOsStringAsUtf8(path->wstring());
-    if (!utf8Path.has_value()) {
-        return "";
-    }
-    return std::format("{}\\{}.log", utf8Path.value(), Version::PROJECT.data());
-}
-
 extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* f4se, F4SE::PluginInfo* info)
 {
     lb_init_logging(GetLogFile());
@@ -142,6 +53,7 @@ extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::Query
 	info->infoVersion = F4SE::PluginInfo::kVersion;
 	info->name = Version::PROJECT.data();
 	info->version = Version::MAJOR;
+
     lb_log_info(std::format("{} {} is loading...", info->name, info->version));
 	if (f4se->IsEditor()) {
 		lb_log_error("loaded in editor");
@@ -162,6 +74,6 @@ extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadIn
 	F4SE::Init(f4se);
 	lb_log_info("plugin loaded");
     InitializeMessaging();
-    InitializePapyrus();
+    InitializeNative();
 	return true;
 }

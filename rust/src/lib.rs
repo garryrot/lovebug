@@ -1,6 +1,6 @@
 use ::config::*;
 use bp_scheduler::{
-    client::{client::*, connection::*, input::*, settings::*},
+    client::{connection::*, input::*, settings::*, status::get_known_actuator_ids, BpClient},
     config::{devices::BpSettings, read::read_config},
     speed::Speed,
 };
@@ -58,7 +58,7 @@ impl Lovebug {
     }
 
     fn enable_all(&mut self) {
-        for actuator in self.client.status.get_known_actuator_ids() {
+        for actuator in get_known_actuator_ids(self.client.buttplug.devices(), &self.client.settings) {
             self.client
                 .settings
                 .device_settings
@@ -149,13 +149,12 @@ pub fn lb_init() -> bool {
         // TODO can maybe moved into a background thread
         let client = BpClient::connect(get_settings()).unwrap();
 
-        let evts = client.connection_events.clone();
         let mut lb = Lovebug {
             client,
             triggers: vec![],
         };
 
-        start_outgoing_event_thread(evts);
+        start_outgoing_event_thread(&lb.client);
 
         lb.client.read_actions();
         lb.read_all_triggers();
