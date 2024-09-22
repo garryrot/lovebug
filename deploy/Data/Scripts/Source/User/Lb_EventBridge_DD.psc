@@ -2,7 +2,7 @@ Scriptname Lb_EventBridge_DD extends Quest
 
 Event OnInit()
     Debug.Notification("Registering")
-    RegisterForMagicEffectApplyEvent( Game.GetPlayer() )
+    RegisterForMagicEffectApplyEvent(Game.GetPlayer())
 EndEvent
 
 Event OnMagicEffectApply(ObjectReference akTarget, ObjectReference akCaster, MagicEffect akEffect)
@@ -10,13 +10,11 @@ Event OnMagicEffectApply(ObjectReference akTarget, ObjectReference akCaster, Mag
     Debug.Notification(akCaster + " applied the " + akEffect.GetName() + " on " + akTarget)
 
     If akEffect.GetName() == "Plugged"
-        Lb_Native.Action( "vibrate", 100, -1 )
+        Lb_Native.Action("vibrate", 100, -1)
     EndIf
 
-    RegisterForMagicEffectApplyEvent( Game.GetPlayer() )
+    RegisterForMagicEffectApplyEvent(Game.GetPlayer())
 EndEvent
 
 ; OnItemEquipped
 ; OnItemUnequipped
-
-; On

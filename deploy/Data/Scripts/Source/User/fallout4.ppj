@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+<!-- Created by vscode papyrus-lang papyrus.fallout4.generateProject -->
+<PapyrusProject xmlns="PapyrusProject.xsd" 
+    Flags="Institute_Papyrus_Flags.flg" 
+    Output="../../"
+    Game="fo4" 
+    Asm="Discard" 
+    Optimize="false" 
+    Release="false" 
+    Final="false">
+    <Imports>
+        <Import>.</Import>
+        <Import>C:\Program Files (x86)\Steam\steamapps\common\Fallout 4\Data\Scripts\Source\Base</Import>
+        <Import>C:\Wabbajack\Downloads\paradise2\mods\Advanced Animation Framework\Scripts\Source\User</Import>
+    </Imports>
+    <Folders>
+        <Folder>.</Folder>
+    </Folders>
+</PapyrusProject>

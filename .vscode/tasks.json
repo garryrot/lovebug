@@ -1,11 +1,12 @@
 {
-	"version": "2.0.0",
-	"tasks": [
+    // created by vscode papyrus-lang papyrus.skyrimSpecialEdition.generateProject
+    "version": "2.0.0",
+    "tasks": [
 		{
-			"label": "Build Papyrus (Debug)",
+            "label": "Fallout 4 (use .ppj)",
 			"type": "pyro",
-			"projectFile": "deploy\\Debug.ppj",
-			"gamePath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\",
+			"projectFile": "./deploy/Data/Source/User/Scripts/fallout4.ppj",
+			"gamePath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Fallout 4",
 			"problemMatcher": [
 				"$PapyrusCompiler"
 			],
@@ -13,27 +14,5 @@
 				"kind": "build"
 			}
 		},
-		{
-			"label": "Build Papyrus (Release)",
-			"type": "pyro",
-			"projectFile": "deploy\\Release.ppj",
-			"gamePath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Skyrim Special Edition\\",
-			"problemMatcher": [
-				"$PapyrusCompiler"
-			],
-			"group": {
-				"kind": "build"
-			}
-		},
-		{
-			"label": "Install Mod (Release)",
-			"type": "shell",
-			"command": "./deploy-scripts-and-run.ps1",
-			"dependsOn": "Build Papyrus (Release)",
-			"presentation": {
-				"reveal": "always",
-				"panel": "new"
-			}
-		}
-	]
+    ]
 }
