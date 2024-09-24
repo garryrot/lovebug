@@ -1,0 +1,12 @@
+[package]
+name = "default_config"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+config = { path = "../rust/config" }
+bp_scheduler = { path = "../rust/bp_scheduler" }
+serde = "1.0.210"
+serde_json = "1.0.128"

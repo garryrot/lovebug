@@ -2,7 +2,7 @@
   {
     "Scene": {
       "enabled": true,
-      "description": "Everything",
+      "description": "Scene Default",
       "framework": "All",
       "scene_id": "Any",
       "tags": "Any",

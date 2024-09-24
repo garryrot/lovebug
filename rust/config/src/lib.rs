@@ -119,31 +119,9 @@ pub enum Form {
     FormId(u32)
 }
 
-
-// parse
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn create_default_config() {
-        let default_config: Vec<Trigger> = vec![Trigger::Scene(Scene {
-            enabled: true,
-            description: "Default: Vibrate Everything".into(),
-            framework: Framework::All,
-            scene_id: SceneId::Any,
-            tags: SceneTags::Any,
-            actions: vec![
-                "vibrate".into(),
-                "linear.stroke".into(),
-                "constrict".into(),
-                "oscillate.stroke".into(),
-            ],
-        })];
-        let strn = serde_json::to_string_pretty(&default_config).unwrap();
-        println!("{}", strn);
-    }
 
     #[test]
     fn create_milkmod_config() {
