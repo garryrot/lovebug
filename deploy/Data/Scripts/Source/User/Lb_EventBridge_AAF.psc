@@ -3,8 +3,6 @@ Scriptname Lb_EventBridge_AAF extends Quest
 Int CurrentHandle = -1
 
 Event OnInit()
-    Debug("Lb_EventBridge_AAF OnInit")
-
     AAF:AAF_API api = Game.GetFormFromFile(0x00000F99, "AAF.esm") as AAF:AAF_API
     RegisterForCustomEvent(api, "OnAnimationStart")
     RegisterForCustomEvent(api, "OnAnimationStop")
@@ -12,21 +10,18 @@ Event OnInit()
 EndEvent
 
 Event AAF:AAF_API.OnAnimationStart(AAF:AAF_API akSender, Var[] akArgs)
-    Debug("OnAnimationStart")
     If !HasFailed(akArgs) && HasPlayer(akArgs)
         StartScene(akArgs)
     EndIf
 EndEvent
 
 Event AAF:AAF_API.OnAnimationChange(AAF:AAF_API akSender, Var[] akArgs)
-    Debug("OnAnimationChange")
     If !HasFailed(akArgs) && HasPlayer(akArgs)
         StartScene(akArgs)
     EndIf
 EndEvent
 
 Event AAF:AAF_API.OnAnimationStop(AAF:AAF_API akSender, Var[] akArgs)
-    Debug("OnAnimationStop")
     If !HasFailed(akArgs) && HasPlayer(akArgs)
         StopScene(akArgs)
     EndIf

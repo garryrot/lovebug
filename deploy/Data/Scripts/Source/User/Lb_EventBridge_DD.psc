@@ -1,7 +1,6 @@
 Scriptname Lb_EventBridge_DD extends Quest
 
 Event OnInit()
-    Debug.Notification("Registering")
     RegisterForMagicEffectApplyEvent(Game.GetPlayer())
 EndEvent
 
