@@ -1,0 +1,108 @@
+[
+  {
+    "name": "dd.nipple",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "nipple"
+            ]
+          },
+          {
+            "Constant": 100
+          },
+          [
+            "Vibrate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "dd.vaginal.vibrator",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "vaginal"
+            ]
+          },
+          {
+            "RandomFunscript": [
+              100,
+              [
+                "60_Blowjob",
+                "61_Deepthroat"
+              ]
+            ]
+          },
+          [
+            "Vibrate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "dd.vaginal.inflator",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "vaginal"
+            ]
+          },
+          {
+            "Constant": 33
+          },
+          [
+            "Inflate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "dd.anal.vibrate",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "anal"
+            ]
+          },
+          {
+            "Constant": 100
+          },
+          [
+            "Vibrate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "dd.anal.inflate",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "anal"
+            ]
+          },
+          {
+            "Constant": 33
+          },
+          [
+            "Inflate"
+          ]
+        ]
+      }
+    ]
+  }
+]

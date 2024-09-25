@@ -7,10 +7,39 @@
       "scene_id": "Any",
       "tags": "Any",
       "actions": [
-        "vibrate",
-        "linear.stroke",
-        "constrict",
-        "oscillate.stroke"
+        {
+          "name": "vibrate",
+          "strength": {
+            "RandomFunscript": [
+              50,
+              [
+                "Blowjob",
+                "Deepthroat"
+              ]
+            ]
+          }
+        },
+        {
+          "name": "linear.stroke",
+          "strength": {
+            "Funscript": [
+              50,
+              "Blowjob"
+            ]
+          }
+        },
+        {
+          "name": "constrict",
+          "strength": {
+            "Constant": 50
+          }
+        },
+        {
+          "name": "oscillate",
+          "strength": {
+            "Constant": 50
+          }
+        }
       ]
     }
   }
