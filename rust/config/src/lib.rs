@@ -3,8 +3,6 @@ use serde_hex::{SerHex,StrictPfx};
 
 use bp_scheduler::config::actions::*;
 
-// triggers/*.json
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Trigger {
     Scene(Scene),
@@ -19,7 +17,27 @@ pub struct Scene {
     pub framework: Framework,
     pub scene_id: SceneId,
     pub tags: SceneTags,
-    pub actions: Vec<String>,
+    pub actions: Vec<ActionRef>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Event {
+    pub enable: bool,
+    pub description: String,
+    pub event_start: EventTrigger,
+    pub event_stop: EventTrigger,
+    pub action: Vec<String>,
+    pub body_parts: BodyParts
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TimedEvent {
+    pub enable: bool,
+    pub description: String,
+    pub event_start: EventTrigger,
+    pub duration_ms: u32,
+    pub action: Vec<String>,
+    pub body_parts: BodyParts
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -29,6 +47,13 @@ pub enum SceneId {
     Contains(String),
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum SceneTags {
+    Any,
+    Tag(String),
+    And(Vec<Box<SceneTags>>),
+    Or(Vec<Box<SceneTags>>),
+}
 impl SceneId {
     pub fn matches(&self, scene_name: &str) -> bool {
         match self {
@@ -37,14 +62,6 @@ impl SceneId {
             SceneId::Contains(needle) => scene_name.contains(needle),
         }
     }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum SceneTags {
-    Any,
-    Tag(String),
-    And(Vec<Box<SceneTags>>),
-    Or(Vec<Box<SceneTags>>),
 }
 
 impl SceneTags {
@@ -70,31 +87,12 @@ impl SceneTags {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Framework {
     All,
+    AAF,
     Sexlab,
     Ostim,
-    Love,
-    AAF
+    Love
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Event {
-    pub enable: bool,
-    pub description: String,
-    pub event_start: EventTrigger,
-    pub event_stop: EventTrigger,
-    pub action: Vec<String>,
-    pub body_parts: BodyParts
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct TimedEvent {
-    pub enable: bool,
-    pub description: String,
-    pub event_start: EventTrigger,
-    pub duration_ms: u32,
-    pub action: Vec<String>,
-    pub body_parts: BodyParts
-}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventTrigger {

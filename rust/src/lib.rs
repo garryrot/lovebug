@@ -1,7 +1,7 @@
 use ::config::*;
 use bp_scheduler::{
     client::{connection::*, input::*, settings::*, status::get_known_actuator_ids, BpClient},
-    config::{devices::BpSettings, read::read_config},
+    config::{actions::{ActionRef, Strength}, devices::BpSettings, read::read_config},
     speed::Speed,
 };
 use cxx::{CxxString, CxxVector};
@@ -173,8 +173,11 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     Lovebug::run_static(
         |lb| {
             lb.enable_all(); // TODO: Remove
-            lb.client.dispatch_name(
-                vec![action_name.into()],
+            lb.client.dispatch_refs(
+                vec![ActionRef {
+                    action: action_name.into(),
+                    strength: Strength::Constant(100)
+                }],
                 vec![],
                 Speed::new(speed.into()),
                 get_duration_from_secs(time_secs),
@@ -199,7 +202,7 @@ pub fn lb_scene(scene: &str, scene_tags: &CxxVector<CxxString>, speed: i32, time
                         && trigger_scene.tags.matches(&tags)
                     {
                         lb.enable_all(); // TODO: Remove
-                        return lb.client.dispatch_name(
+                        return lb.client.dispatch_refs(
                             trigger_scene.actions,
                             vec![],
                             Speed::new(speed.into()),
