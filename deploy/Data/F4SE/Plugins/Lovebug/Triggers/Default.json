@@ -8,7 +8,7 @@
       "tags": "Any",
       "actions": [
         {
-          "name": "vibrate",
+          "action": "vibrate",
           "strength": {
             "RandomFunscript": [
               50,
@@ -20,7 +20,7 @@
           }
         },
         {
-          "name": "linear.stroke",
+          "action": "linear.stroke",
           "strength": {
             "Funscript": [
               50,
@@ -29,13 +29,13 @@
           }
         },
         {
-          "name": "constrict",
+          "action": "constrict",
           "strength": {
             "Constant": 50
           }
         },
         {
-          "name": "oscillate",
+          "action": "oscillate",
           "strength": {
             "Constant": 50
           }

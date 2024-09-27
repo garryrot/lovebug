@@ -1,6 +1,6 @@
 [
   {
-    "name": "dd.nipple",
+    "name": "vibrate.nipple",
     "control": [
       {
         "Scalar": [
@@ -9,9 +9,6 @@
               "nipple"
             ]
           },
-          {
-            "Constant": 100
-          },
           [
             "Vibrate"
           ]
@@ -20,22 +17,13 @@
     ]
   },
   {
-    "name": "dd.vaginal.vibrator",
+    "name": "vibrate.vaginal",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
               "vaginal"
-            ]
-          },
-          {
-            "RandomFunscript": [
-              100,
-              [
-                "60_Blowjob",
-                "61_Deepthroat"
-              ]
             ]
           },
           [
@@ -46,17 +34,48 @@
     ]
   },
   {
-    "name": "dd.vaginal.inflator",
+    "name": "vibrate.clitoral",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
-              "vaginal"
+              "clitoral"
             ]
           },
+          [
+            "Vibrate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "vibrate.anal",
+    "control": [
+      {
+        "Scalar": [
           {
-            "Constant": 33
+            "BodyParts": [
+              "anal"
+            ]
+          },
+          [
+            "Vibrate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "constrict.vaginal",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "constrict"
+            ]
           },
           [
             "Inflate"
@@ -66,27 +85,41 @@
     ]
   },
   {
-    "name": "dd.anal.vibrate",
+    "name": "constrict.anal",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
-              "anal"
+              "constrict"
             ]
           },
-          {
-            "Constant": 100
-          },
           [
-            "Vibrate"
+            "Inflate"
           ]
         ]
       }
     ]
   },
   {
-    "name": "dd.anal.inflate",
+    "name": "inflate.vaginal",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "vaginal"
+            ]
+          },
+          [
+            "Inflate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "inflate.anal",
     "control": [
       {
         "Scalar": [
@@ -94,9 +127,6 @@
             "BodyParts": [
               "anal"
             ]
-          },
-          {
-            "Constant": 33
           },
           [
             "Inflate"

@@ -169,7 +169,7 @@ pub fn lb_init() -> bool {
 }
 
 pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
-    info!(action_name, speed, time_secs);
+    info!(action_name, speed, time_secs, "lb_action");
     Lovebug::run_static(
         |lb| {
             lb.enable_all(); // TODO: Remove
@@ -189,7 +189,7 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
 }
 
 pub fn lb_scene(scene: &str, scene_tags: &CxxVector<CxxString>, speed: i32, time_secs: f32) -> i32 {
-    info!(scene, speed, time_secs);
+    info!(scene, speed, time_secs, "lb_scene");
     Lovebug::run_static(
         |lb| {
             lb.client.settings.try_write(SETTINGS_PATH, SETTINGS_FILE);
@@ -218,7 +218,7 @@ pub fn lb_scene(scene: &str, scene_tags: &CxxVector<CxxString>, speed: i32, time
 }
 
 pub fn lb_update(handle: i32, speed: i32) -> bool {
-    info!(handle, speed);
+    info!(handle, speed, "lb_update");
     Lovebug::run_static(
         |lb| lb.client.update(handle, Speed::new(speed.into())),
         false,
@@ -226,7 +226,7 @@ pub fn lb_update(handle: i32, speed: i32) -> bool {
 }
 
 pub fn lb_stop(handle: i32) -> bool {
-    info!(handle);
+    info!(handle, "lb_stop");
     Lovebug::run_static(|lb| lb.client.stop(handle), false)
 }
 

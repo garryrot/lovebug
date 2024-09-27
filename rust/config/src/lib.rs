@@ -47,13 +47,6 @@ pub enum SceneId {
     Contains(String),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum SceneTags {
-    Any,
-    Tag(String),
-    And(Vec<Box<SceneTags>>),
-    Or(Vec<Box<SceneTags>>),
-}
 impl SceneId {
     pub fn matches(&self, scene_name: &str) -> bool {
         match self {
@@ -62,6 +55,14 @@ impl SceneId {
             SceneId::Contains(needle) => scene_name.contains(needle),
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum SceneTags {
+    Any,
+    Tag(String),
+    And(Vec<Box<SceneTags>>),
+    Or(Vec<Box<SceneTags>>),
 }
 
 impl SceneTags {
@@ -92,7 +93,6 @@ pub enum Framework {
     Ostim,
     Love
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventTrigger {
