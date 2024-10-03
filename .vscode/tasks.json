@@ -3,16 +3,46 @@
     "version": "2.0.0",
     "tasks": [
 		{
-            "label": "Fallout 4 (use .ppj)",
-			"type": "pyro",
-			"projectFile": "./deploy/Data/Source/User/Scripts/fallout4.ppj",
-			"gamePath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Fallout 4",
-			"problemMatcher": [
-				"$PapyrusCompiler"
-			],
-			"group": {
-				"kind": "build"
-			}
-		},
+            "label": "Build Papyrus Scripts (Fallout 4)",
+            "detail": "",
+            "type": "shell",
+            "command": "./build_scripts.ps1",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+		{
+            "label": "Install Mod",
+            "detail": "Copy all build output to mod dir",
+            "type": "shell",
+            "command": "./install_mod.ps1",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+		{
+            "label": "Build & Install All",
+            "detail": "Build Native, Build Papyrus & Install",
+            "type": "shell",
+            "command": "./build_and_install.ps1",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
     ]
 }

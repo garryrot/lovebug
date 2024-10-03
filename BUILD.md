@@ -37,6 +37,13 @@ cmake --preset build
 cmake --build --preset build --config Release
 ```
 
-# Building Papyrus Scripts 
+# Building Papyrus Scripts
 
-*to be done*
+## Requirements
+
+- Joelday VSCode Extension present in VSCode extension path
+- OR: Pyro Parallel Papyrus Build System (`$pyro_path` in build_scripts.ps1 has to be adapted) 
+
+```sh
+./build_scripts.ps1
+```
