@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use bp_scheduler::config::read::read_config;
 use tracing::{debug, info};
 
 use crate::*;
@@ -14,7 +13,6 @@ pub struct Triggers {
 }
 
 impl Triggers {
-
     pub fn default() -> Self {
         Triggers {
             scenes_exact_index: HashMap::new(),
@@ -22,7 +20,6 @@ impl Triggers {
         }
     }
 
-    // let triggers : Vec<Trigger> = read_config(dir.into());
     pub fn load_triggers(&mut self, triggers: Vec<Trigger>) {
         let mut scenes_default : Vec<Scene> = vec![];
         for trigger in triggers {

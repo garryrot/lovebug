@@ -1,18 +1,15 @@
+use crate::{events::ffi_event::*, ffi};
 use bp_scheduler::client::BpClient;
-use tracing::info;
 use buttplug::client::ButtplugClientEvent;
-use crate::{
-    events::ffi_event::*, 
-    ffi
-};
 use futures_util::StreamExt;
+use tracing::info;
 
 #[cxx::bridge]
 mod ffi_event {
 
     #[derive(Debug)]
     pub struct ModEvent {
-        pub event_name: String, 
+        pub event_name: String,
         pub str_arg: String,
         pub num_arg: f64,
     }
@@ -51,31 +48,42 @@ impl ModEvent {
 ///  - RegisterForModEvent (standard signature) on SKSE
 ///  - RegisterForExternalEvent on F4SE
 /// Events can be sent by adding to the queue in the main struct
-pub fn start_outgoing_event_thread( client: &BpClient ) {
+pub fn start_outgoing_event_thread(client: &BpClient) {
     let mut events = client.buttplug.event_stream();
 
-    client.runtime.spawn( async move {
+    client.runtime.spawn(async move {
         fn send_mod_event(event: ModEvent) {
             AddTask_ModEvent(
                 |context| {
                     let form = ffi::GetFormById(0x0F99, "Lovebug.esp"); // TODO: Is getting form even required?
-                    unsafe { SendEvent(form, context); }
+                    unsafe {
+                        SendEvent(form, context);
+                    }
                 },
-                event
+                event,
             );
         }
-    
+
         while let Some(evt) = events.next().await {
             info!("got event: {:?}", evt);
-            let str_arg = match evt {
-                ButtplugClientEvent::DeviceAdded(device) => format!("Connected({})", device.name()),
-                ButtplugClientEvent::DeviceRemoved(device) => format!("Disconnected({})", device.name()),
-                ButtplugClientEvent::Error(buttplug_error) => format!("Error({:?})", buttplug_error),
-                _ => String::new()
+            match evt {
+                ButtplugClientEvent::DeviceAdded(device) => send_mod_event(ModEvent::new(
+                    "Tele_DeviceAdded",
+                    device.name().as_str(),
+                    0.0,
+                )),
+                ButtplugClientEvent::DeviceRemoved(device) => send_mod_event(ModEvent::new(
+                    "Tele_DeviceRemoved",
+                    device.name().as_str(),
+                    0.0,
+                )),
+                ButtplugClientEvent::Error(buttplug_error) => send_mod_event(ModEvent::new(
+                    "Tele_ConnectionError",
+                    format!("{:?}", buttplug_error).as_str(),
+                    0.0,
+                )),
+                _ => {}
             };
-            if str_arg != String::new() {
-                send_mod_event(ModEvent::new("LbEvent", str_arg.as_str(), 0.0))   
-            }
         }
     });
 }

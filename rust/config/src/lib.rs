@@ -3,7 +3,7 @@ use serde_hex::{SerHex,StrictPfx};
 
 use bp_scheduler::config::actions::*;
 
-pub mod triggers;
+pub mod find;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Trigger {
@@ -22,7 +22,6 @@ pub struct Scene {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Event {
-    pub enable: bool,
     pub description: String,
     pub event_start: EventTrigger,
     pub event_stop: EventTrigger,
@@ -32,7 +31,6 @@ pub struct Event {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TimedEvent {
-    pub enable: bool,
     pub description: String,
     pub event_start: EventTrigger,
     pub duration_ms: u32,
@@ -125,7 +123,6 @@ mod tests {
     fn create_milkmod_config() {
         let default_config = vec![
             Trigger::Event(Event {
-                enable: true,
                 description: "Milk Mod: Feeding Stage".into(),
                 event_start: EventTrigger {
                     form: Form::All,
@@ -147,7 +144,6 @@ mod tests {
                 )
             }),
             Trigger::Event(Event {
-                enable: true,
                 description: "Milk Mod: Milking Stage".into(),
                 event_start: EventTrigger {
                     form: Form::All,
@@ -170,7 +166,6 @@ mod tests {
                 )
             }),
             Trigger::Event(Event {
-                enable: true,
                 description: "Milk Mod: Fucking Machine Stage".into(),
                 event_start: EventTrigger {
                     form: Form::All,
@@ -193,7 +188,6 @@ mod tests {
                 )
             }),
             Trigger::Timed(TimedEvent {
-                enable: true,
                 description: "Milk Mod: Start Milking Machine".into(),
                 event_start: EventTrigger {
                     form: Form::All,
