@@ -1,9 +1,8 @@
 use ::config::*;
 use bp_scheduler::{
-    client::{connection::*, input::*, settings::*, status::get_known_actuator_ids, BpClient},
+    client::{input::*, settings::*, status::get_known_actuator_ids, BpClient},
     config::{
         actions::{ActionRef, Strength},
-        devices::BpSettings,
         read::read_config,
     },
     speed::Speed,
@@ -12,9 +11,7 @@ use cxx::{CxxString, CxxVector};
 use events::start_outgoing_event_thread;
 use lazy_static::lazy_static;
 use triggers::Triggers;
-use std::{
-    cmp::Ordering, collections::HashMap, sync::{Arc, Mutex}
-};
+use std::sync::{Arc, Mutex};
 use tracing::{debug, error, info};
 
 pub static SETTINGS_FILE: &str = "Settings.json";
@@ -126,17 +123,9 @@ mod ffi {
 }
 
 fn get_settings() -> TkSettings {
-    let mut settings = TkSettings::try_read_or(
+    let mut settings = TkSettings::try_read_or_default(
         SETTINGS_PATH,
         SETTINGS_FILE,
-        TkSettings {
-            version: 2,
-            log_level: TkLogLevel::Debug,
-            connection: TkConnectionType::InProcess,
-            device_settings: BpSettings { devices: vec![] },
-            pattern_path: "".into(),
-            action_path: "".into(),
-        },
     );
     settings.pattern_path = String::from(PATTERNS_DIR);
     settings.action_path = String::from(ACTIONS_DIR);
@@ -156,7 +145,7 @@ pub fn lb_init() -> bool {
 
         lb.client.read_actions();
         lb.triggers.load_triggers(read_config(TRIGGERS_DIR.into()));
-
+        
         lb.client.scan_for_devices();
 
         guard.replace(lb);
@@ -190,10 +179,8 @@ pub fn lb_scene(scene_name: &str, scene_tags: &CxxVector<CxxString>, speed: i32,
     Lovebug::run_static(
         |lb| {
             let tags = read_input_string(scene_tags);
-
-            let mut scene = lb.triggers.find_scene(scene_name, &tags);   
+            let scene = lb.triggers.find_scene(scene_name, &tags);   
             info!("matched scene {:?}", scene);
-
             if let Some(scene) = scene {
                 return lb.client.dispatch_refs(
                     scene.actions,

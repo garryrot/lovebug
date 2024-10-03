@@ -10,24 +10,28 @@ Event OnInit()
 EndEvent
 
 Event AAF:AAF_API.OnAnimationStart(AAF:AAF_API akSender, Var[] akArgs)
+    Debug("AAF:AAF_API.OnAnimationStart")
     If !HasFailed(akArgs) && HasPlayer(akArgs)
         StartScene(akArgs)
     EndIf
 EndEvent
 
 Event AAF:AAF_API.OnAnimationChange(AAF:AAF_API akSender, Var[] akArgs)
+    Debug("AAF:AAF_API.OnAnimationChange")
     If !HasFailed(akArgs) && HasPlayer(akArgs)
         StartScene(akArgs)
     EndIf
 EndEvent
 
 Event AAF:AAF_API.OnAnimationStop(AAF:AAF_API akSender, Var[] akArgs)
+    Debug("AAF:AAF_API.OnAnimationStop")
     If !HasFailed(akArgs) && HasPlayer(akArgs)
         StopScene(akArgs)
     EndIf
 EndEvent
 
 Bool Function HasPlayer(Var[] akArgs)
+    Debug("HasPlayer")
     Actor[] actors = Utility.VarToVarArray(akArgs[1]) as Actor[]
     Int i = actors.Length
     While i > 0
@@ -40,6 +44,7 @@ Bool Function HasPlayer(Var[] akArgs)
 EndFunction
 
 Bool Function HasFailed(Var[] akArgs)
+    Debug("HasFailed")
     int status = akArgs[0] as int
     If status != 0
         Debug("Scene Failed: " + status)
