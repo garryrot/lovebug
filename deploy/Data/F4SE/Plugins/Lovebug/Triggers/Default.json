@@ -1,9 +1,7 @@
 [
   {
     "Scene": {
-      "enabled": true,
       "description": "Scene Default",
-      "framework": "All",
       "scene_id": "Any",
       "tags": "Any",
       "actions": [
@@ -20,12 +18,9 @@
           }
         },
         {
-          "action": "linear.stroke",
+          "action": "linear",
           "strength": {
-            "Funscript": [
-              50,
-              "Blowjob"
-            ]
+            "Constant": 50
           }
         },
         {

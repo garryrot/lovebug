@@ -1,13 +1,20 @@
 use ::config::*;
 use bp_scheduler::{
     client::{connection::*, input::*, settings::*, status::get_known_actuator_ids, BpClient},
-    config::{actions::{ActionRef, Strength}, devices::BpSettings, read::read_config},
+    config::{
+        actions::{ActionRef, Strength},
+        devices::BpSettings,
+        read::read_config,
+    },
     speed::Speed,
 };
 use cxx::{CxxString, CxxVector};
 use events::start_outgoing_event_thread;
 use lazy_static::lazy_static;
-use std::sync::{Arc, Mutex};
+use triggers::Triggers;
+use std::{
+    cmp::Ordering, collections::HashMap, sync::{Arc, Mutex}
+};
 use tracing::{debug, error, info};
 
 pub static SETTINGS_FILE: &str = "Settings.json";
@@ -23,7 +30,7 @@ mod settings;
 #[derive(Debug)]
 pub struct Lovebug {
     client: BpClient,
-    triggers: Vec<Trigger>,
+    triggers: Triggers
 }
 
 impl Lovebug {
@@ -48,17 +55,10 @@ impl Lovebug {
         default
     }
 
-    fn read_all_triggers(&mut self) {
-        let triggers = read_config(TRIGGERS_DIR.into());
-        info!("read {} triggers...", triggers.len());
-        for trigger in triggers.clone() {
-            debug!("{:?}", trigger);
-        }
-        self.triggers = triggers;
-    }
-
     fn enable_all(&mut self) {
-        for actuator in get_known_actuator_ids(self.client.buttplug.devices(), &self.client.settings) {
+        for actuator in
+            get_known_actuator_ids(self.client.buttplug.devices(), &self.client.settings)
+        {
             self.client
                 .settings
                 .device_settings
@@ -145,19 +145,17 @@ fn get_settings() -> TkSettings {
 
 pub fn lb_init() -> bool {
     if let Ok(mut guard) = LB.state.try_lock() {
-
-        // TODO can maybe moved into a background thread
+        info!("lb_init");
         let client = BpClient::connect(get_settings()).unwrap();
-
         let mut lb = Lovebug {
             client,
-            triggers: vec![],
+            triggers: Triggers::default()
         };
 
         start_outgoing_event_thread(&lb.client);
 
         lb.client.read_actions();
-        lb.read_all_triggers();
+        lb.triggers.load_triggers(read_config(TRIGGERS_DIR.into()));
 
         lb.client.scan_for_devices();
 
@@ -172,11 +170,10 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     info!(action_name, speed, time_secs, "lb_action");
     Lovebug::run_static(
         |lb| {
-            lb.enable_all(); // TODO: Remove
             lb.client.dispatch_refs(
                 vec![ActionRef {
                     action: action_name.into(),
-                    strength: Strength::Constant(100)
+                    strength: Strength::Constant(100),
                 }],
                 vec![],
                 Speed::new(speed.into()),
@@ -188,28 +185,22 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     -1
 }
 
-pub fn lb_scene(scene: &str, scene_tags: &CxxVector<CxxString>, speed: i32, time_secs: f32) -> i32 {
-    info!(scene, speed, time_secs, "lb_scene");
+pub fn lb_scene(scene_name: &str, scene_tags: &CxxVector<CxxString>, speed: i32, time_secs: f32) -> i32 {
+    info!(scene_name, speed, time_secs, "lb_scene");
     Lovebug::run_static(
         |lb| {
-            lb.client.settings.try_write(SETTINGS_PATH, SETTINGS_FILE);
             let tags = read_input_string(scene_tags);
 
-            for trigger in lb.triggers.clone() {
-                if let Trigger::Scene(trigger_scene) = trigger {
-                    if trigger_scene.enabled
-                        && trigger_scene.scene_id.matches(scene)
-                        && trigger_scene.tags.matches(&tags)
-                    {
-                        lb.enable_all(); // TODO: Remove
-                        return lb.client.dispatch_refs(
-                            trigger_scene.actions,
-                            vec![],
-                            Speed::new(speed.into()),
-                            get_duration_from_secs(time_secs),
-                        );
-                    }
-                }
+            let mut scene = lb.triggers.find_scene(scene_name, &tags);   
+            info!("matched scene {:?}", scene);
+
+            if let Some(scene) = scene {
+                return lb.client.dispatch_refs(
+                    scene.actions,
+                    vec![],
+                    Speed::new(speed.into()),
+                    get_duration_from_secs(time_secs),
+                )
             }
             -1
         },

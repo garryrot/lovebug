@@ -1,0 +1,1052 @@
+[
+  {
+    "Scene": {
+      "description": "Blowjob",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Blowjob"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.oral",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Cowgirl",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Cowgirl"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Cowgirl Sequence 1",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Cowgirl Sequence 1"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 25
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Cowgirl Sequence 2",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Cowgirl Sequence 2"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Cowgirl Sequence 3",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Cowgirl Sequence 3"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Cowgirl Sequence 4",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Cowgirl Sequence 4"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Cowgirl Sequence 5",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Cowgirl Sequence 5"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 90
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Cunnilungus",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Cowgirl Sequence 5"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "cunnilungus",
+          "strength": {
+            "Constant": 60
+          }
+        },
+        {
+          "action": "vibrate.nipple",
+          "strength": {
+            "Constant": 20
+          }
+        },
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 30
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Doggy",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Doggy"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Footjob",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Footjob"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "footjob",
+          "strength": {
+            "Constant": 25
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Footjob Fast",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Footjob Fast"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "footjob",
+          "strength": {
+            "Constant": 75
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Cowgirl Kiss",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Cowgirl Kiss"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "constrict.penis",
+          "strength": {
+            "Constant": 20
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Cowgirl Start Fucking",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Cowgirl Start Fucking"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 30
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Cowgirl Fuck Faster and Deeper",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Cowgirl Fuck Faster and Deeper"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 50
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Cowgirl Thrust Into Her",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Cowgirl Thrust Into Her"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 75
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Cowgirl Orgasm",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Cowgirl Orgasm"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Missionary Stage Kiss",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Missionary Stage Kiss"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "constrict.penis",
+          "strength": {
+            "Constant": 20
+          }
+        },
+        {
+          "action": "constrict.vagina",
+          "strength": {
+            "Constant": 20
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Missionary Stage Grab His Back",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Missionary Stage Grab His Back"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Missionary Stage Grab His Back 2",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Missionary Stage Grab His Back 2"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Missionary Stage Grab His Back 3",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Missionary Stage Grab His Back 3"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 75
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Impregnate Missionary Stage Grab His Back 4",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Impregnate Missionary Stage Grab His Back 4"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Kissing",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Kissing"
+      },
+      "tags": "Any",
+      "actions": []
+    }
+  },
+  {
+    "Scene": {
+      "description": "Laying Blowjob",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Laying Blowjob"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.oral",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Leg Wrap Cunnilungus",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Leg Wrap Cunnilungus"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "cunnilungus",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Lotus",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Lotus"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary Grind (tease)",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary Grind (tease)"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 10
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary Grind 2",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary Grind 2"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary Grind 3",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary Grind 3"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary Grind 4",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary Grind 4"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary Sequence Stage 1",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary Sequence Stage 1"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 20
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary Sequence Stage 2",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary Sequence Stage 2"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Missionary Sequence Stage 3",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Missionary Sequence Stage 2"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Mistress",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Mistress"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 85
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Mistress 2",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Mistress 2"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Mistress 3",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Mistress 3"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "cunnilungus",
+          "strength": {
+            "Constant": 50
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Mistress 4",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Mistress 4"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 75
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Mistress 5",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Mistress 5"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Pit Doggy 01 (fingering, kissing)",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Pit Doggy 01"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "cunnilungus",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Pit Doggy 02 (fingering, kissing)",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Pit Doggy 02"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "cunnilungus",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Pit Doggy 03",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Pit Doggy 03"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Pit Doggy 04",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Pit Doggy 04"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Pit Doggy 05",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Pit Doggy 05"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Pit Doggy 06",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Pit Doggy 06"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Prone Bone 01",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Prone Bone 01"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 50
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Prone Bone 02",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Prone Bone 02"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Prone Bone 03",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Prone Bone 03"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 90
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Prone Bone Anal 02",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Prone Bone Anal 02"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.anal",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Prone Bone Anal 03",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Prone Bone Anal 03"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.anal.deep",
+          "strength": {
+            "Constant": 90
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Romantic Cowgirl",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Romantic Cowgirl"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Romantic Missionary 01",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Romantic Missionary 01"
+      },
+      "tags": "Any",
+      "actions": []
+    }
+  },
+  {
+    "Scene": {
+      "description": "Romantic Missionary 02",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Romantic Missionary 02"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 50
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Romantic Missionary 03",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Romantic Missionary 03"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 70
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Romantic Missionary 04",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Romantic Missionary 04"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Spooning 01",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Spooning 01"
+      },
+      "tags": "Any",
+      "actions": []
+    }
+  },
+  {
+    "Scene": {
+      "description": "Spooning 02",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Spooning 02"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Spooning 03",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Spooning 03"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 60
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Spooning 04",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Spooning 04"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal.deep",
+          "strength": {
+            "Constant": 80
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Standing 69",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Standing 69"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.oral",
+          "strength": {
+            "Constant": 40
+          }
+        },
+        {
+          "action": "cunnilungus",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Standing Sequence",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Standing Sequence Stage 1"
+      },
+      "tags": "Any",
+      "actions": []
+    }
+  },
+  {
+    "Scene": {
+      "description": "Standing Sequence Stage 2",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Standing Sequence Stage 2"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 50
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Standing Sequence Stage 3",
+      "scene_id": {
+        "Exact": "[UAP] BP70 - Standing Sequence Stage 3"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.vaginal",
+          "strength": {
+            "Constant": 75
+          }
+        }
+      ]
+    }
+  }
+]

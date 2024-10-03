@@ -3,6 +3,8 @@ use serde_hex::{SerHex,StrictPfx};
 
 use bp_scheduler::config::actions::*;
 
+pub mod triggers;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Trigger {
     Scene(Scene),
@@ -12,9 +14,7 @@ pub enum Trigger {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Scene {
-    pub enabled: bool,
     pub description: String,
-    pub framework: Framework,
     pub scene_id: SceneId,
     pub tags: SceneTags,
     pub actions: Vec<ActionRef>,
@@ -212,9 +212,7 @@ mod tests {
             }),
 
             Trigger::Scene(Scene {
-                enabled: false,
                 description: "Default scene".into(),
-                framework: Framework::All,
                 scene_id: SceneId::Any,
                 tags: SceneTags::Or(vec![
                     SceneTags::tag("Anal"),

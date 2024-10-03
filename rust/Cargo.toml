@@ -26,8 +26,8 @@ futures-util = "0.3.30"
 cxx-build = "1.0"
 
 [profile.release]
-opt-level = "z"
+# opt-level = "z"
 lto = true
-strip = true
+# strip = true
 codegen-units = 1
-panic = "abort"
+# panic = "abort"

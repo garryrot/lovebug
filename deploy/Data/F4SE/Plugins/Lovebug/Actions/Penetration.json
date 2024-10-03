@@ -1,0 +1,339 @@
+[
+  {
+    "name": "cunnilungus",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "vagina"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "masturbation",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "footjob",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis"
+            ]
+          },
+          [
+            "Vibrate",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "penetration.vaginal",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis",
+              "vagina"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "vagina"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "penetration.vaginal.deep",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis",
+              "vagina"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "vagina"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 1.0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "penetration.oral.shallow",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 0.3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "penetration.oral",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "penetration.oral.deep",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 1.0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "penetration.anal",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "penetration.anal.deep",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          [
+            "Vibrate",
+            "Constrict",
+            "Oscillate"
+          ]
+        ]
+      },
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "oral"
+            ]
+          },
+          {
+            "min_ms": 150,
+            "max_ms": 1500,
+            "min_pos": 0.0,
+            "max_pos": 1.0
+          }
+        ]
+      }
+    ]
+  }
+]

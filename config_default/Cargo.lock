@@ -452,6 +452,7 @@ dependencies = [
  "serde",
  "serde-hex",
  "serde_json",
+ "tracing",
 ]
 
 [[package]]

@@ -17,13 +17,13 @@
     ]
   },
   {
-    "name": "vibrate.vaginal",
+    "name": "vibrate.vagina",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
-              "vaginal"
+              "vagina"
             ]
           },
           [
@@ -68,7 +68,24 @@
     ]
   },
   {
-    "name": "constrict.vaginal",
+    "name": "constrict.penis",
+    "control": [
+      {
+        "Scalar": [
+          {
+            "BodyParts": [
+              "constrict"
+            ]
+          },
+          [
+            "Inflate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "constrict.vagina",
     "control": [
       {
         "Scalar": [
@@ -102,13 +119,13 @@
     ]
   },
   {
-    "name": "inflate.vaginal",
+    "name": "inflate.vagina",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
-              "vaginal"
+              "vagina"
             ]
           },
           [
