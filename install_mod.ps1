@@ -1,3 +1,8 @@
-Copy-Item -v "deploy\Data\Scripts\*.pex" "C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\"
-Copy-Item -v "deploy\Data\Source\Scripts\*.psc" "C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Source\Scripts\"
-Copy-Item -v "deploy\Data\SKSE\Plugins\*.dll"  "C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\SKSE\Plugins\"
+$ModDeployPath = "mods\Telekinesis"
+
+Copy-Item -v    "deploy\Data\F4SE\Plugins\*.dll" "$ModDeployPath\F4SE\Plugins\"
+Copy-Item -v -r "deploy\Data\F4SE\Plugins\Lovebug\Triggers\*.json" "$ModDeployPath\F4SE\Plugins\Lovebug\Triggers\"
+Copy-Item -v -r "deploy\Data\F4SE\Plugins\Lovebug\Actions\*.json" "$ModDeployPath\F4SE\Plugins\Lovebug\Actions\"
+Copy-Item -v -r "deploy\Data\F4SE\Plugins\Lovebug\Patterns\*.funscript" "$ModDeployPath\F4SE\Plugins\Lovebug\Patterns\"
+Copy-Item -v -r "deploy\Data\Scripts\*.pex" "$ModDeployPath\Scripts"
+Copy-Item -v -r "deploy\Data\Scripts\Source\User\*.psc" "$ModDeployPath\Scripts\Source\User\"
