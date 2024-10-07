@@ -15,6 +15,7 @@ using namespace RE::BSScript;
 #define DllExport __declspec(dllexport)
 
 #include "Logs.cpp"
+#include "Bones.cpp"
 #include "Native.cpp"
 #include "Events.cpp"
 
@@ -25,17 +26,22 @@ void InitializeMessaging()
     if (!messaging || !messaging->RegisterListener([](F4SE::MessagingInterface::Message *message)
         {
             switch (message->type) {
-                case F4SE::MessagingInterface::kInputLoaded:
+                case F4SE::MessagingInterface::kInputLoaded: {
                     lb_log_info("input loaded");
                     break;
-                case F4SE::MessagingInterface::kGameDataReady:
+                }
+                case F4SE::MessagingInterface::kGameDataReady: {
                     lb_log_info("game data ready");
                     GameVM* gameVm = RE::GameVM::GetSingleton();
                     if (gameVm) {
                         gameVm->GetVM()->RegisterForLogEvent(LogEventSink::GetSingleton());
                     }
-                
                     lb_init();
+                    break;
+                }
+                case F4SE::MessagingInterface::kGameLoaded:
+                    lb_log_info("game loaded");
+                    
                     break;
             }
         })) {

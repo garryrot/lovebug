@@ -16,12 +16,23 @@ bool Update(std::monostate, int handle, int speed)
 
 bool Stop(std::monostate, int handle) 
 {
+    if (handle > -1)
+    {
+        boneThreadHandle = -1;
+    }
     return lb_stop(handle);
 }
 
-int Scene(std::monostate, std::string sceneName, std::vector<std::string> tags, int speed, float secs) 
+int threadCounter = 0;
+int Scene(std::monostate, std::string sceneName, std::vector<RE::Actor*> actors, std::vector<std::string> tags, int speed, float secs) 
 {
-    return lb_scene(sceneName, tags, speed, secs);
+    int x = lb_scene(sceneName, tags, speed, secs);
+    if (boneThreadHandle == -1)
+    {
+        BoneThread[(threadCounter ++) % 128] = std::thread(Bone_Monitoring_Prototype, actors);
+        boneThreadHandle = x;
+    }
+    return x;
 }
 
 constexpr std::string_view PapyrusClass = "Lb_Native";

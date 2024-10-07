@@ -53,14 +53,14 @@ Bool Function HasFailed(Var[] akArgs)
     return False
 EndFunction
 
-
 Function StartScene(Var[] akArgs)
     String sceneName = akArgs[2] as String
+    Actor[] actors = Utility.VarToVarArray(akArgs[1]) as Actor[]
     String[] tags = Utility.VarToVarArray(akArgs[3]) as String[]         
     If CurrentHandle != -1
         Lb_Native.Stop(CurrentHandle)
     EndIf
-    CurrentHandle = Lb_Native.Scene(sceneName, tags, 100, -1)
+    CurrentHandle = Lb_Native.Scene(sceneName, actors, tags, 100, -1)
 EndFunction
 
 Function StopScene(Var[] akArgs)

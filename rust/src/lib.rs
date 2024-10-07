@@ -1,3 +1,4 @@
+use buttplug::client::{device, LinearCommand};
 use ::config::*;
 use bp_scheduler::{
     client::{input::*, settings::*, status::*, BpClient},
@@ -111,6 +112,7 @@ mod ffi {
             speed: i32,
             time_sec: f32,
         ) -> i32;
+        fn lb_stroke(ms: i32, pos: f32) -> bool;
         fn lb_update(id: i32, speed: i32) -> bool;
         fn lb_stop(id: i32) -> bool;
         unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
@@ -192,6 +194,22 @@ pub fn lb_scene(scene_name: &str, scene_tags: &CxxVector<CxxString>, speed: i32,
             -1
         },
         -1,
+    )
+}
+
+pub fn lb_stroke(ms: i32, pos: f32) -> bool {
+    info!(ms, pos, "lb_stroke");
+    Lovebug::run_static(
+        |lb| {
+            let devices = lb.client.buttplug.devices();
+            lb.client.runtime.spawn(async move {
+                for device in devices {
+                    device.linear(&LinearCommand::Linear(ms as u32, pos.into())).await.unwrap();
+                }
+            });
+            true
+        },
+        false,
     )
 }
 
