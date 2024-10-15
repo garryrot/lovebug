@@ -16,10 +16,7 @@ bool Update(std::monostate, int handle, int speed)
 
 bool Stop(std::monostate, int handle) 
 {
-    if (handle > -1)
-    {
-        boneThreadHandle = -1;
-    }
+    lb_dynamic_stop();
     return lb_stop(handle);
 }
 
@@ -27,11 +24,9 @@ int threadCounter = 0;
 int Scene(std::monostate, std::string sceneName, std::vector<RE::Actor*> actors, std::vector<std::string> tags, int speed, float secs) 
 {
     int x = lb_scene(sceneName, tags, speed, secs);
-    if (boneThreadHandle == -1)
-    {
-        BoneThread[(threadCounter ++) % 128] = std::thread(Bone_Monitoring_Prototype, actors);
-        boneThreadHandle = x;
-    }
+    
+    auto actorVec = ActorVec::ActorVec(actors);
+    lb_dynamic_tracking(actorVec);
     return x;
 }
 

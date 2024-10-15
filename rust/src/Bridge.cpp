@@ -1,18 +1,16 @@
 #pragma once
+
 #include "rust/cxx.h"
 #include "Bridge.h"
 
-// Wrap TESForm
-
-RE::TESForm* GetFormById(int form_id, rust::Str esp) noexcept {
-    return NULL; // RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESQuest>(form_id, (std::string) esp);
+ActorVec::ActorVec(std::vector<RE::Actor*> actors) {
+    this->actors = actors;
 }
 
-/*
-RE::TESForm* GetSender(const SKSE::ModCallbackEvent* event) noexcept {
-    if (event != NULL) {
-        return event->sender;
-    }
-    return NULL;
+const RE::Actor* ActorVec::GetActor( int pos ) const {
+    return this->actors[ pos ];
 }
-*/
+
+int ActorVec::Size() const {
+    return this->actors.size();
+}

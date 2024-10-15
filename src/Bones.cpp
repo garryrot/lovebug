@@ -1,41 +1,34 @@
 
-std::thread BoneThread[128];
-int boneThreadHandle = -1;
+// std::thread BoneThread[128];
+// int boneThreadHandle = -1;
 
-float distance(RE::NiAVObject* actorNode, RE::NiAVObject* playerNode, Actor* player, Actor* actor) {
-    return sqrtf(powf((actorNode->world.translate.x - playerNode->world.translate.x), 2) +
-                 powf((actorNode->world.translate.y - playerNode->world.translate.y), 2) +
-                 powf((actorNode->world.translate.z - playerNode->world.translate.z), 2));
+float distance(RE::NiAVObject* actorA, RE::NiAVObject* actorB) {
+    return sqrtf(powf((actorA->world.translate.x - actorB->world.translate.x), 2) +
+                 powf((actorA->world.translate.y - actorB->world.translate.y), 2) +
+                 powf((actorA->world.translate.z - actorB->world.translate.z), 2));
 }
 
-void logPosition(RE::NiAVObject* actorNode, RE::NiAVObject* playerNode, Actor* player, Actor* actor) {
-    auto playerBodyPartX = playerNode->world.translate.x;
-    auto playerBodyPartY = playerNode->world.translate.y;
-    auto playerBodyPartZ = playerNode->world.translate.z;
-    lb_log_info( std::format("player.BodyPart, {}, {}, {}", playerBodyPartX, playerBodyPartY, playerBodyPartZ) );
-
-    auto actorBodyPartX = actorNode->world.translate.x;
-    auto actorBodyPartY = actorNode->world.translate.y;
-    auto actorBodyPartZ = actorNode->world.translate.z;
-    lb_log_info( std::format("actor.BodyPart, {}, {}, {}", actorBodyPartX, actorBodyPartY, actorBodyPartZ) );
-
-    lb_log_info( 
-        std::format("diff, x-diff: {}, y-diff: {}, z-diff: {}", 
-        playerBodyPartX - actorBodyPartX, 
-        playerBodyPartY - actorBodyPartY,
-        playerBodyPartZ - actorBodyPartZ ));
+RE::NiAVObject* GetBoneFromActor(const RE::Actor *actor, rust::Str bone) 
+{
+    return actor->Get3D()->GetObjectByName( (std::string) bone );   
 }
+
+float GetDistance(
+    RE::NiAVObject* boneA,
+    RE::NiAVObject* boneB) {
+    if (boneA == NULL)
+    {
+        return 999999.0;
+    }
+    if (boneB == NULL)
+    {
+        return 999999.0;
+    }
+    return distance(boneA, boneB);
+}
+
 
 /*
-
-// get base formID (without mod index)
-static inline UInt32 GetBaseFormID(UInt32 formId)
-{
-	return formId & 0x00FFFFFF;
-}
-
-*/
-
 struct timings {
     int last_ms_t;
     int last_ms_t_1;
@@ -66,6 +59,7 @@ void Bone_Monitoring_Prototype(std::vector<RE::Actor*> actors) {
     std::string playerNode = "Pelvis_skin";
     float max_distance_penetration = 14.5;
     float min_distance_penetration = 6.5;
+    
 
     // TODO settings for oral penetration
     // TODO settings for anal penetration
@@ -100,7 +94,6 @@ void Bone_Monitoring_Prototype(std::vector<RE::Actor*> actors) {
         {
             if (player != actor)
             {
-                // Leito Cowgirl 2
                 if (last_inward_dist < max_distance_penetration || last_outward_dist < max_distance_penetration)
                 {
                     isPenetrating = true;
@@ -119,7 +112,6 @@ void Bone_Monitoring_Prototype(std::vector<RE::Actor*> actors) {
                     // lb_log_error( std::format("min:{}  max:{} diff: {}, abs {} ", minStroke, maxStroke, minStroke - maxStroke, fabs(minStroke - maxStroke) ));
                     if (fabs(maxStroke - minStroke) < min_str_dist)
                     {
-                        // lb_log_error( std::format("min stroke distance too low min:{}  max:{}", minStroke, maxStroke ));
                         if (maxStroke < min_str_dist)
                         {
                             maxStroke = min_str_dist;
@@ -138,10 +130,8 @@ void Bone_Monitoring_Prototype(std::vector<RE::Actor*> actors) {
                         {
                             minStroke = maxStroke - min_str_dist;
                         }
-                        // lb_log_error( std::format("adapted: {}  max:{}", minStroke, maxStroke ));
                     }
                 }
-                
 
                 RE::NiAVObject* actorPenis = actor->Get3D()->GetObjectByName(actorNode);
                 if (actorPenis == NULL)
@@ -155,7 +145,7 @@ void Bone_Monitoring_Prototype(std::vector<RE::Actor*> actors) {
                     lb_log_error("pelvis is null");
                     continue;
                 }
-                auto dist = distance( actorPenis, playerPelvis, player, actor );
+                auto dist = distance( actorPenis, playerPelvis );
                 auto diff = dist - lastDist;
 
                 bool doLog = false;
@@ -195,28 +185,24 @@ void Bone_Monitoring_Prototype(std::vector<RE::Actor*> actors) {
                     doLog = true;
                 }
                 if (doLog) {
-                    
                     lb_log_info( std::format( "dist {}",dist) );
-                    // logPosition( actorPenis, playerPelvis, player, actor );
                 }
-                  
-            
-                // distances[ i++ % 1024 ] = dist - lastDist;
-                // lb_log_info( std::format("distance: {}", dist) );
-                // lb_log_info( std::format("diff: {}", dist - lastDist) );
                 lastDist = dist;
-
-                // if (i % 1024 == 0)
-                // {
-                //     lb_log_info( std::format("DUMPING DIFFS:") );
-                //     for (size_t i = 0; i < 1024; i++)
-                //     {
-                //         lb_log_info( std::format("{}", distances[ i ] ) );
-                //     }
-                // }
             }
         }
         
         std::this_thread::sleep_for(50ms);
     } 
 }
+
+*/
+
+/*
+
+// get base formID (without mod index)
+static inline UInt32 GetBaseFormID(UInt32 formId)
+{
+	return formId & 0x00FFFFFF;
+}
+
+*/

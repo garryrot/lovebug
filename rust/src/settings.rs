@@ -36,7 +36,7 @@ impl ModSettings {
         match fs::read_to_string(path) {
             Ok(settings_json) => match serde_json::from_str::<ModSettings>(&settings_json) {
                 Ok(settings) => settings,
-                Err(err) => ModSettings::default(),
+                Err(_err) => ModSettings::default(),
             },
             Err(err) => {
                 info!("Settings path '{}' could not be opened. Error: {}. Using default configuration.", SETTINGS_PATH, err);

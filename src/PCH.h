@@ -13,4 +13,8 @@
 #include <windows.h>
 #include <winuser.h>
 
+#include "Bridge.h"
+#include "Events.h"
+#include "Bones.h"
+
 using namespace std::literals;

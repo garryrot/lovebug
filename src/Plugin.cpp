@@ -4,7 +4,10 @@
 #include <chrono>
 #include <codecvt>
 
+#include "Bridge.h"
+
 #include "lbug/src/logging.rs.h"
+#include "lbug/src/bones.rs.h"
 #include "lbug/src/lib.rs.h"
 
 #include "Version.h"
@@ -18,6 +21,23 @@ using namespace RE::BSScript;
 #include "Bones.cpp"
 #include "Native.cpp"
 #include "Events.cpp"
+
+bool IsPlayer(const RE::Actor *actor) {
+    return actor == RE::PlayerCharacter::GetSingleton();
+}
+
+Sex GetSex(const RE::Actor *actor) {
+    auto npc = actor->GetNPC();
+    if (npc != NULL)
+    {
+        if (npc->GetSex() == 1) {
+            return Sex::Female;
+        } else {
+            return Sex::Male;
+        }
+    }
+    return Sex::None;
+}
 
 // Messaging
 void InitializeMessaging()
@@ -60,6 +80,7 @@ extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::Query
 	info->name = Version::PROJECT.data();
 	info->version = Version::MAJOR;
 
+  
     lb_log_info(std::format("{} {} is loading...", info->name, info->version));
 	if (f4se->IsEditor()) {
 		lb_log_error("loaded in editor");

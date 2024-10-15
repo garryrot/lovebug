@@ -1,7 +1,7 @@
-use buttplug::client::{device, LinearCommand};
+use buttplug::client::LinearCommand;
 use ::config::*;
 use bp_scheduler::{
-    client::{input::*, settings::*, status::*, BpClient},
+    client::{input::*, settings::*, BpClient},
     config::{
         actions::{ActionRef, Strength},
         read::read_config,
@@ -10,6 +10,7 @@ use bp_scheduler::{
 };
 use cxx::{CxxString, CxxVector};
 use events::start_outgoing_event_thread;
+use tokio_util::sync::CancellationToken;
 use lazy_static::lazy_static;
 use find::Triggers;
 use std::sync::{Arc, Mutex};
@@ -24,11 +25,13 @@ pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
 mod events;
 mod logging;
 mod settings;
+mod bones;
 
 #[derive(Debug)]
 pub struct Lovebug {
     client: BpClient,
-    triggers: Triggers
+    triggers: Triggers,
+    dynamic_task: Option<CancellationToken>
 }
 
 impl Lovebug {
@@ -52,25 +55,12 @@ impl Lovebug {
         }
         default
     }
-
-    fn enable_all(&mut self) {
-        for actuator in
-            get_known_actuator_ids(self.client.buttplug.devices(), &self.client.settings)
-        {
-            self.client
-                .settings
-                .device_settings
-                .set_enabled(&actuator, true);
-        }
-    }
 }
 
 #[derive(Debug)]
 pub struct LbApi {
     pub state: Arc<Mutex<Option<Lovebug>>>,
 }
-
-pub struct TaskContext(i32);
 
 lazy_static! {
     static ref LB: LbApi = {
@@ -82,28 +72,20 @@ lazy_static! {
 
 #[cxx::bridge]
 mod ffi {
-    pub struct Ret {
-        i: i32,
-    }
+    unsafe extern "C++" {
+        include!("Bridge.h");
+        type ActorVec;
+        fn GetActor(self: &ActorVec, pos: i32) -> *const Actor;
+        fn Size(self: &ActorVec) -> i32;
+    } 
 
     #[namespace = "RE"]
     unsafe extern "C++" {
         include!("PCH.h");
-        type TESForm;
-        // fn GetFormID(self: &TESForm) -> u32;
-        // fn GetRawFormID(self: &TESForm) -> u32;
-        // fn GetLocalFormID(self: &TESForm) -> u32;
+        type Actor;
     }
-
-    #[namespace = "SKSE"]
-    unsafe extern "C++" {
-        include!("PCH.h");
-        // Unsupported F4
-        // type ModCallbackEvent;
-    }
-
+   
     extern "Rust" {
-        type TaskContext;
         fn lb_init() -> bool;
         fn lb_action(action: &str, speed: i32, time_sec: f32) -> i32;
         fn lb_scene(
@@ -116,11 +98,6 @@ mod ffi {
         fn lb_update(id: i32, speed: i32) -> bool;
         fn lb_stop(id: i32) -> bool;
         unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
-    }
-
-    unsafe extern "C++" {
-        include!("Bridge.h");
-        fn GetFormById(id: i32, esp: &str) -> *mut TESForm;
     }
 }
 
@@ -140,7 +117,8 @@ pub fn lb_init() -> bool {
         let client = BpClient::connect(get_settings()).unwrap();
         let mut lb = Lovebug {
             client,
-            triggers: Triggers::default()
+            triggers: Triggers::default(),
+            dynamic_task: None
         };
 
         start_outgoing_event_thread(&lb.client);

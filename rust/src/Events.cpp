@@ -14,7 +14,7 @@ void AddTask_ModEvent(rust::Fn<void(ModEvent)> done, ModEvent ctx) noexcept {
     F4SE::GetTaskInterface()->AddTask(task);
 }
 
-void SendEvent(RE::TESForm* _, ModEvent event) noexcept {
+void SendEvent(ModEvent event) noexcept {
     F4SE::GetPapyrusInterface()->GetExternalEventRegistrations(
         event.event_name.c_str(), 
         &event, 

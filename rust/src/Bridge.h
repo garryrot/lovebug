@@ -1,7 +1,14 @@
 #pragma once
-#include "lbug/src/lib.rs.h"
+
 #include "rust/cxx.h"
 #include "PCH.h"
 
-// struct ModEvent;
-RE::TESForm* GetFormById(int form_id, rust::Str esp) noexcept;
+// lightweight wrapper on vector<Actor*> cause cxx crate does 
+// not allow passing pointers to opaque c++ types in vectors
+class ActorVec {
+    std::vector<RE::Actor*> actors;
+    public: 
+        ActorVec(std::vector<RE::Actor*> actors);
+        const RE::Actor* GetActor(int pos) const;
+        int Size() const;
+};

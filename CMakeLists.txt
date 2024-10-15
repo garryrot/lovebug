@@ -19,13 +19,15 @@ set(RUST_LIB_NAME "lovebug")
 set(RUST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_LIBRARY_PREFIX}${RUST_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(RUST_CXX_BRIDGE ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/lib.rs.cc 
                     ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/logging.rs.cc
-                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/events.rs.cc)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/events.rs.cc
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/bones.rs.cc)
 
 add_custom_command(
     OUTPUT ${RUST_CXX_BRIDGE} ${RUST_LIBRARY}
     COMMAND cargo build --manifest-path ${CMAKE_CURRENT_SOURCE_DIR}/rust/Cargo.toml --release
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/config.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/events.rs
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/bones.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/lib.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/logging.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/settings.rs
@@ -65,7 +67,7 @@ add_compile_options( /MP )
 
 target_precompile_headers(
         ${PROJECT_NAME} 
-        PRIVATE 
+        PRIVATE
         src/PCH.h)
 
 target_include_directories(
