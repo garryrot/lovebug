@@ -1,13 +1,16 @@
 use std::time::Duration;
 
-use collision::Collision;
 use tokio::{sync::mpsc::unbounded_channel, time::{sleep, Instant}};
 use tokio_util::sync::CancellationToken;
-use tracing::{error, info};
+use tracing::{debug, error, info, trace};
 
 use crate::Lovebug;
 
-use bp_scheduler::dynamic_tracking::*;
+use collision::Collision;
+use bp_scheduler::{
+    config::linear::LinearRange, 
+    dynamic_tracking::*
+};
 use ffi_bones::*;
 
 #[cxx::bridge]
@@ -95,12 +98,21 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
 
             let (sender, receiver) = unbounded_channel::<TrackingSignal>();
             lb.client.runtime.spawn(async move {
-                info!("control task started");
                 let dynamic = DynamicTracking {
-                    settings: DynamicSettings::default(),
+                    settings:  DynamicSettings {
+                        boundaries: LinearRange::max(),
+                        move_at_start: true,
+                        min_resolution_ms: 80,
+                        min_duration_ms: 200,
+                        default_stroke_ms: 400,
+                        default_stroke_in: 0.0,
+                        default_stroke_out: 1.0,
+                        stroke_window_ms: 3_000,
+                    },
                     signals: receiver,
                     devices,
                 };
+                info!(?dynamic.settings, "control task started with settings");
                 let _ = dynamic.track_mirror().await;
             });
 
@@ -123,6 +135,9 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                     min_stroke: 0.25,
                 };
 
+                // heuristic to avoid crazy alignment moving at the beginning
+                sleep(Duration::from_millis(1200)).await;
+
                 let mut penetrating = false;
                 let mut dir_inward = false;
                 let mut last_distance = f32::MAX;
@@ -131,19 +146,6 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
 
                 while !cancellation_token.is_cancelled() {     
                     // TODO: Test if this can be moved upwards
-                    fn get_genital_bone(actor: *const Actor) -> *mut NiAVObject {
-                        unsafe  {
-                            let sex  = GetSex( actor );
-                            match sex {
-                                Sex::Female => GetBoneFromActor(actor, "Pelvis_skin"),
-                                Sex::Male => GetBoneFromActor(actor, "Penis_01"),
-                                _ => {
-                                    error!("Unknown sex type {:?}", sex);
-                                    GetBoneFromActor(actor, "Pelvis_skin")
-                                }
-                            }
-                        }
-                    }
                     let bone_a = get_genital_bone( actors.payload[ 0 ] );
                     let bone_b = get_genital_bone( actors.payload[ 1 ] );
 
@@ -155,9 +157,8 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                         }
                         penetrating = true;
                     }
-
             
-                    info!("dist = {}", dist);
+                    debug!("dist = {}", dist);
                     let diff = last_distance - dist;
                     if diff > 0.0 && !dir_inward {
                         most_outward = dist;
@@ -188,5 +189,19 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
         },
         (),
     );
+
+    fn get_genital_bone(actor: *const Actor) -> *mut NiAVObject {
+        unsafe  {
+            let sex  = GetSex( actor );
+            match sex {
+                Sex::Female => GetBoneFromActor(actor, "Pelvis_skin"),
+                Sex::Male => GetBoneFromActor(actor, "Penis_01"),
+                _ => {
+                    error!("Unknown sex type {:?}", sex);
+                    GetBoneFromActor(actor, "Pelvis_skin")
+                }
+            }
+        }
+    }
 }
 
