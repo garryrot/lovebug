@@ -153,7 +153,7 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                     if dist < collision.outer_distance {
                         if ! penetrating {
                             info!("sending penetration {}", dist);
-                            sender.send(TrackingSignal::Penetration(Instant::now())).unwrap(); // TODO remove unwrap
+                            let _ = sender.send(TrackingSignal::Penetration(Instant::now()));
                         }
                         penetrating = true;
                     }
@@ -174,7 +174,7 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                         info!(most_outward, most_inward);
 
                         let (from, to) = collision.get_stroke_range(most_outward, most_inward );
-                        let _ = sender.send(TrackingSignal::InnerTurn(Instant::now(), Margins::new(from, to))); // TODO remove unwrap
+                        let _ = sender.send(TrackingSignal::InnerTurn(Instant::now(), Margins::new(from, to)));
 
                         info!(from, to, dist, "sending inward complete");
                         most_inward = dist;
