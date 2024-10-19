@@ -39,32 +39,63 @@ mod ffi_bones {
     }
 }
 
-/// Just for sending the array of actor pointers to a differen thread 
-struct UnsafeActorVec {
-    pub payload: Vec<*const Actor>
+// *Actor
+struct UnsafeActorPtr {
+    pub actor: *const Actor
 }
-
-unsafe impl Send for UnsafeActorVec {}
-
-impl UnsafeActorVec {
-    fn move_hack(self) -> Self {
-        let mut clone = vec![];
-        for actor in self.payload {
-            clone.push(actor);
-        }
-        Self {
-            payload: clone
-        }
-    }
-    fn from_actor_vec(actors: &ActorVec) -> Self {
-        let mut vec_clone = vec![];
-        for i in 0..actors.Size() {
-            vec_clone.push(actors.GetActor(i));
-        }
-        Self {
-            payload: vec_clone
+impl UnsafeActorPtr {
+    fn get_genital_bone(&self) -> UnsafeAvObjectPtr {
+        unsafe  {
+            let sex  = GetSex( self.actor );
+            let av_object = match sex {
+                Sex::Female => GetBoneFromActor(self.actor, "Pelvis_skin"),
+                Sex::Male => GetBoneFromActor(self.actor, "Penis_01"),
+                _ => {
+                    error!("Unknown sex type {:?}", sex);
+                    GetBoneFromActor(self.actor, "Pelvis_skin")
+                }
+            };
+            UnsafeAvObjectPtr {
+                av_object,
+            }
         }
     }
+    fn get_sex(&self) -> Sex {
+        unsafe { GetSex(self.actor) }
+    }
+    fn is_player(&self) -> bool  {
+        unsafe { IsPlayer(self.actor) }
+    }
+}
+impl Clone for UnsafeActorPtr {
+    fn clone(&self) -> Self {
+        Self { actor: self.actor }
+    }
+}
+unsafe impl Send for UnsafeActorPtr {}
+
+// *NiAVObject
+struct UnsafeAvObjectPtr {
+    pub av_object: *mut NiAVObject
+}
+impl Clone for UnsafeAvObjectPtr {
+    fn clone(&self) -> Self {
+        Self { av_object: self.av_object }
+    }
+}
+impl UnsafeAvObjectPtr {
+    fn get_distance(&self, other: &UnsafeAvObjectPtr) -> f32 {
+        unsafe { GetDistance( self.av_object, other.av_object ) }
+    }
+}
+unsafe impl Send for UnsafeAvObjectPtr {}
+
+fn from_actor_vec(actors: &ActorVec) -> Vec<UnsafeActorPtr> {
+    let mut vec_clone = vec![];
+    for i in 0..actors.Size() {
+        vec_clone.push( UnsafeActorPtr { actor: actors.GetActor(i) });
+    }
+    vec_clone
 }
 
 pub fn lb_dynamic_stop() {
@@ -79,7 +110,7 @@ pub fn lb_dynamic_stop() {
 
 pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
     info!("lb_dynamic_tracking Actors={}", actor_vec.Size());
-    let actors_in: UnsafeActorVec = UnsafeActorVec::from_actor_vec(actor_vec);
+    let actors_in = from_actor_vec(actor_vec);
 
     Lovebug::run_static(
         |lb| {
@@ -112,15 +143,15 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
 
             lb.client.runtime.spawn(async move {
                 info!("observation task started");
-                let actors = actors_in.move_hack();
+                let actors = actors_in.clone();
                 
-                if actors.payload.len() != 2 {
-                    error!("not exactly 2 actors: {}", actors.payload.len());
+                if actors.len() != 2 {
+                    error!("not exactly 2 actors: {}", actors.len());
                     return;
                 }
 
-                for actor in &actors.payload {
-                    info!("actor {:?} Player:{}", unsafe { GetSex(*actor) }, unsafe { IsPlayer(*actor) });
+                for actor in &actors {
+                    info!("actor {:?} Player:{}", actor.get_sex(), actor.is_player());
                 }
 
                 let collision = Collision {
@@ -129,7 +160,6 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                     min_stroke: 0.25,
                 };
 
-                // heuristic to avoid crazy alignment moving at the beginning
                 sleep(Duration::from_millis(1200)).await;
 
                 let mut penetrating = false;
@@ -138,12 +168,11 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                 let mut most_outward = f32::MAX;
                 let mut most_inward = 0.0;
 
-                while !cancellation_token.is_cancelled() {     
-                    // TODO: Test if this can be moved upwards
-                    let bone_a = get_genital_bone( actors.payload[ 0 ] );
-                    let bone_b = get_genital_bone( actors.payload[ 1 ] );
+                let bone_a = actors[ 0 ].get_genital_bone();
+                let bone_b = actors[ 1 ].get_genital_bone();
 
-                    let dist = unsafe { GetDistance( bone_a, bone_b ) };
+                while !cancellation_token.is_cancelled() {     
+                    let dist =  bone_a.get_distance(&bone_b);
                     if dist < collision.outer_distance {
                         if ! penetrating {
                             info!("sending penetration {}", dist);
@@ -183,19 +212,5 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
         },
         (),
     );
-
-    fn get_genital_bone(actor: *const Actor) -> *mut NiAVObject {
-        unsafe  {
-            let sex  = GetSex( actor );
-            match sex {
-                Sex::Female => GetBoneFromActor(actor, "Pelvis_skin"),
-                Sex::Male => GetBoneFromActor(actor, "Penis_01"),
-                _ => {
-                    error!("Unknown sex type {:?}", sex);
-                    GetBoneFromActor(actor, "Pelvis_skin")
-                }
-            }
-        }
-    }
 }
 
