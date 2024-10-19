@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rust/cxx.h"
+#include "lbug/src/bridge.rs.h"
 #include "PCH.h"
 
 // lightweight wrapper on vector<Actor*> cause cxx crate does 
@@ -12,3 +13,7 @@ class ActorVec {
         const RE::Actor* GetActor(int pos) const;
         int Size() const;
 };
+
+bool IsPlayer(const RE::Actor *actor);
+
+Sex GetSex(const RE::Actor *actor);

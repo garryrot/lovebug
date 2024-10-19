@@ -2,16 +2,19 @@ use std::time::Duration;
 
 use tokio::{sync::mpsc::unbounded_channel, time::{sleep, Instant}};
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, error, info, trace};
+use tracing::{debug, error, info};
 
-use crate::Lovebug;
+use ffi_bones::{ActorVec, GetBoneFromActor, GetDistance, NiAVObject};
+use crate::{
+    bridge::ffi_bridge::{GetSex, IsPlayer, Sex}, ffi::*, Lovebug
+};
 
 use collision::Collision;
 use bp_scheduler::{
     config::linear::LinearRange, 
     dynamic_tracking::*
 };
-use ffi_bones::*;
+
 
 #[cxx::bridge]
 mod ffi_bones {
@@ -20,23 +23,14 @@ mod ffi_bones {
         type Actor = crate::ffi::Actor;
         type NiAVObject;
     }
-
-    #[derive(Debug)]
-    enum Sex {
-        None = -1,
-        Male = 0,
-        Female = 1,
-        Total = 2
-    }
     
     unsafe extern "C++" {
-        type ActorVec = crate::ffi::ActorVec;
-
         include!("Bones.h");
+        type ActorVec;
+        pub fn GetActor(self: &ActorVec, pos: i32) -> *const Actor;
+        pub fn Size(self: &ActorVec) -> i32;
         unsafe fn GetDistance(boneA: *mut NiAVObject, boneB: *mut NiAVObject) -> f32;
         unsafe fn GetBoneFromActor(actor: *const Actor, bone: &str) -> *mut NiAVObject;
-        unsafe fn IsPlayer(actor: *const Actor) -> bool;
-        unsafe fn GetSex(actor: *const Actor) -> Sex;
     }
     
     extern "Rust" {
@@ -107,7 +101,7 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                         default_stroke_ms: 400,
                         default_stroke_in: 0.0,
                         default_stroke_out: 1.0,
-                        stroke_window_ms: 3_000,
+                        stroke_window_ms: 2_000,
                     },
                     signals: receiver,
                     devices,

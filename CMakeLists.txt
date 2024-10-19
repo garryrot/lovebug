@@ -20,6 +20,7 @@ set(RUST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_
 set(RUST_CXX_BRIDGE ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/lib.rs.cc 
                     ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/logging.rs.cc
                     ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/events.rs.cc
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/bridge.rs.cc
                     ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/bones.rs.cc)
 
 add_custom_command(
@@ -28,6 +29,7 @@ add_custom_command(
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/config.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/events.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/bones.rs
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/bridge.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/lib.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/logging.rs
             ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/settings.rs
@@ -59,6 +61,7 @@ add_library(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Plugin.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Bridge.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Events.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Bones.cpp
         ${RUST_CXX_BRIDGE}
 )
 

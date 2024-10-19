@@ -14,3 +14,20 @@ const RE::Actor* ActorVec::GetActor( int pos ) const {
 int ActorVec::Size() const {
     return this->actors.size();
 }
+
+bool IsPlayer(const RE::Actor *actor) {
+    return actor == RE::PlayerCharacter::GetSingleton();
+}
+
+Sex GetSex(const RE::Actor *actor) {
+    auto npc = actor->GetNPC();
+    if (npc != NULL)
+    {
+        if (npc->GetSex() == 1) {
+            return Sex::Female;
+        } else {
+            return Sex::Male;
+        }
+    }
+    return Sex::None;
+}

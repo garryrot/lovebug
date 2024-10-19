@@ -18,14 +18,15 @@ use tracing::{debug, error, info};
 
 pub static SETTINGS_FILE: &str = "Settings.json";
 pub static SETTINGS_PATH: &str = "Data\\F4SE\\Plugins\\Lovebug";
-pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
-pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Actions";
-pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
+pub static PATTERNS_DIR: &str =  "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
+pub static ACTIONS_DIR: &str =   "Data\\F4SE\\Plugins\\Lovebug\\Actions";
+pub static TRIGGERS_DIR: &str =  "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
 
 mod events;
 mod logging;
 mod settings;
 mod bones;
+mod bridge;
 
 #[derive(Debug)]
 pub struct Lovebug {
@@ -70,15 +71,9 @@ lazy_static! {
     };
 }
 
+
 #[cxx::bridge]
 mod ffi {
-    unsafe extern "C++" {
-        include!("Bridge.h");
-        type ActorVec;
-        fn GetActor(self: &ActorVec, pos: i32) -> *const Actor;
-        fn Size(self: &ActorVec) -> i32;
-    } 
-
     #[namespace = "RE"]
     unsafe extern "C++" {
         include!("PCH.h");
