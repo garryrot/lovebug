@@ -68,40 +68,40 @@ fn get_default_trigger() -> Vec<Trigger> {
 
 fn get_default_actions() -> Vec<Action> {
     vec![
-        Action::build(
+        Action::new(
             "vibrate",
             vec![Control::Scalar(
                 Selector::All,
-                vec![ScalarActuators::Vibrate],
+                vec![ScalarActuator::Vibrate],
             )],
         ),
-        Action::build(
+        Action::new(
             "constrict",
             vec![Control::Scalar(
                 Selector::All,
-                vec![ScalarActuators::Constrict],
+                vec![ScalarActuator::Constrict],
             )],
         ),
-        Action::build(
+        Action::new(
             "inflate",
             vec![Control::Scalar(
                 Selector::All,
-                vec![ScalarActuators::Inflate],
+                vec![ScalarActuator::Inflate],
             )],
         ),
-        Action::build(
+        Action::new(
             "scalar",
             vec![Control::Scalar(
                 Selector::All,
                 vec![
-                    ScalarActuators::Vibrate,
-                    ScalarActuators::Constrict,
-                    ScalarActuators::Oscillate,
-                    ScalarActuators::Inflate,
+                    ScalarActuator::Vibrate,
+                    ScalarActuator::Constrict,
+                    ScalarActuator::Oscillate,
+                    ScalarActuator::Inflate,
                 ],
             )],
         ),
-        Action::build(
+        Action::new(
             "linear",
             vec![Control::Stroke(
                 Selector::All,
@@ -113,11 +113,11 @@ fn get_default_actions() -> Vec<Action> {
                 },
             )],
         ),
-        Action::build(
+        Action::new(
             "oscillate",
             vec![Control::Scalar(
                 Selector::All,
-                vec![ScalarActuators::Oscillate],
+                vec![ScalarActuator::Oscillate],
             )],
         ),
     ]
@@ -125,22 +125,22 @@ fn get_default_actions() -> Vec<Action> {
 
 fn get_penetration_actions() -> Vec<Action> {
     vec![
-        Action::build(
+        Action::new(
             "cunnilungus",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["vagina".into()]),
-                vec![ScalarActuators::Vibrate, ScalarActuators::Constrict],
+                vec![ScalarActuator::Vibrate, ScalarActuator::Constrict],
             )],
         ),
-        Action::build(
+        Action::new(
             "masturbation",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -154,12 +154,12 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "footjob",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into()]),
-                    vec![ScalarActuators::Vibrate, ScalarActuators::Oscillate],
+                    vec![ScalarActuator::Vibrate, ScalarActuator::Oscillate],
                 ),
                 Control::Stroke(
                     Selector::BodyParts(vec!["penis".into()]),
@@ -172,15 +172,15 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "penetration.vaginal",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into(), "vagina".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -194,15 +194,15 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "penetration.vaginal.deep",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into(), "vagina".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -216,15 +216,15 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "penetration.oral.shallow",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into(), "oral".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -238,15 +238,15 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "penetration.oral",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into(), "oral".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -260,15 +260,15 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "penetration.oral.deep",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into(), "oral".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -282,15 +282,15 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "penetration.anal",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into(), "oral".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -304,15 +304,15 @@ fn get_penetration_actions() -> Vec<Action> {
                 ),
             ],
         ),
-        Action::build(
+        Action::new(
             "penetration.anal.deep",
             vec![
                 Control::Scalar(
                     Selector::BodyParts(vec!["penis".into(), "oral".into()]),
                     vec![
-                        ScalarActuators::Vibrate,
-                        ScalarActuators::Constrict,
-                        ScalarActuators::Oscillate,
+                        ScalarActuator::Vibrate,
+                        ScalarActuator::Constrict,
+                        ScalarActuator::Oscillate,
                     ],
                 ),
                 Control::Stroke(
@@ -331,67 +331,67 @@ fn get_penetration_actions() -> Vec<Action> {
 
 fn get_body_actions() -> Vec<Action> {
     vec![
-        Action::build(
+        Action::new(
             "vibrate.nipple",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["nipple".into()]),
-                vec![ScalarActuators::Vibrate],
+                vec![ScalarActuator::Vibrate],
             )],
         ),
-        Action::build(
+        Action::new(
             "vibrate.vagina",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["vagina".into()]),
-                vec![ScalarActuators::Vibrate],
+                vec![ScalarActuator::Vibrate],
             )],
         ),
-        Action::build(
+        Action::new(
             "vibrate.clitoral",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["clitoral".into()]),
-                vec![ScalarActuators::Vibrate],
+                vec![ScalarActuator::Vibrate],
             )],
         ),
-        Action::build(
+        Action::new(
             "vibrate.anal",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["anal".into()]),
-                vec![ScalarActuators::Vibrate],
+                vec![ScalarActuator::Vibrate],
             )],
         ),
-        Action::build(
+        Action::new(
             "constrict.penis",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["constrict".into()]),
-                vec![ScalarActuators::Inflate],
+                vec![ScalarActuator::Inflate],
             )],
         ),
-        Action::build(
+        Action::new(
             "constrict.vagina",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["constrict".into()]),
-                vec![ScalarActuators::Inflate],
+                vec![ScalarActuator::Inflate],
             )],
         ),
-        Action::build(
+        Action::new(
             "constrict.anal",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["constrict".into()]),
-                vec![ScalarActuators::Inflate],
+                vec![ScalarActuator::Inflate],
             )],
         ),
-        Action::build(
+        Action::new(
             "inflate.vagina",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["vagina".into()]),
-                vec![ScalarActuators::Inflate],
+                vec![ScalarActuator::Inflate],
             )],
         ),
-        Action::build(
+        Action::new(
             "inflate.anal",
             vec![Control::Scalar(
                 Selector::BodyParts(vec!["anal".into()]),
-                vec![ScalarActuators::Inflate],
+                vec![ScalarActuator::Inflate],
             )],
         ),
     ]
