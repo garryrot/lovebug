@@ -1,20 +1,21 @@
-use buttplug::client::LinearCommand;
+use std::{sync::{Arc, Mutex}, time::Duration};
+use lazy_static::lazy_static;
+use cxx::{CxxString, CxxVector};
+use tracing::{debug, error, info};
+use tokio_util::sync::CancellationToken;
+
+use buttplug::{client::LinearCommand, core::message::ActuatorType};
+
 use ::config::*;
+use find::Triggers;
+use events::start_outgoing_event_thread;
 use bp_scheduler::{
-    client::{input::*, settings::*, BpClient},
+    client::BpClient,
     config::{
-        actions::{ActionRef, Strength},
-        read::read_config,
+        actions::{ActionRef, Strength}, client::ClientSettings, read::read_config
     },
     speed::Speed,
 };
-use cxx::{CxxString, CxxVector};
-use events::start_outgoing_event_thread;
-use tokio_util::sync::CancellationToken;
-use lazy_static::lazy_static;
-use find::Triggers;
-use std::sync::{Arc, Mutex};
-use tracing::{debug, error, info};
 
 pub static SETTINGS_FILE: &str = "Settings.json";
 pub static SETTINGS_PATH: &str = "Data\\F4SE\\Plugins\\Lovebug";
@@ -96,8 +97,8 @@ mod ffi {
     }
 }
 
-fn get_settings() -> TkSettings {
-    let mut settings = TkSettings::try_read_or_default(
+fn get_settings() -> ClientSettings {
+    let mut settings = ClientSettings::try_read_or_default(
         SETTINGS_PATH,
         SETTINGS_FILE,
     );
@@ -141,7 +142,7 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
                 }],
                 vec![],
                 Speed::new(speed.into()),
-                get_duration_from_secs(time_secs),
+                read_input_duration(time_secs),
             )
         },
         -1,
@@ -161,7 +162,7 @@ pub fn lb_scene(scene_name: &str, scene_tags: &CxxVector<CxxString>, speed: i32,
                     scene.actions,
                     vec![],
                     Speed::new(speed.into()),
-                    get_duration_from_secs(time_secs),
+                    read_input_duration(time_secs),
                 )
             }
             -1
@@ -207,4 +208,36 @@ unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bo
         form_id, event_name, str_arg, num_arg
     );
     false
+}
+
+
+fn read_input_string(list: &CxxVector<CxxString>) -> Vec<String> {
+    // automatically discards any empty strings to account for papyrus
+    // inability to do dynamic array sizes
+    list.iter()
+        .filter(|d| !d.is_empty())
+        .map(|d| d.to_string_lossy().into_owned())
+        .collect()
+}
+
+fn read_input_duration(secs: f32) -> Duration {
+    if secs > 0.0 {
+        Duration::from_millis((secs * 1000.0) as u64)
+    } else {
+        Duration::MAX
+    }
+}
+
+fn _read_input_actuators(actuator: &str) -> ActuatorType {
+    let lower = actuator.to_ascii_lowercase();
+    match lower.as_str() {
+        "constrict" => ActuatorType::Constrict,
+        "inflate" => ActuatorType::Inflate,
+        "oscillate" => ActuatorType::Oscillate,
+        "vibrate" => ActuatorType::Vibrate,
+        _ => {
+            error!("unknown actuator {:?}", lower);
+            ActuatorType::Vibrate
+        }
+    }
 }
