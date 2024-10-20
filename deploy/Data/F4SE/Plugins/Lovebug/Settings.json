@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "log_level": "Debug",
-  "connection": "InProcess",
-  "device_settings": {
-    "devices": []
-  }
-}

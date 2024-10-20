@@ -10,10 +10,7 @@ use crate::{
 };
 
 use collision::Collision;
-use bp_scheduler::{
-    config::linear::LinearRange, 
-    dynamic_tracking::*
-};
+use bp_scheduler::dynamic_tracking::*;
 
 
 #[cxx::bridge]
@@ -125,7 +122,6 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
             lb.client.runtime.spawn(async move {
                 let dynamic = DynamicTracking {
                     settings:  DynamicSettings {
-                        boundaries: LinearRange::max(),
                         move_at_start: true,
                         min_resolution_ms: 80,
                         min_duration_ms: 200,

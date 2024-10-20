@@ -1,0 +1,9 @@
+{
+  "log_level": "Debug",
+  "connection": "InProcess",
+  "in_process_features": {
+    "bluetooth": true,
+    "serial": true,
+    "xinput": true
+  }
+}

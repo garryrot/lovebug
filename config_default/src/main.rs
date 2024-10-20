@@ -1,7 +1,7 @@
 use std::fs::{self};
 
 use bp70::get_pb70_triggers;
-use bp_scheduler::config::actions::*;
+use bp_scheduler::config::{actions::*, actuators::ActuatorSettings, client::ClientSettings};
 use config::*;
 use serde::Serialize;
 
@@ -9,7 +9,6 @@ mod bp70;
 
 fn main() {
     let config_dir = "deploy/Data/F4SE/Plugins/Lovebug";
-
     let triggers: Vec<(&str, Vec<Trigger>)> = vec![
         ("Default.json", get_default_trigger()),
         ("BP70.json", get_pb70_triggers())
@@ -28,6 +27,9 @@ fn main() {
         let path = format!("../{}/Actions/{}", config_dir, action.0);
         write_file(path, action.1);
     }
+
+    write_file(  format!("../{}/Connection.json", config_dir) , ClientSettings::default());
+    write_file(  format!("../{}/Devices.json", config_dir) , ActuatorSettings::default());
 }
 
 pub fn scene(description: &str, scene_id: SceneId, actions: Vec<ActionRef>) -> Trigger {
