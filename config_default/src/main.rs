@@ -1,9 +1,11 @@
 use std::fs::{self};
 
+use bodies::BodyType;
 use bp70::get_pb70_triggers;
 use bp_scheduler::config::{actions::*, actuators::ActuatorSettings, client::ClientSettings};
 use config::*;
 use serde::Serialize;
+use triggers::Trigger;
 
 mod bp70;
 
@@ -19,6 +21,10 @@ fn main() {
         ("Penetration.json", get_penetration_actions()),
     ];
 
+    let bodies = vec![
+        ("Bodies.json", get_bodies())
+    ];
+
     for trigger in triggers {
         let path = format!("../{}/Triggers/{}", config_dir, trigger.0);
         write_file(path, trigger.1);
@@ -27,9 +33,17 @@ fn main() {
         let path = format!("../{}/Actions/{}", config_dir, action.0);
         write_file(path, action.1);
     }
+    for body in bodies {
+        let path = format!("../{}/Bodies/{}", config_dir, body.0);
+        write_file(path, body.1);
+    }
 
-    write_file(  format!("../{}/Connection.json", config_dir) , ClientSettings::default());
-    write_file(  format!("../{}/Devices.json", config_dir) , ActuatorSettings::default());
+    write_file( format!("../{}/Connection.json", config_dir) , ClientSettings::default());
+    write_file( format!("../{}/Devices.json", config_dir) , ActuatorSettings::default());
+}
+
+fn get_bodies() -> Vec<BodyType> {
+    vec![]
 }
 
 pub fn scene(description: &str, scene_id: SceneId, actions: Vec<ActionRef>) -> Trigger {
@@ -130,7 +144,7 @@ fn get_penetration_actions() -> Vec<Action> {
         Action::new(
             "cunnilungus",
             vec![Control::Scalar(
-                Selector::BodyParts(vec!["vagina".into()]),
+                Selector::BodyParts(vec!["vaginal".into()]),
                 vec![ScalarActuator::Vibrate, ScalarActuator::Constrict],
             )],
         ),

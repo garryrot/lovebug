@@ -1,6 +1,8 @@
+use body_parts::{TAG_ANAL, TAG_CLIT, TAG_NIPPLE, TAG_ORAL, TAG_PENIS, TAG_VAGINAL};
 use cxx::{CxxString, CxxVector};
 use input::{read_input_duration, read_input_string};
 use lazy_static::lazy_static;
+
 use std::sync::{Arc, Mutex};
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, info};
@@ -9,17 +11,19 @@ use buttplug::client::LinearCommand;
 
 use ::config::*;
 use bp_scheduler::{
+    actuator::Actuators,
     client::BpClient,
     config::{
         actions::{ActionRef, Strength},
         actuators::ActuatorSettings,
         client::ClientSettings,
         read::*,
+        write::try_write,
     },
     speed::Speed,
 };
 use events::start_outgoing_event_thread;
-use find::Triggers;
+use triggers::Triggers;
 
 pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug";
 pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
@@ -62,6 +66,27 @@ impl Lovebug {
             error!("failed locking mutex");
         }
         default
+    }
+
+    pub fn refresh_devices(&mut self) {
+        let devices = self.client.buttplug.devices();
+        for actuator in devices.flatten_actuators() {
+            self.client
+                .device_settings
+                .set_enabled(actuator.identifier(), true);
+            self.client.device_settings.set_body_parts(
+                actuator.identifier(),
+                &[
+                    TAG_ANAL,
+                    TAG_CLIT,
+                    TAG_NIPPLE,
+                    TAG_ORAL,
+                    TAG_PENIS,
+                    TAG_VAGINAL,
+                ],
+            );
+        }
+        try_write(&self.client.device_settings, CONFIG_DIR, DEVICE_SETTINGS);
     }
 }
 
@@ -111,7 +136,8 @@ pub fn lb_init() -> bool {
                 ..read_or_default::<ClientSettings>(CONFIG_DIR, CLIENT_SETTINGS)
             },
             read_or_default::<ActuatorSettings>(CONFIG_DIR, DEVICE_SETTINGS),
-        ).unwrap();
+        )
+        .unwrap();
         let mut lb = Lovebug {
             client,
             triggers: Triggers::default(),
@@ -159,6 +185,8 @@ pub fn lb_scene(
     info!(scene_name, speed, time_secs, "lb_scene");
     Lovebug::run_static(
         |lb| {
+            lb.refresh_devices();
+
             let tags = read_input_string(scene_tags);
             let scene = lb.triggers.find_scene(scene_name, &tags);
             info!("matched scene {:?}", scene);

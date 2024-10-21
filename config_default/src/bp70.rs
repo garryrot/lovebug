@@ -1,5 +1,6 @@
 use bp_scheduler::config::actions::*;
 use config::*;
+use triggers::Trigger;
 
 use crate::scene;
 

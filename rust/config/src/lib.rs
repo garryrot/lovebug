@@ -3,14 +3,9 @@ use serde_hex::{SerHex,StrictPfx};
 
 use bp_scheduler::config::actions::*;
 
-pub mod find;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Trigger {
-    Scene(Scene),
-    Event(Event),
-    Timed(TimedEvent)
-}
+pub mod triggers;
+pub mod bodies;
+pub mod body_parts;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Scene {
@@ -204,7 +199,6 @@ mod tests {
                     ]
                 )
             }),
-
             Trigger::Scene(Scene {
                 description: "Default scene".into(),
                 scene_id: SceneId::Any,

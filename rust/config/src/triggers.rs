@@ -4,6 +4,13 @@ use tracing::{debug, info};
 
 use crate::*;
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Trigger {
+    Scene(Scene),
+    Event(Event),
+    Timed(TimedEvent)
+}
+
 #[derive(Debug)]
 pub struct Triggers {
     /// maps lowercased scene IDs to a specific trigger
