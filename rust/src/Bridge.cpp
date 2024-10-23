@@ -31,3 +31,16 @@ Sex GetSex(const RE::Actor *actor) {
     }
     return Sex::None;
 }
+const RE::TESRace* GetRace(const RE::Actor *actor) {
+    if (actor == NULL || actor->race == NULL)
+    {
+        return NULL;
+    }
+    return actor->race;
+}
+std::uint32_t GetFormID(const RE::TESForm* form) {
+    return form->GetFormID();
+}
+const RE::TESForm* AsForm(const RE::TESRace* form) {
+    return form;
+}

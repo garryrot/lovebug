@@ -44,6 +44,7 @@ pub struct Lovebug {
     client: BpClient,
     triggers: Triggers,
     dynamic_task: Option<CancellationToken>,
+    tracking_counter: i32
 }
 
 impl Lovebug {
@@ -142,6 +143,7 @@ pub fn lb_init() -> bool {
             client,
             triggers: Triggers::default(),
             dynamic_task: None,
+            tracking_counter: 0,
         };
         lb.client.read_actions(ACTIONS_DIR);
         start_outgoing_event_thread(&lb.client);

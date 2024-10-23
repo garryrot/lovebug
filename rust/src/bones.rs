@@ -7,17 +7,17 @@ use tokio::{
     time::{sleep, Instant},
 };
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, info_span, Instrument};
 
 use crate::{
-    bridge::ffi_bridge::{GetSex, IsPlayer, Sex},
+    bridge::ffi_bridge::{GetRace, GetSex, IsPlayer, Sex, TESRace},
     ffi::*,
     Lovebug,
 };
 use ffi_bones::{ActorVec, GetBoneFromActor, GetDistance, NiAVObject};
 
 use bp_scheduler::{
-    actuator::Actuator, config::actuators::ActuatorSettings, dynamic_tracking::*, filter::Filter
+    actuator::Actuator, config::actuators::ActuatorSettings, dynamic_tracking::*, filter::Filter,
 };
 use collision::Collision;
 
@@ -44,9 +44,11 @@ mod ffi_bones {
     }
 }
 
+
 struct BodyTypes {
     female: BodyType,
-    male: BodyType
+    male: BodyType,
+    default_race_male: BodyType
 }
 
 fn get_body_types() -> BodyTypes {
@@ -54,45 +56,78 @@ fn get_body_types() -> BodyTypes {
         outer_distance: 14.5,
         depth: 10.0,
         min_stroke: 0.25,
+        error_tolerance: 0.35,
     };
 
-    BodyTypes { female: BodyType {
-        name: "Fusion Girl".into(),
-        is_female: true,
-        genital_bone: Bone {
-            name: "Pelvis_skin".into(),
-            collision: Some(pelvis_collision),
+    BodyTypes {
+        female: BodyType {
+            name: "Fusion Girl".into(),
+            is_female: true,
+            genital_bone: Bone {
+                name: "Pelvis_skin".into(),
+                collision: Some(pelvis_collision),
+            },
+            oral_bone: Bone {
+                name: "HEAD".into(),
+                collision: Some(pelvis_collision),
+            },
+            anal_bone: Bone {
+                name: "Pelvis_skin".into(),
+                collision: Some(pelvis_collision),
+            },
         },
-        oral_bone: Bone {
-            name: "HEAD".into(),
-            collision: Some(pelvis_collision),
+        male: BodyType {
+            name: "Body Talk".into(),
+            is_female: false,
+            genital_bone: Bone {
+                name: "Penis_01".into(),
+                collision: None,
+            },
+            oral_bone: Bone {
+                name: "HEAD".into(),
+                collision: Some(pelvis_collision),
+            },
+            anal_bone: Bone {
+                name: "Anus_01".into(),
+                collision: Some(pelvis_collision),
+            },
         },
-        anal_bone: Bone {
-            name: "Pelvis_skin".into(),
-            collision: Some(pelvis_collision),
+        default_race_male: BodyType {
+            name: "Super Mutant".into(),
+            is_female: false,
+            genital_bone: Bone {
+                name: "Penis1".into(),
+                collision: Some(Collision {
+                    outer_distance: 30.5,
+                    depth: 10.0,
+                    min_stroke: 0.25,
+                    error_tolerance: 0.35,
+                }),
+            },
+            oral_bone: Bone {
+                name: "HEAD".into(),
+                collision: Some(pelvis_collision),
+            },
+            anal_bone: Bone {
+                name: "Pelvis".into(),
+                collision: Some(pelvis_collision),
+            },
         },
-    }, male: BodyType {
-        name: "Body Talk".into(),
-        is_female: false,
-        genital_bone: Bone {
-            name: "Penis_01".into(),
-            collision: None,
-        },
-        oral_bone: Bone {
-            name: "HEAD".into(),
-            collision: Some(pelvis_collision),
-        },
-        anal_bone: Bone {
-            name: "Anus_01".into(),
-            collision: Some(pelvis_collision),
-        },
-    } }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum TrackingState {
+    Init,
+    MovingOut,
+    OuterTurn,
+    MovingIn,
+    InnerTurn,
 }
 
 pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
     info!("lb_dynamic_tracking Actors={}", actor_vec.Size());
     let actors_in = from_actor_vec(actor_vec);
-
     let dynamic_settings = DynamicSettings {
         move_at_start: true,
         min_resolution_ms: 80,
@@ -101,16 +136,16 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
         default_stroke_in: 0.0,
         default_stroke_out: 1.0,
         stroke_window_ms: 2_000,
-        min_turn_dist: 0.25,
     };
 
+    // Penis1
     Lovebug::run_static(
         |lb| {
             if let Some(token) = lb.dynamic_task.take() {
                 token.cancel();
             }
-            let cancellation_token = CancellationToken::new();
-            lb.dynamic_task = Some(cancellation_token.clone());
+            let global_cancel = CancellationToken::new();
+            lb.dynamic_task = Some(global_cancel.clone());
 
             let (sender, receiver) = unbounded_channel::<TrackingSignal>();
 
@@ -151,29 +186,28 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
             let mut t_id = 0;
             if player_actor.get_sex() == Sex::Female {
                 debug!("player female");
+                // let race = player_actor.get_race();
                 let body_types = get_body_types();
 
-                // starts bone threads that minotir of any bone penetrates the player vaginally
-                // (anal is simply included due to lack of distance, maybe this will be differentiated 
+                // starts bone threads that monitor if any bone penetrates the player vaginally
+                // (anal is simply included due to lack of distance, maybe this will be differentiated
                 // at some point in the feature but I doubt it)
                 if !npc_male_actors.is_empty() {
                     for npc in npc_male_actors {
                         t_id += 1;
-                        let first_pen_1 = CancellationToken::new();
+                        let pen_signal = CancellationToken::new();
                         let female_collision = body_types.female.genital_bone.clone();
-                        let genital_bone_player = &player_actor.get_bone(&female_collision.name);
-                        let genital_bone_other = &npc.get_bone(&body_types.male.genital_bone.name);
                         let stop_track = observe_bones(
                             lb,
-                            genital_bone_player,
-                            genital_bone_other,
+                            &player_actor.get_bone(&female_collision.name),
+                            &npc.get_bone(&body_types.male.genital_bone.name),
                             female_collision.collision.unwrap(),
                             sender.clone(),
-                            first_pen_1.clone(),
-                            t_id,
+                            pen_signal.clone(),
+                            global_cancel.clone(),
                         );
                         starting_ramps.push((
-                            first_pen_1,
+                            pen_signal,
                             stop_track,
                             vec!["penis", "vaginal", "anal"],
                             t_id,
@@ -201,7 +235,7 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                         sleep(Duration::from_millis(200)).await;
                         for (i, ramp) in starting_ramps.iter().enumerate() {
                             if ramp.0.is_cancelled() {
-                                debug!("t_id={} penetrated, closing all remaining thredas", ramp.3);
+                                debug!("t#={} penetrated, closing all remaining thredas", ramp.3);
                                 for (j, loser_thread) in starting_ramps.iter().enumerate() {
                                     if j != i {
                                         debug!("cancelling other tracking thread {}", j);
@@ -222,126 +256,150 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                     );
                 });
             }
-
-            fn start_control_thread(
-                dynamic_settings: DynamicSettings,
-                actuator_settings: ActuatorSettings,
-                body_parts: &[&str],
-                receiver: UnboundedReceiver<TrackingSignal>,
-                actuators: Vec<Arc<Actuator>>,
-            ) {
-                let parts = body_parts.iter().map(|s| s.to_string()).collect::<Vec<String>>();
-                tokio::spawn(async move {
-                    let (_, actuators) =  Filter::from_actuators(actuator_settings, actuators).with_body_parts(&parts).result();
-                    let dynamic = DynamicTracking {
-                        settings: dynamic_settings,
-                        signals: receiver,
-                        actuators,
-                    };
-                    info!(?dynamic.settings, "control task started with settings");
-                    let _ = dynamic.track_mirror().await;
-                });
-            }
-
-            fn observe_bones(
-                lb: &Lovebug,
-                a1_bone: &UnsafeAvObjectPtr,
-                a2_bone: &UnsafeAvObjectPtr,
-                collision_sphere: Collision,
-                sender: UnboundedSender<TrackingSignal>,
-                first_pen: CancellationToken,
-                t_id: i32,
-            ) -> CancellationToken {
-                let cancel_me = CancellationToken::new();
-                let bone1 = a1_bone.clone();
-                let bone2 = a2_bone.clone();
-                let cancellation_token = cancel_me.clone();
-
-                let MIN_STROKE_LENGTH = 0.25;
-
-                lb.client.runtime.spawn(async move {
-                    info!("observation task {} started {} - {}", t_id, bone1.name, bone2.name);
-                    sleep(Duration::from_millis(1200)).await;
-                    let mut penetrating = false;
-                    let mut dir_inward = false;
-                    let mut last_distance = f32::MAX;
-                    let mut most_outward = f32::MAX;
-                    let mut most_inward = 0.0;
-
-                    let mut stroke_len = 0.0;
-                    let mut turn_done = false;
-
-                    while !cancellation_token.is_cancelled() {
-                        let dist = bone1.get_distance(&bone2);
-                        if dist < collision_sphere.outer_distance {
-                            if !penetrating {
-                                first_pen.cancel();
-                                info!("sending penetration {}", dist);
-                                let _ = sender.send(TrackingSignal::Penetration(Instant::now()));
-                            }
-                            penetrating = true;
-                        }
-
-                        debug!("dist = {}", dist);
-                        let diff = last_distance - dist;
-                        if diff > 0.0 && !dir_inward {
-                            most_outward = dist;
-                            info!(most_outward, most_inward, "moving inward now");
-
-                            dir_inward = true;
-                            penetrating = false;
-                            turn_done = false;
-                            stroke_len = 0.0;
-                        } else if diff < 0.0 && dir_inward {
-                            most_inward = dist;
-                            info!(most_outward, most_inward, "moving outward now");
-                            
-                            dir_inward = false;
-                            penetrating = false;
-                            turn_done = false;
-                            stroke_len = 0.0;
-                        }
-                        stroke_len += diff;
-
-                        debug!(stroke_len);
-                        if f32::abs(stroke_len) > MIN_STROKE_LENGTH && !turn_done {
-                            debug!("SENDING!");
-                            turn_done = true;
-                            let (from, to) = collision_sphere.get_stroke_range(most_outward, most_inward);
-                            if dir_inward {
-                                let _ = sender.send(TrackingSignal::OuterTurn(
-                                    Instant::now(),
-                                    Margins::new(from, to),
-                                ));
-                                info!(from, to, dist, "sending outward complete");
-                            } else {
-                                let _ = sender.send(TrackingSignal::InnerTurn(
-                                    Instant::now(),
-                                    Margins::new(from, to),
-                                ));
-                                info!(from, to, dist, "sending inward complete");
-                            }
-                            
-                        } 
-
-                        last_distance = dist;
-                        sleep(Duration::from_millis(50)).await;
-                    }
-                    info!(t_id, "tracking thread stopped");
-                });
-                cancel_me
-            }
         },
         (),
     );
 }
 
-pub enum TrackingState {
-    Init,
-    MovingOut,
-    TurningOutward,
-    MovingIn,
-    TurningInward
+fn start_control_thread(
+    dynamic_settings: DynamicSettings,
+    actuator_settings: ActuatorSettings,
+    body_parts: &[&str],
+    receiver: UnboundedReceiver<TrackingSignal>,
+    actuators: Vec<Arc<Actuator>>,
+) {
+    let parts = body_parts
+        .iter()
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
+    tokio::spawn(async move {
+        let (_, actuators) = Filter::from_actuators(actuator_settings, actuators)
+            .with_body_parts(&parts)
+            .result();
+        let dynamic = DynamicTracking {
+            settings: dynamic_settings,
+            signals: receiver,
+            actuators,
+        };
+        info!(?dynamic.settings, "control task started with settings");
+        let _ = dynamic.track_mirror().await;
+    });
+}
+
+fn observe_bones(
+    lb: &mut Lovebug,
+    a1_bone: &UnsafeAvObjectPtr,
+    a2_bone: &UnsafeAvObjectPtr,
+    collision_sphere: Collision,
+    sender: UnboundedSender<TrackingSignal>,
+    first_pen: CancellationToken,
+    global_cancel: CancellationToken,
+) -> CancellationToken {
+    let cancel_me = CancellationToken::new();
+    let bone1 = a1_bone.clone();
+    let bone2 = a2_bone.clone();
+    let cancellation_token = cancel_me.clone();
+
+    let t_id = lb.tracking_counter;
+    lb.tracking_counter += 1;
+    lb.client.runtime.spawn(async move {
+        let span = info_span!("observe_bones", id=t_id);
+        async move {
+            info!(
+                "observation task {} started {} - {}",
+                t_id, bone1.name, bone2.name
+            );
+            sleep(Duration::from_millis(1200)).await;
+            let mut last_dist = f32::MAX;
+            let mut most_outward = f32::MAX;
+            let mut most_inward = f32::MAX;
+            let mut penetrated = false;
+            let mut state = TrackingState::Init;
+            while !cancellation_token.is_cancelled() && !global_cancel.is_cancelled() {
+                let dist = bone1.get_distance(&bone2);
+                let diff = last_dist - dist;
+                debug!("dist = {}", dist);
+                match state {
+                    TrackingState::Init => {
+                        if dist < collision_sphere.outer_distance {
+                            state = TrackingState::MovingIn;
+                            info!(?state, dist);
+                            first_pen.cancel();
+                            let _ = sender.send(TrackingSignal::Penetration(Instant::now()));
+                            penetrated = true;
+                        }
+                    }
+                    TrackingState::MovingIn => {
+                        if diff < 0.0 {
+                            state = TrackingState::InnerTurn;
+                            most_inward = dist;
+                            info!(?state, dist, most_inward);
+                        }
+                        if !penetrated && dist < collision_sphere.outer_distance {
+                            penetrated = true;
+                            let _ = sender.send(TrackingSignal::Penetration(Instant::now()));
+                        }
+                    }
+                    TrackingState::InnerTurn => {
+                        if dist - most_inward > collision_sphere.error_tolerance {
+                            let (from, to) =
+                                collision_sphere.get_stroke_range(most_outward, most_inward);
+                            let _ = sender.send(TrackingSignal::InnerTurn(
+                                Instant::now(),
+                                Margins::new(from, to),
+                            ));
+                            info!("sending inner turn!");
+                            state = TrackingState::MovingOut;
+                            info!(?state, dist, most_inward);
+                        } else if dist - most_inward < -collision_sphere.error_tolerance {
+                            state = TrackingState::MovingIn;
+                            error!(
+                                ?state,
+                                dist, most_inward, "dist - most_inward < -ERROR_TOLERANCE"
+                            );
+                        }
+                    }
+                    TrackingState::MovingOut => {
+                        if diff > 0.0 {
+                            state = TrackingState::OuterTurn;
+                            most_outward = dist;
+                            info!(?state, dist, most_outward);
+                        }
+                    }
+                    TrackingState::OuterTurn => {
+                        if most_outward - dist > collision_sphere.error_tolerance {
+                            let (from, to) =
+                                collision_sphere.get_stroke_range(most_outward, most_inward);
+                            let _ = sender.send(TrackingSignal::OuterTurn(
+                                Instant::now(),
+                                Margins::new(from, to),
+                            ));
+                            info!("sending outer turn!");
+                            penetrated = false;
+                            state = TrackingState::MovingIn;
+                            info!(?state, dist, most_outward);
+                        } else if most_outward - dist < -collision_sphere.error_tolerance {
+                            state = TrackingState::MovingOut;
+                            error!(
+                                ?state,
+                                dist, most_inward, "most_outward - dist < -ERROR_TOLERANCE"
+                            );
+                        }
+                    }
+                };
+
+                last_dist = dist;
+                sleep(Duration::from_millis(50)).await;
+            }
+            if global_cancel.is_cancelled() {
+                let _ = sender.send(TrackingSignal::Stop);
+            }
+            info!("observation task stopped");
+        }
+        .instrument(span)
+        .await
+    });
+    cancel_me
 }
 
 #[derive(Clone)]
@@ -361,6 +419,9 @@ impl UnsafeActorPtr {
     }
     fn is_player(&self) -> bool {
         unsafe { IsPlayer(self.actor) }
+    }
+    fn get_race(&self) -> *const TESRace {
+        unsafe { GetRace(self.actor) }
     }
 }
 unsafe impl Send for UnsafeActorPtr {}

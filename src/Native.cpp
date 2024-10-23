@@ -20,11 +20,9 @@ bool Stop(std::monostate, int handle)
     return lb_stop(handle);
 }
 
-int threadCounter = 0;
 int Scene(std::monostate, std::string sceneName, std::vector<RE::Actor*> actors, std::vector<std::string> tags, int speed, float secs) 
 {
     int x = lb_scene(sceneName, tags, speed, secs);
-    
     auto actorVec = ActorVec::ActorVec(actors);
     lb_dynamic_tracking(actorVec);
     return x;

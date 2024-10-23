@@ -15,5 +15,7 @@ class ActorVec {
 };
 
 bool IsPlayer(const RE::Actor *actor);
-
 Sex GetSex(const RE::Actor *actor);
+const RE::TESRace* GetRace(const RE::Actor *actor);
+std::uint32_t GetFormID(const RE::TESForm* form);
+const RE::TESForm* AsForm(const RE::TESRace* form);

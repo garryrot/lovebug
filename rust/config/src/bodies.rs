@@ -2,7 +2,7 @@ use bp_scheduler::dynamic_tracking::{collision::Collision, DynamicSettings};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct BoneTracking {
+pub struct BodySet {
     pub male_body_type: String,
     pub female_body_type: String,
     pub dynamic: DynamicSettings
