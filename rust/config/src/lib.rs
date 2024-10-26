@@ -21,7 +21,7 @@ pub struct Event {
     pub event_start: EventTrigger,
     pub event_stop: EventTrigger,
     pub action: Vec<String>,
-    pub body_parts: BodyParts
+    pub body_parts: Selector
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -30,7 +30,7 @@ pub struct TimedEvent {
     pub event_start: EventTrigger,
     pub duration_ms: u32,
     pub action: Vec<String>,
-    pub body_parts: BodyParts
+    pub body_parts: Selector
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

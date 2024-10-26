@@ -4,7 +4,7 @@ use triggers::Trigger;
 
 use crate::scene;
 
-pub fn get_pb70_triggers() -> Vec<Trigger> {
+pub fn pb70_triggers() -> Vec<Trigger> {
     fn pb70_name(name: &str) -> String {
         format!("[UAP] BP70 - {}", name)
     }
@@ -132,7 +132,7 @@ pub fn get_pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Impregnate Missionary Stage Kiss")),
             vec![
                 ActionRef::new("constrict.penis", Strength::Constant(20)),
-                ActionRef::new("constrict.vagina", Strength::Constant(20)),
+                ActionRef::new("constrict.vaginal", Strength::Constant(20)),
             ],
         ),
         scene(

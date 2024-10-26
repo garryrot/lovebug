@@ -1,20 +1,24 @@
-use body_parts::{TAG_ANAL, TAG_CLIT, TAG_NIPPLE, TAG_ORAL, TAG_PENIS, TAG_VAGINAL};
+
+use bodies::Race;
+use bones::lb_dynamic_tracking;
 use cxx::{CxxString, CxxVector};
 use input::{read_input_duration, read_input_string};
 use lazy_static::lazy_static;
+use tracing_subscriber::field::debug;
 
 use std::sync::{Arc, Mutex};
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, info};
 
+use crate::bones::ffi_bones::ActorVec;
+
 use buttplug::client::LinearCommand;
 
-use ::config::*;
 use bp_scheduler::{
     actuator::Actuators,
     client::BpClient,
     config::{
-        actions::{ActionRef, Strength},
+        actions::{ActionRef, Control, Strength},
         actuators::ActuatorSettings,
         client::ClientSettings,
         read::*,
@@ -22,14 +26,18 @@ use bp_scheduler::{
     },
     speed::Speed,
 };
+
+use body_parts::*;
+use ::config::*;
 use events::start_outgoing_event_thread;
 use triggers::Triggers;
 
-pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug";
-pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
-pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Actions";
-pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
-
+pub static CONFIG_DIR:      &str = "Data/F4SE/Plugins/Lovebug";
+pub static PATTERNS_DIR:    &str = "Data/F4SE/Plugins/Lovebug/Patterns";
+pub static ACTIONS_DIR:     &str = "Data/F4SE/Plugins/Lovebug/Actions";
+pub static TRIGGERS_DIR:    &str = "Data/F4SE/Plugins/Lovebug/Triggers";
+pub static RACES_DIR:       &str = "Data/F4SE/Plugins/Lovebug/Races";
+pub static DEFAULT_RACE:    &str = "DefaultRace.json";
 pub static CLIENT_SETTINGS: &str = "Connection.json";
 pub static DEVICE_SETTINGS: &str = "Devices.json";
 
@@ -44,7 +52,9 @@ pub struct Lovebug {
     client: BpClient,
     triggers: Triggers,
     dynamic_task: Option<CancellationToken>,
-    tracking_counter: i32
+    tracking_counter: i32,
+    races: Vec<Race>,
+    default_race: Option<Race>
 }
 
 impl Lovebug {
@@ -89,6 +99,12 @@ impl Lovebug {
         }
         try_write(&self.client.device_settings, CONFIG_DIR, DEVICE_SETTINGS);
     }
+
+    pub fn read_races(&mut self) {
+        self.races = read_config_dir(RACES_DIR.into());
+        let default_race : Race = read_or_default(CONFIG_DIR, DEFAULT_RACE);
+        self.default_race = Some(default_race);
+    }
 }
 
 #[derive(Debug)]
@@ -106,6 +122,10 @@ lazy_static! {
 
 #[cxx::bridge]
 mod ffi {
+    unsafe extern "C++" {
+        type ActorVec = crate::bones::ffi_bones::ActorVec;
+    }
+
     #[namespace = "RE"]
     unsafe extern "C++" {
         include!("PCH.h");
@@ -119,6 +139,7 @@ mod ffi {
             scene_tags: &CxxVector<CxxString>,
             speed: i32,
             time_sec: f32,
+            actors: &ActorVec
         ) -> i32;
         fn lb_stroke(ms: i32, pos: f32) -> bool;
         fn lb_update(id: i32, speed: i32) -> bool;
@@ -143,9 +164,14 @@ pub fn lb_init() -> bool {
             triggers: Triggers::default(),
             dynamic_task: None,
             tracking_counter: 0,
+            races: vec![],
+            default_race: None,
         };
         lb.client.read_actions(ACTIONS_DIR);
+        lb.read_races();
+
         start_outgoing_event_thread(&lb.client);
+
 
         lb.triggers
             .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
@@ -162,11 +188,14 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     info!(action_name, speed, time_secs, "lb_action");
     Lovebug::run_static(
         |lb| {
+
+            let actions = lb.client.get_actions_from_refs(vec![ActionRef {
+                action: action_name.into(),
+                strength: Strength::Constant(100),
+            }]);
+
             lb.client.dispatch_refs(
-                vec![ActionRef {
-                    action: action_name.into(),
-                    strength: Strength::Constant(100),
-                }],
+                actions,
                 vec![],
                 Speed::new(speed.into()),
                 read_input_duration(time_secs),
@@ -182,6 +211,7 @@ pub fn lb_scene(
     scene_tags: &CxxVector<CxxString>,
     speed: i32,
     time_secs: f32,
+    actor_vec: &ActorVec
 ) -> i32 {
     info!(scene_name, speed, time_secs, "lb_scene");
     Lovebug::run_static(
@@ -191,9 +221,26 @@ pub fn lb_scene(
             let tags = read_input_string(scene_tags);
             let scene = lb.triggers.find_scene(scene_name, &tags);
             info!("matched scene {:?}", scene);
+
             if let Some(scene) = scene {
+                let mut actions = lb.client.get_actions_from_refs(scene.actions);
+
+                let mut do_stroke = false;
+                for action in actions.iter_mut() {
+                    debug!("action {}", action.1.name);
+                    if action.1.allow_bone_tracking {
+                        let has_stroker = action.1.control.iter().any(|x| matches!(x, Control::Stroke(_,_)));
+                        do_stroke = has_stroker || do_stroke;
+                        debug!(do_stroke, "allows bone tracking");
+                        action.1.control.retain( |x| matches!(x, Control::Scalar(_,_)));
+                    }
+                }
+                debug!(?actions);
+                if do_stroke {
+                    lb_dynamic_tracking(lb, actor_vec);
+                }
                 return lb.client.dispatch_refs(
-                    scene.actions,
+                    actions,
                     vec![],
                     Speed::new(speed.into()),
                     read_input_duration(time_secs),
