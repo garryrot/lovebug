@@ -1,7 +1,11 @@
 use std::{sync::Arc, time::Duration};
 
 use buttplug::core::message::ActuatorType;
-use config::bodies::{BodyType, Bone};
+use config::{
+    bodies::{BodyType, Bone},
+    body_parts::*,
+};
+use ffi_bones::{ActorVec, GetDistance};
 use tokio::{
     sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
     time::{sleep, Instant},
@@ -10,11 +14,9 @@ use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, info, info_span, Instrument};
 
 use crate::{
-    bridge::ffi_bridge::{GetRace, GetSex, IsPlayer, Sex, TESRace},
-    ffi::*,
+    bridge::{ffi_bridge::*, UnsafeActorPtr, UnsafeAvObjectPtr, UnsafeTESFormPtr},
     Lovebug,
 };
-use ffi_bones::{ActorVec, GetBoneFromActor, GetDistance, NiAVObject};
 
 use bp_scheduler::{
     actuator::Actuator, config::actuators::ActuatorSettings, dynamic_tracking::*, filter::Filter,
@@ -25,8 +27,8 @@ use collision::Collision;
 mod ffi_bones {
     #[namespace = "RE"]
     unsafe extern "C++" {
-        type Actor = crate::ffi::Actor;
-        type NiAVObject;
+        type Actor = crate::bridge::ffi_bridge::Actor;
+        type NiAVObject = crate::bridge::ffi_bridge::NiAVObject;
     }
 
     unsafe extern "C++" {
@@ -34,8 +36,7 @@ mod ffi_bones {
         type ActorVec;
         pub fn GetActor(self: &ActorVec, pos: i32) -> *const Actor;
         pub fn Size(self: &ActorVec) -> i32;
-        unsafe fn GetDistance(boneA: *mut NiAVObject, boneB: *mut NiAVObject) -> f32;
-        unsafe fn GetBoneFromActor(actor: *const Actor, bone: &str) -> *mut NiAVObject;
+        unsafe fn GetDistance(boneA: *const NiAVObject, boneB: *const NiAVObject) -> f32;
     }
 
     extern "Rust" {
@@ -44,76 +45,144 @@ mod ffi_bones {
     }
 }
 
-
-struct BodyTypes {
-    female: BodyType,
-    male: BodyType,
-    default_race_male: BodyType
+impl UnsafeAvObjectPtr {
+    fn get_distance(&self, other: &UnsafeAvObjectPtr) -> f32 {
+        if self.ptr.is_null() {
+            error!("bone is null {}", self.name);
+            f32::MAX
+        } else if other.ptr.is_null() {
+            error!("bone is null {}", other.name);
+            f32::MAX
+        } else {
+            unsafe { GetDistance(self.ptr, other.ptr) }
+        }
+    }
 }
 
-fn get_body_types() -> BodyTypes {
+fn get_default_race() -> Race {
+    let default_collision = Collision {
+        outer_distance: 14.0,
+        depth: 10.0,
+        min_stroke: 0.25,
+        error_tolerance: 0.35,
+    };
+    Race {
+        form_id: 0,
+        name: "Default Race".into(),
+        male: Some(BodyType {
+            name: "Default Male".into(),
+            is_female: false,
+            genital_bone: Bone {
+                name: "Pelvis".into(),
+                collision: Some(default_collision),
+            },
+            oral_bone: Bone {
+                name: "HEAD".into(),
+                collision: Some(default_collision),
+            },
+            anal_bone: Bone {
+                name: "Pelvis".into(),
+                collision: Some(default_collision),
+            },
+        }),
+        female: Some(BodyType {
+            name: "Default Female".into(),
+            is_female: false,
+            genital_bone: Bone {
+                name: "Pelvis".into(),
+                collision: Some(default_collision),
+            },
+            oral_bone: Bone {
+                name: "HEAD".into(),
+                collision: Some(default_collision),
+            },
+            anal_bone: Bone {
+                name: "Pelvis".into(),
+                collision: Some(default_collision),
+            },
+        }),
+    }
+}
+
+fn get_races() -> Vec<Race> {
     let pelvis_collision = Collision {
         outer_distance: 14.5,
         depth: 10.0,
         min_stroke: 0.25,
         error_tolerance: 0.35,
     };
-
-    BodyTypes {
-        female: BodyType {
-            name: "Fusion Girl".into(),
-            is_female: true,
-            genital_bone: Bone {
-                name: "Pelvis_skin".into(),
-                collision: Some(pelvis_collision),
-            },
-            oral_bone: Bone {
-                name: "HEAD".into(),
-                collision: Some(pelvis_collision),
-            },
-            anal_bone: Bone {
-                name: "Pelvis_skin".into(),
-                collision: Some(pelvis_collision),
-            },
+    vec![
+        Race {
+            form_id: 0x13746,
+            name: "Race Human".into(),
+            male: Some(BodyType {
+                name: "Body Talk".into(),
+                is_female: false,
+                genital_bone: Bone {
+                    name: "Penis_01".into(),
+                    collision: Some(pelvis_collision),
+                },
+                oral_bone: Bone {
+                    name: "HEAD".into(),
+                    collision: Some(pelvis_collision),
+                },
+                anal_bone: Bone {
+                    name: "Anus_01".into(),
+                    collision: Some(pelvis_collision),
+                },
+            }),
+            female: Some(BodyType {
+                name: "Fusion Girl".into(),
+                is_female: true,
+                genital_bone: Bone {
+                    name: "Pelvis_skin".into(),
+                    collision: Some(pelvis_collision),
+                },
+                oral_bone: Bone {
+                    name: "HEAD".into(),
+                    collision: Some(pelvis_collision),
+                },
+                anal_bone: Bone {
+                    name: "Pelvis_skin".into(),
+                    collision: Some(pelvis_collision),
+                },
+            }),
         },
-        male: BodyType {
-            name: "Body Talk".into(),
-            is_female: false,
-            genital_bone: Bone {
-                name: "Penis_01".into(),
-                collision: None,
-            },
-            oral_bone: Bone {
-                name: "HEAD".into(),
-                collision: Some(pelvis_collision),
-            },
-            anal_bone: Bone {
-                name: "Anus_01".into(),
-                collision: Some(pelvis_collision),
-            },
-        },
-        default_race_male: BodyType {
+        Race {
+            form_id: 0x1A009,
             name: "Super Mutant".into(),
-            is_female: false,
-            genital_bone: Bone {
-                name: "Penis1".into(),
-                collision: Some(Collision {
-                    outer_distance: 30.5,
-                    depth: 10.0,
-                    min_stroke: 0.25,
-                    error_tolerance: 0.35,
-                }),
-            },
-            oral_bone: Bone {
-                name: "HEAD".into(),
-                collision: Some(pelvis_collision),
-            },
-            anal_bone: Bone {
-                name: "Pelvis".into(),
-                collision: Some(pelvis_collision),
-            },
+            male: Some(BodyType {
+                name: "Super Mutant".into(),
+                is_female: false,
+                genital_bone: Bone {
+                    name: "Penis1".into(),
+                    collision: Some(Collision {
+                        outer_distance: 14.5,
+                        depth: 10.0,
+                        min_stroke: 0.25,
+                        error_tolerance: 0.35,
+                    }),
+                },
+                oral_bone: Bone {
+                    name: "HEAD".into(),
+                    collision: Some(pelvis_collision),
+                },
+                anal_bone: Bone {
+                    name: "Pelvis".into(),
+                    collision: Some(pelvis_collision),
+                },
+            }),
+            female: None,
         },
-    }
+    ]
+}
+
+#[derive(Debug, Clone)]
+pub struct Race {
+    form_id: u32,
+    name: String,
+    male: Option<BodyType>,
+    female: Option<BodyType>,
 }
 
 #[derive(Clone, Debug)]
@@ -123,6 +192,36 @@ pub enum TrackingState {
     OuterTurn,
     MovingIn,
     InnerTurn,
+}
+
+fn get_body_for_actor(actor: &UnsafeActorPtr) -> Option<BodyType> {
+    let race_form: UnsafeTESFormPtr = actor.get_race().into();
+    let race_id = race_form.get_form_id();
+    let sex = actor.get_sex();
+    debug!(
+        "fetching body for sex={:?} player={} race_id={:X}",
+        sex,
+        actor.is_player(),
+        race_id
+    );
+
+    let races = get_races();
+    let default_race = get_default_race();
+    let mut chosen_race = default_race;
+    for race in races {
+        if race.form_id == race_id {
+            chosen_race = race;
+            debug!("found race {}", chosen_race.name);
+        }
+    }
+    let mut result = None;
+    if sex == Sex::Female {
+        result = chosen_race.female;
+    } else if sex == Sex::Male {
+        result = chosen_race.male
+    }
+    debug!("body: {:?}", result);
+    result
 }
 
 pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
@@ -138,7 +237,6 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
         stroke_window_ms: 2_000,
     };
 
-    // Penis1
     Lovebug::run_static(
         |lb| {
             if let Some(token) = lb.dynamic_task.take() {
@@ -185,9 +283,11 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
             let player_actor = player_actor_opt.unwrap();
             let mut t_id = 0;
             if player_actor.get_sex() == Sex::Female {
-                debug!("player female");
-                // let race = player_actor.get_race();
-                let body_types = get_body_types();
+                let player_body = get_body_for_actor(player_actor);
+                if player_body.is_none() {
+                    error!("player body not found");
+                    return;
+                }
 
                 // starts bone threads that monitor if any bone penetrates the player vaginally
                 // (anal is simply included due to lack of distance, maybe this will be differentiated
@@ -195,23 +295,63 @@ pub fn lb_dynamic_tracking(actor_vec: &ActorVec) {
                 if !npc_male_actors.is_empty() {
                     for npc in npc_male_actors {
                         t_id += 1;
-                        let pen_signal = CancellationToken::new();
-                        let female_collision = body_types.female.genital_bone.clone();
-                        let stop_track = observe_bones(
-                            lb,
-                            &player_actor.get_bone(&female_collision.name),
-                            &npc.get_bone(&body_types.male.genital_bone.name),
-                            female_collision.collision.unwrap(),
-                            sender.clone(),
-                            pen_signal.clone(),
-                            global_cancel.clone(),
-                        );
-                        starting_ramps.push((
-                            pen_signal,
-                            stop_track,
-                            vec!["penis", "vaginal", "anal"],
-                            t_id,
-                        ));
+
+                        let npc_body = get_body_for_actor(npc);
+                        if npc_body.is_none() {
+                            error!("did not find body for npc, skipping...");
+                            continue;
+                        }
+
+                        let player_pelvis = &player_body.as_ref().unwrap().genital_bone.name;
+                        let player_head = &player_body.as_ref().unwrap().oral_bone.name;
+                        let npc_penis = &npc_body.as_ref().unwrap().genital_bone.name;
+
+                        if let Some(penis_collision) =
+                            npc_body.as_ref().unwrap().genital_bone.collision
+                        {
+                            // F/M genital collision
+                            // use collision sphere of male and genital collision
+                            let pen_signal = CancellationToken::new();
+                            let cancel_observation = observe_bones(
+                                lb,
+                                &player_actor.get_bone(player_pelvis),
+                                &npc.get_bone(npc_penis),
+                                penis_collision,
+                                sender.clone(),
+                                pen_signal.clone(),
+                                global_cancel.clone(),
+                            );
+                            starting_ramps.push((
+                                pen_signal,
+                                cancel_observation,
+                                vec![TAG_PENIS, TAG_VAGINAL, TAG_ANAL],
+                                t_id,
+                            ));
+
+                            // F/M oral collision
+                            // Use collision sphere of male penis and head
+                            let pen_signal = CancellationToken::new();
+                            let cancel_observation = observe_bones(
+                                lb,
+                                &player_actor.get_bone(player_head),
+                                &npc.get_bone(npc_penis),
+                                penis_collision,
+                                sender.clone(),
+                                pen_signal.clone(),
+                                global_cancel.clone(),
+                            );
+                            starting_ramps.push((
+                                pen_signal,
+                                cancel_observation,
+                                vec![TAG_PENIS, TAG_ORAL],
+                                t_id,
+                            ));
+                        } else {
+                            error!(
+                                "npc penis collision found {}",
+                                player_body.as_ref().unwrap().name
+                            );
+                        }
                     }
                 } else {
                     error!("only female actors TODO");
@@ -281,7 +421,7 @@ fn start_control_thread(
             signals: receiver,
             actuators,
         };
-        info!(?dynamic.settings, "control task started with settings");
+        info!(?dynamic.settings, ?parts, "control task started with settings");
         let _ = dynamic.track_mirror().await;
     });
 }
@@ -303,11 +443,11 @@ fn observe_bones(
     let t_id = lb.tracking_counter;
     lb.tracking_counter += 1;
     lb.client.runtime.spawn(async move {
-        let span = info_span!("observe_bones", id=t_id);
+        let span = info_span!("observe_bones", id = t_id);
         async move {
             info!(
-                "observation task {} started {} - {}",
-                t_id, bone1.name, bone2.name
+                "observation task {} started. bone1={} - bone2={}. collision_sphere={:?}",
+                t_id, bone1.name, bone2.name, collision_sphere
             );
             sleep(Duration::from_millis(1200)).await;
             let mut last_dist = f32::MAX;
@@ -402,55 +542,11 @@ fn observe_bones(
     cancel_me
 }
 
-#[derive(Clone)]
-struct UnsafeActorPtr {
-    pub actor: *const Actor,
-}
-impl UnsafeActorPtr {
-    fn get_bone(&self, bone_name: &str) -> UnsafeAvObjectPtr {
-        let av_object = unsafe { GetBoneFromActor(self.actor, bone_name) };
-        UnsafeAvObjectPtr {
-            av_object,
-            name: bone_name.to_owned(),
-        }
-    }
-    fn get_sex(&self) -> Sex {
-        unsafe { GetSex(self.actor) }
-    }
-    fn is_player(&self) -> bool {
-        unsafe { IsPlayer(self.actor) }
-    }
-    fn get_race(&self) -> *const TESRace {
-        unsafe { GetRace(self.actor) }
-    }
-}
-unsafe impl Send for UnsafeActorPtr {}
-
-#[derive(Clone)]
-struct UnsafeAvObjectPtr {
-    pub name: String,
-    pub av_object: *mut NiAVObject,
-}
-impl UnsafeAvObjectPtr {
-    fn get_distance(&self, other: &UnsafeAvObjectPtr) -> f32 {
-        if self.av_object.is_null() {
-            error!("bone is null {}", self.name);
-            f32::MAX
-        } else if other.av_object.is_null() {
-            error!("bone is null {}", other.name);
-            f32::MAX
-        } else {
-            unsafe { GetDistance(self.av_object, other.av_object) }
-        }
-    }
-}
-unsafe impl Send for UnsafeAvObjectPtr {}
-
 fn from_actor_vec(actors: &ActorVec) -> Vec<UnsafeActorPtr> {
     let mut vec_clone = vec![];
     for i in 0..actors.Size() {
         vec_clone.push(UnsafeActorPtr {
-            actor: actors.GetActor(i),
+            ptr: actors.GetActor(i),
         });
     }
     vec_clone

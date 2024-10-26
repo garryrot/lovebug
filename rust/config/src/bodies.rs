@@ -10,7 +10,7 @@ pub struct BodySet {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BodyType {
-    pub name: String,   // BodyTalk (Male Bodies), FusionGirl
+    pub name: String,
     pub is_female: bool,
     pub genital_bone: Bone,
     pub oral_bone: Bone,

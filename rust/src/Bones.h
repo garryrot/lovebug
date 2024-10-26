@@ -4,7 +4,6 @@
 #include "PCH.h"
 
 float GetDistance(
-    RE::NiAVObject* boneA,
-    RE::NiAVObject* boneB);
+    const RE::NiAVObject* boneA,
+    const RE::NiAVObject* boneB);
 
-RE::NiAVObject* GetBoneFromActor(const RE::Actor *actor, rust::Str bone);

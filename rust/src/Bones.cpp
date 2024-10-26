@@ -1,12 +1,7 @@
 
-RE::NiAVObject* GetBoneFromActor(const RE::Actor *actor, rust::Str bone) 
-{
-    return actor->Get3D()->GetObjectByName( (std::string) bone );   
-}
-
 float GetDistance(
-    RE::NiAVObject* boneA,
-    RE::NiAVObject* boneB) {
+    const RE::NiAVObject* boneA,
+    const RE::NiAVObject* boneB) {
     if (boneA == NULL)
     {
         return 999999.0;

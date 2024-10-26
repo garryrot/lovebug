@@ -109,7 +109,6 @@ mod ffi {
     #[namespace = "RE"]
     unsafe extern "C++" {
         include!("PCH.h");
-        type Actor;
     }
 
     extern "Rust" {
