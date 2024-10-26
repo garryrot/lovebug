@@ -6,7 +6,7 @@
         "Scalar": [
           {
             "BodyParts": [
-              "vagina"
+              "vaginal"
             ]
           },
           [
@@ -15,7 +15,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": false
   },
   {
     "name": "masturbation",
@@ -49,7 +50,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": false
   },
   {
     "name": "footjob",
@@ -82,7 +84,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": false
   },
   {
     "name": "penetration.vaginal",
@@ -92,7 +95,7 @@
           {
             "BodyParts": [
               "penis",
-              "vagina"
+              "vaginal"
             ]
           },
           [
@@ -107,7 +110,7 @@
           {
             "BodyParts": [
               "penis",
-              "vagina"
+              "vaginal"
             ]
           },
           {
@@ -118,7 +121,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "penetration.vaginal.deep",
@@ -128,7 +132,7 @@
           {
             "BodyParts": [
               "penis",
-              "vagina"
+              "vaginal"
             ]
           },
           [
@@ -143,7 +147,7 @@
           {
             "BodyParts": [
               "penis",
-              "vagina"
+              "vaginal"
             ]
           },
           {
@@ -154,7 +158,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "penetration.oral.shallow",
@@ -190,7 +195,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "penetration.oral",
@@ -226,7 +232,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "penetration.oral.deep",
@@ -262,7 +269,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "penetration.anal",
@@ -298,7 +306,8 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "penetration.anal.deep",
@@ -334,6 +343,7 @@
           }
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   }
 ]

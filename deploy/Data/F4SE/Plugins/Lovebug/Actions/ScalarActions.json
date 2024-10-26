@@ -14,16 +14,17 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
-    "name": "vibrate.vagina",
+    "name": "vibrate.vaginal",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
-              "vagina"
+              "vaginal"
             ]
           },
           [
@@ -31,7 +32,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "vibrate.clitoral",
@@ -48,7 +50,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "vibrate.anal",
@@ -65,7 +68,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "constrict.penis",
@@ -74,7 +78,7 @@
         "Scalar": [
           {
             "BodyParts": [
-              "constrict"
+              "penis"
             ]
           },
           [
@@ -82,16 +86,17 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
-    "name": "constrict.vagina",
+    "name": "constrict.vaginal",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
-              "constrict"
+              "vaginal"
             ]
           },
           [
@@ -99,7 +104,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "constrict.anal",
@@ -108,7 +114,7 @@
         "Scalar": [
           {
             "BodyParts": [
-              "constrict"
+              "anal"
             ]
           },
           [
@@ -116,16 +122,17 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
-    "name": "inflate.vagina",
+    "name": "inflate.vaginal",
     "control": [
       {
         "Scalar": [
           {
             "BodyParts": [
-              "vagina"
+              "vaginal"
             ]
           },
           [
@@ -133,7 +140,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   },
   {
     "name": "inflate.anal",
@@ -150,6 +158,7 @@
           ]
         ]
       }
-    ]
+    ],
+    "allow_bone_tracking": true
   }
 ]

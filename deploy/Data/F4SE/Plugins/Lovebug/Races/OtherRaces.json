@@ -1,0 +1,38 @@
+[
+  {
+    "form_id": 106505,
+    "name": "Super Mutant",
+    "male": {
+      "name": "Super Mutant",
+      "is_female": false,
+      "genital_bone": {
+        "name": "Penis1",
+        "collision": {
+          "outer_distance": 14.5,
+          "depth": 10.0,
+          "min_stroke": 0.25,
+          "error_tolerance": 0.35
+        }
+      },
+      "oral_bone": {
+        "name": "HEAD",
+        "collision": {
+          "outer_distance": 14.5,
+          "depth": 10.0,
+          "min_stroke": 0.25,
+          "error_tolerance": 0.35
+        }
+      },
+      "anal_bone": {
+        "name": "Pelvis",
+        "collision": {
+          "outer_distance": 14.5,
+          "depth": 10.0,
+          "min_stroke": 0.25,
+          "error_tolerance": 0.35
+        }
+      }
+    },
+    "female": null
+  }
+]

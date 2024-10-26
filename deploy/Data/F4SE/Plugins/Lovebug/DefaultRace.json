@@ -1,0 +1,66 @@
+{
+  "form_id": 0,
+  "name": "Default Race",
+  "male": {
+    "name": "Default Male",
+    "is_female": false,
+    "genital_bone": {
+      "name": "Pelvis",
+      "collision": {
+        "outer_distance": 14.5,
+        "depth": 10.0,
+        "min_stroke": 0.25,
+        "error_tolerance": 0.35
+      }
+    },
+    "oral_bone": {
+      "name": "HEAD",
+      "collision": {
+        "outer_distance": 14.5,
+        "depth": 10.0,
+        "min_stroke": 0.25,
+        "error_tolerance": 0.35
+      }
+    },
+    "anal_bone": {
+      "name": "Pelvis",
+      "collision": {
+        "outer_distance": 14.5,
+        "depth": 10.0,
+        "min_stroke": 0.25,
+        "error_tolerance": 0.35
+      }
+    }
+  },
+  "female": {
+    "name": "Default Female",
+    "is_female": false,
+    "genital_bone": {
+      "name": "Pelvis",
+      "collision": {
+        "outer_distance": 14.5,
+        "depth": 10.0,
+        "min_stroke": 0.25,
+        "error_tolerance": 0.35
+      }
+    },
+    "oral_bone": {
+      "name": "HEAD",
+      "collision": {
+        "outer_distance": 14.5,
+        "depth": 10.0,
+        "min_stroke": 0.25,
+        "error_tolerance": 0.35
+      }
+    },
+    "anal_bone": {
+      "name": "Pelvis",
+      "collision": {
+        "outer_distance": 14.5,
+        "depth": 10.0,
+        "min_stroke": 0.25,
+        "error_tolerance": 0.35
+      }
+    }
+  }
+}
