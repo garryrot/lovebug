@@ -1,6 +1,7 @@
 [
   {
     "name": "cunnilungus",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -15,11 +16,11 @@
           ]
         ]
       }
-    ],
-    "allow_bone_tracking": false
+    ]
   },
   {
     "name": "masturbation",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -50,11 +51,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": false
+    ]
   },
   {
     "name": "footjob",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -84,11 +85,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": false
+    ]
   },
   {
     "name": "penetration.vaginal",
+    "do_bone_tracking": true,
     "control": [
       {
         "Scalar": [
@@ -121,11 +122,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "penetration.vaginal.deep",
+    "do_bone_tracking": true,
     "control": [
       {
         "Scalar": [
@@ -158,11 +159,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "penetration.oral.shallow",
+    "do_bone_tracking": true,
     "control": [
       {
         "Scalar": [
@@ -195,11 +196,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "penetration.oral",
+    "do_bone_tracking": true,
     "control": [
       {
         "Scalar": [
@@ -232,11 +233,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "penetration.oral.deep",
+    "do_bone_tracking": true,
     "control": [
       {
         "Scalar": [
@@ -269,11 +270,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "penetration.anal",
+    "do_bone_tracking": true,
     "control": [
       {
         "Scalar": [
@@ -306,11 +307,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "penetration.anal.deep",
+    "do_bone_tracking": true,
     "control": [
       {
         "Scalar": [
@@ -343,7 +344,6 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   }
 ]

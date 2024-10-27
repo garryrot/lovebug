@@ -1,7 +1,6 @@
 use std::fs::{self};
 
 use bodies::Race;
-use body_parts::*;
 
 use actions::*;
 use races::*;
@@ -13,7 +12,7 @@ use triggers::Trigger;
 
 use serde::Serialize;
 
-use bp_scheduler::config::{actions::*, actuators::ActuatorSettings, client::ClientSettings};
+use bp_scheduler::config::{actuators::ActuatorSettings, client::ClientSettings};
 
 mod actions;
 mod races;

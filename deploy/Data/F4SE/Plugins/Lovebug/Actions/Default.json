@@ -1,6 +1,7 @@
 [
   {
     "name": "vibrate",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -10,11 +11,11 @@
           ]
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "constrict",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -24,11 +25,11 @@
           ]
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "inflate",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -38,11 +39,11 @@
           ]
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "scalar",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -55,11 +56,11 @@
           ]
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "linear",
+    "do_bone_tracking": true,
     "control": [
       {
         "Stroke": [
@@ -72,11 +73,11 @@
           }
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   },
   {
     "name": "oscillate",
+    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -86,7 +87,6 @@
           ]
         ]
       }
-    ],
-    "allow_bone_tracking": true
+    ]
   }
 ]

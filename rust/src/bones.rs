@@ -19,7 +19,7 @@ use crate::{
 };
 
 use bp_scheduler::{
-    actuator::Actuator, config::actuators::ActuatorSettings, dynamic_tracking::*, filter::Filter,
+    actuator::Actuator, config::{actions::Control, actuators::ActuatorSettings}, dynamic_tracking::*, filter::Filter,
 };
 use collision::Collision;
 
@@ -99,7 +99,7 @@ fn get_body_for_actor(
     result
 }
 
-pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec) {
+pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Control) {
     info!("lb_dynamic_tracking Actors={}", actor_vec.Size());
     let actors_in = from_actor_vec(actor_vec);
     let dynamic_settings = DynamicSettings {

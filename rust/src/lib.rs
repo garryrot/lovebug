@@ -4,7 +4,6 @@ use bones::lb_dynamic_tracking;
 use cxx::{CxxString, CxxVector};
 use input::{read_input_duration, read_input_string};
 use lazy_static::lazy_static;
-use tracing_subscriber::field::debug;
 
 use std::sync::{Arc, Mutex};
 use tokio_util::sync::CancellationToken;
@@ -172,7 +171,6 @@ pub fn lb_init() -> bool {
 
         start_outgoing_event_thread(&lb.client);
 
-
         lb.triggers
             .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
         lb.client.scan_for_devices();
@@ -225,19 +223,19 @@ pub fn lb_scene(
             if let Some(scene) = scene {
                 let mut actions = lb.client.get_actions_from_refs(scene.actions);
 
-                let mut do_stroke = false;
+                let mut do_stroke = None;
                 for action in actions.iter_mut() {
-                    debug!("action {}", action.1.name);
-                    if action.1.allow_bone_tracking {
-                        let has_stroker = action.1.control.iter().any(|x| matches!(x, Control::Stroke(_,_)));
-                        do_stroke = has_stroker || do_stroke;
-                        debug!(do_stroke, "allows bone tracking");
+                    if action.1.do_bone_tracking {
+                        let has_stroker = action.1.control.iter().find(|x| matches!(x, Control::Stroke(_,_)));
+                        if has_stroker.is_some() {
+                            do_stroke = has_stroker.cloned();
+                        }
                         action.1.control.retain( |x| matches!(x, Control::Scalar(_,_)));
                     }
                 }
-                debug!(?actions);
-                if do_stroke {
-                    lb_dynamic_tracking(lb, actor_vec);
+                debug!(?do_stroke, ?actions, "allows bone tracking");
+                if let Some(stroke) = do_stroke {
+                    lb_dynamic_tracking(lb, actor_vec, stroke);
                 }
                 return lb.client.dispatch_refs(
                     actions,
