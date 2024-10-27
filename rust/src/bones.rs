@@ -182,18 +182,41 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
                     continue;
                 }
 
-                let player_pelvis = &player_body.as_ref().unwrap().genital_bone.name;
-                let player_head = &player_body.as_ref().unwrap().oral_bone.name;
-                let npc_penis = &npc_body.as_ref().unwrap().genital_bone.name;
+                let player_pelvis = &player_body.as_ref().unwrap().genital_bone;
+                let player_head = &player_body.as_ref().unwrap().oral_bone;
+                let npc_penis = &npc_body.as_ref().unwrap().genital_bone;
 
-                if let Some(penis_collision) = npc_body.as_ref().unwrap().genital_bone.collision {
+                if let Some(oral_collision) = player_head.collision {
+                    // F/M oral collision
+                    // Use collision sphere of player head
+                    let pen_signal = CancellationToken::new();
+                    let cancel_observation = observe_bones(
+                        lb,
+                        &player_actor.get_bone(&player_head.name),
+                        &npc.get_bone(&npc_penis.name),
+                        oral_collision,
+                        sender.clone(),
+                        pen_signal.clone(),
+                        global_cancel.clone(),
+                    );
+                    starting_ramps.push((
+                        pen_signal,
+                        cancel_observation,
+                        vec![TAG_PENIS, TAG_ORAL],
+                        t_id,
+                    ));
+                } else {
+                    error!(?player_head, "actor has no head collision");
+                }
+
+                if let Some(penis_collision) = npc_penis.collision {
                     // F/M genital collision
                     // use collision sphere of male and genital collision
                     let pen_signal = CancellationToken::new();
                     let cancel_observation = observe_bones(
                         lb,
-                        &player_actor.get_bone(player_pelvis),
-                        &npc.get_bone(npc_penis),
+                        &player_actor.get_bone(&player_pelvis.name),
+                        &npc.get_bone(&npc_penis.name),
                         penis_collision,
                         sender.clone(),
                         pen_signal.clone(),
@@ -206,29 +229,8 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
                         t_id,
                     ));
 
-                    // F/M oral collision
-                    // Use collision sphere of male penis and head
-                    let pen_signal = CancellationToken::new();
-                    let cancel_observation = observe_bones(
-                        lb,
-                        &player_actor.get_bone(player_head),
-                        &npc.get_bone(npc_penis),
-                        penis_collision,
-                        sender.clone(),
-                        pen_signal.clone(),
-                        global_cancel.clone(),
-                    );
-                    starting_ramps.push((
-                        pen_signal,
-                        cancel_observation,
-                        vec![TAG_PENIS, TAG_ORAL],
-                        t_id,
-                    ));
                 } else {
-                    error!(
-                        "npc penis collision found {}",
-                        player_body.as_ref().unwrap().name
-                    );
+                    error!(?npc_penis, "actor has no penis collision");
                 }
             }
         } else {

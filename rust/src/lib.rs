@@ -31,11 +31,11 @@ use ::config::*;
 use events::start_outgoing_event_thread;
 use triggers::Triggers;
 
-pub static CONFIG_DIR:      &str = "Data/F4SE/Plugins/Lovebug";
-pub static PATTERNS_DIR:    &str = "Data/F4SE/Plugins/Lovebug/Patterns";
-pub static ACTIONS_DIR:     &str = "Data/F4SE/Plugins/Lovebug/Actions";
-pub static TRIGGERS_DIR:    &str = "Data/F4SE/Plugins/Lovebug/Triggers";
-pub static RACES_DIR:       &str = "Data/F4SE/Plugins/Lovebug/Races";
+pub static CONFIG_DIR:      &str = "Data\\F4SE\\Plugins\\Lovebug";
+pub static PATTERNS_DIR:    &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
+pub static ACTIONS_DIR:     &str = "Data\\F4SE\\Plugins\\Lovebug\\Actions";
+pub static TRIGGERS_DIR:    &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
+pub static RACES_DIR:       &str = "Data\\F4SE\\Plugins\\Lovebug\\Races";
 pub static DEFAULT_RACE:    &str = "DefaultRace.json";
 pub static CLIENT_SETTINGS: &str = "Connection.json";
 pub static DEVICE_SETTINGS: &str = "Devices.json";
@@ -218,11 +218,10 @@ pub fn lb_scene(
 
             let tags = read_input_string(scene_tags);
             let scene = lb.triggers.find_scene(scene_name, &tags);
-            info!("matched scene {:?}", scene);
+            debug!(?scene, "matched scene");
 
             if let Some(scene) = scene {
                 let mut actions = lb.client.get_actions_from_refs(scene.actions);
-
                 let mut do_stroke = None;
                 for action in actions.iter_mut() {
                     if action.1.do_bone_tracking {
@@ -233,7 +232,6 @@ pub fn lb_scene(
                         action.1.control.retain( |x| matches!(x, Control::Scalar(_,_)));
                     }
                 }
-                debug!(?do_stroke, ?actions, "allows bone tracking");
                 if let Some(stroke) = do_stroke {
                     lb_dynamic_tracking(lb, actor_vec, stroke);
                 }

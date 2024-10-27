@@ -21,11 +21,11 @@ pub fn human_race() -> Vec<Race> {
             },
             oral_bone: Bone {
                 name: "HEAD".into(),
-                collision: Some(DEFAULT_COLLISION),
+                collision: None,
             },
             anal_bone: Bone {
                 name: "Anus_01".into(),
-                collision: Some(DEFAULT_COLLISION),
+                collision: None,
             },
         }),
         female: Some(BodyType {
@@ -33,15 +33,20 @@ pub fn human_race() -> Vec<Race> {
             is_female: true,
             genital_bone: Bone {
                 name: "Pelvis_skin".into(),
-                collision: Some(DEFAULT_COLLISION),
+                collision: None,
             },
             oral_bone: Bone {
                 name: "HEAD".into(),
-                collision: Some(DEFAULT_COLLISION),
+                collision: Some(Collision {
+                    outer_distance: 25.0,
+                    depth: 12.0,
+                    min_stroke: 0.25,
+                    error_tolerance: 0.35,
+                }),
             },
             anal_bone: Bone {
                 name: "Pelvis_skin".into(),
-                collision: Some(DEFAULT_COLLISION),
+                collision: None,
             },
         }),
     }]
@@ -65,11 +70,11 @@ pub fn other_races() -> Vec<Race> {
             },
             oral_bone: Bone {
                 name: "HEAD".into(),
-                collision: Some(DEFAULT_COLLISION),
+                collision: None,
             },
             anal_bone: Bone {
                 name: "Pelvis".into(),
-                collision: Some(DEFAULT_COLLISION),
+                collision: None,
             },
         }),
         female: None,
