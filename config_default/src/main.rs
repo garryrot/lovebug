@@ -45,14 +45,16 @@ fn main() {
 
     // Races
     let bodies: Vec<(&str, Vec<bodies::Race>)> = vec![
-        ("HumanRace.json", human_race()),
-        ("OtherRaces.json", other_races()),
+        ("HumanRaceFemale.json", human_race_female_fusion_girl()),
+        ("HumanRaceMale.json", human_race_male_body_talk()),
+        ("OtherRaces.json", ultimate_aaf_patch_races()),
     ];
     for body in bodies {
         let path = format!("../{}/Races/{}", config_dir, body.0);
         write_file(path, body.1);
     }
-    write_file(format!("../{}/DefaultRace.json", config_dir), Race::default());
+    write_file(format!("../{}/DefaultRaceMale.json", config_dir), Race::default());
+    write_file(format!("../{}/DefaultRaceFemale.json", config_dir), Race::default());
     write_file(format!("../{}/Connection.json", config_dir) , ClientSettings::default());
     write_file(format!("../{}/Devices.json", config_dir) , ActuatorSettings::default());
 }

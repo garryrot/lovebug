@@ -36,15 +36,17 @@ pub static PATTERNS_DIR:    &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
 pub static ACTIONS_DIR:     &str = "Data\\F4SE\\Plugins\\Lovebug\\Actions";
 pub static TRIGGERS_DIR:    &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
 pub static RACES_DIR:       &str = "Data\\F4SE\\Plugins\\Lovebug\\Races";
-pub static DEFAULT_RACE:    &str = "DefaultRace.json";
+
+pub static DEFAULT_RACE_MALE:   &str = "DefaultRaceMale.json";
+pub static DEFAULT_RACE_FEMALE: &str = "DefaultRaceFemale.json";
 pub static CLIENT_SETTINGS: &str = "Connection.json";
 pub static DEVICE_SETTINGS: &str = "Devices.json";
 
 mod bones;
-mod bridge;
 mod events;
 mod input;
 mod logging;
+pub mod bridge;
 
 #[derive(Debug)]
 pub struct Lovebug {
@@ -53,7 +55,8 @@ pub struct Lovebug {
     dynamic_task: Option<CancellationToken>,
     tracking_counter: i32,
     races: Vec<Race>,
-    default_race: Option<Race>
+    default_race_male: Option<Race>,
+    default_race_female: Option<Race>
 }
 
 impl Lovebug {
@@ -101,8 +104,8 @@ impl Lovebug {
 
     pub fn read_races(&mut self) {
         self.races = read_config_dir(RACES_DIR.into());
-        let default_race : Race = read_or_default(CONFIG_DIR, DEFAULT_RACE);
-        self.default_race = Some(default_race);
+        self.default_race_male = Some(read_or_default(CONFIG_DIR, DEFAULT_RACE_MALE));
+        self.default_race_female = Some(read_or_default(CONFIG_DIR, DEFAULT_RACE_FEMALE));
     }
 }
 
@@ -164,15 +167,15 @@ pub fn lb_init() -> bool {
             dynamic_task: None,
             tracking_counter: 0,
             races: vec![],
-            default_race: None,
+            default_race_male: None,
+            default_race_female: None,
         };
         lb.client.read_actions(ACTIONS_DIR);
         lb.read_races();
 
         start_outgoing_event_thread(&lb.client);
 
-        lb.triggers
-            .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
+        lb.triggers.load_triggers(read_config_dir(TRIGGERS_DIR.into()));
         lb.client.scan_for_devices();
 
         guard.replace(lb);

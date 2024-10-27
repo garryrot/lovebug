@@ -1,11 +1,11 @@
 [
   {
-    "form_id": 106505,
-    "name": "Super Mutant",
+    "form_id": 79686,
+    "name": "Body Talk",
     "sex": "Male",
-    "genital_bone": "Penis1",
+    "genital_bone": "Penis_01",
     "oral_bone": "HEAD",
-    "anal_bone": "Pelvis",
+    "anal_bone": "Anus_01",
     "genital_collision": {
       "outer_distance": 14.5,
       "depth": 10.0,
@@ -13,8 +13,8 @@
       "error_tolerance": 0.35
     },
     "oral_collision": {
-      "outer_distance": 14.5,
-      "depth": 10.0,
+      "outer_distance": 25.0,
+      "depth": 12.0,
       "min_stroke": 0.25,
       "error_tolerance": 0.35
     }

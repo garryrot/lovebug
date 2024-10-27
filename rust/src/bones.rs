@@ -2,7 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use buttplug::core::message::ActuatorType;
 use config::{
-    bodies::{BodyType, Race},
+    bodies::Race,
     body_parts::*,
 };
 use ffi_bones::{ActorVec, GetDistance};
@@ -22,6 +22,8 @@ use bp_scheduler::{
     actuator::Actuator, config::{actions::Control, actuators::ActuatorSettings}, dynamic_tracking::*, filter::Filter,
 };
 use collision::Collision;
+
+use config::bodies::Sex as RaceSex;
 
 #[cxx::bridge]
 pub mod ffi_bones {
@@ -69,9 +71,8 @@ pub enum TrackingState {
 
 fn get_body_for_actor(
     actor: &UnsafeActorPtr,
-    races: &Vec<Race>,
-    default_race: &Race,
-) -> Option<BodyType> {
+    races: &Vec<Race>
+) -> Option<Race> {
     let race_form: UnsafeTESFormPtr = actor.get_race().into();
     let race_id = race_form.get_form_id();
     let sex = actor.get_sex();
@@ -82,21 +83,23 @@ fn get_body_for_actor(
         race_id
     );
 
-    let mut chosen_race = default_race.clone();
+    let actor_sex = match actor.get_sex() {
+        Sex::Female => RaceSex::Female,
+        Sex::Male => RaceSex::Male,
+        _ => RaceSex::None
+    };
+    
+    let mut chosen_race = None;
     for race in races {
-        if race.form_id == race_id {
-            chosen_race = race.clone();
-            debug!("found race {}", chosen_race.name);
+        if race.form_id == race_id &&
+           race.sex == actor_sex
+        {
+            chosen_race = Some(race.clone());
+            debug!("found race {:?}", chosen_race);
         }
     }
-    let mut result = None;
-    if sex == Sex::Female {
-        result = chosen_race.female;
-    } else if sex == Sex::Male {
-        result = chosen_race.male
-    }
-    debug!("body: {:?}", result);
-    result
+    debug!("body: {:?}", chosen_race);
+    chosen_race
 }
 
 pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Control) {
@@ -130,8 +133,8 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
         return;
     };
 
-    if lb.default_race.is_none() {
-        error!("default race is not defined, does DefaultRace.json exist?");
+    if lb.default_race_female.is_none() || lb.default_race_male.is_none() {
+        error!("default race is not defined");
         return;
     }
 
@@ -161,12 +164,13 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
     let player_actor = player_actor_opt.unwrap();
     let mut t_id = 0;
     if player_actor.get_sex() == Sex::Female {
-        let player_body =
-            get_body_for_actor(player_actor, &lb.races, lb.default_race.as_ref().unwrap());
-        if player_body.is_none() {
-            error!("player body not found");
-            return;
-        }
+        let player_body = match get_body_for_actor(player_actor, &lb.races) {
+            Some(race) => race,
+            None => {
+                error!(?lb.default_race_female, "player body not found using default");
+                lb.default_race_female.clone().unwrap()
+            },
+        };
 
         // starts bone threads that monitor if any bone penetrates the player vaginally
         // (anal is simply included due to lack of distance, maybe this will be differentiated
@@ -175,25 +179,26 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
             for npc in npc_male_actors {
                 t_id += 1;
 
-                let npc_body =
-                    get_body_for_actor(npc, &lb.races, lb.default_race.as_ref().unwrap());
-                if npc_body.is_none() {
-                    error!("did not find body for npc, skipping...");
-                    continue;
-                }
+                let npc_body = match get_body_for_actor(npc, &lb.races ) {
+                    Some(race) => race,
+                    None => { 
+                        error!(?lb.default_race_male, "player body not found using default");
+                        lb.default_race_male.clone().unwrap() 
+                    },
+                };
 
-                let player_pelvis = &player_body.as_ref().unwrap().genital_bone;
-                let player_head = &player_body.as_ref().unwrap().oral_bone;
-                let npc_penis = &npc_body.as_ref().unwrap().genital_bone;
+                let player_pelvis = &player_body.genital_bone;
+                let player_head = &player_body.oral_bone;
+                let npc_penis = &npc_body.genital_bone;
 
-                if let Some(oral_collision) = player_head.collision {
+                if let Some(oral_collision) = player_body.oral_collision {
                     // F/M oral collision
                     // Use collision sphere of player head
                     let pen_signal = CancellationToken::new();
                     let cancel_observation = observe_bones(
                         lb,
-                        &player_actor.get_bone(&player_head.name),
-                        &npc.get_bone(&npc_penis.name),
+                        &player_actor.get_bone(player_head),
+                        &npc.get_bone(npc_penis),
                         oral_collision,
                         sender.clone(),
                         pen_signal.clone(),
@@ -209,14 +214,14 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
                     error!(?player_head, "actor has no head collision");
                 }
 
-                if let Some(penis_collision) = npc_penis.collision {
+                if let Some(penis_collision) = npc_body.genital_collision {
                     // F/M genital collision
                     // use collision sphere of male and genital collision
                     let pen_signal = CancellationToken::new();
                     let cancel_observation = observe_bones(
                         lb,
-                        &player_actor.get_bone(&player_pelvis.name),
-                        &npc.get_bone(&npc_penis.name),
+                        &player_actor.get_bone(player_pelvis),
+                        &npc.get_bone(npc_penis),
                         penis_collision,
                         sender.clone(),
                         pen_signal.clone(),
@@ -316,6 +321,14 @@ fn observe_bones(
     let bone1 = a1_bone.clone();
     let bone2 = a2_bone.clone();
     let cancellation_token = cancel_me.clone();
+    if bone1.ptr.is_null() {
+        error!( bone1.name, "bone null, stopping");
+        return cancellation_token;
+    }
+    if bone2.ptr.is_null() {
+        error!( bone2.name, "bone null, stopping");
+        return cancellation_token;
+    }
 
     let t_id = lb.tracking_counter;
     lb.tracking_counter += 1;

@@ -1,18 +1,28 @@
 use bp_scheduler::dynamic_tracking::collision::Collision;
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum Sex {
+    Male,
+    Female,
+    None
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Race {
     pub form_id: u32,
     pub name: String,
-    pub male: Option<BodyType>,
-    pub female: Option<BodyType>,
+    pub sex: Sex,
+    pub genital_bone: String,
+    pub oral_bone: String,
+    pub anal_bone: String,
+    pub genital_collision: Option<Collision>,
+    pub oral_collision: Option<Collision>
 }
 
 impl Default for Race {
     fn default() -> Self {
-        let col = Collision {
+        let collision = Collision {
             outer_distance: 14.5,
             depth: 10.0,
             min_stroke: 0.25,
@@ -21,53 +31,52 @@ impl Default for Race {
         Race {
             form_id: 0,
             name: "Default Race".into(),
-            male: Some(BodyType {
-                name: "Default Male".into(),
-                is_female: false,
-                genital_bone: Bone {
-                    name: "Pelvis".into(),
-                    collision: Some(col),
-                },
-                oral_bone: Bone {
-                    name: "HEAD".into(),
-                    collision: Some(col),
-                },
-                anal_bone: Bone {
-                    name: "Pelvis".into(),
-                    collision: Some(col),
-                },
-            }),
-            female: Some(BodyType {
-                name: "Default Female".into(),
-                is_female: false,
-                genital_bone: Bone {
-                    name: "Pelvis".into(),
-                    collision: Some(col),
-                },
-                oral_bone: Bone {
-                    name: "HEAD".into(),
-                    collision: Some(col),
-                },
-                anal_bone: Bone {
-                    name: "Pelvis".into(),
-                    collision: Some(col),
-                },
-            }),
+            sex: Sex::Female,
+            genital_bone: "Pelvis".into(),
+            oral_bone: "HEAD".into(),
+            anal_bone: "Pelvis".into(),
+            genital_collision: Some(collision),
+            oral_collision: Some(collision),
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct BodyType {
-    pub name: String,
-    pub is_female: bool,
-    pub genital_bone: Bone,
-    pub oral_bone: Bone,
-    pub anal_bone: Bone
-}
+impl Race {
+    pub fn female_default() -> Race {
+        let collision = Collision {
+            outer_distance: 14.5,
+            depth: 10.0,
+            min_stroke: 0.25,
+            error_tolerance: 0.35,
+        };
+        Race {
+            form_id: 0,
+            name: "Default Female".into(),
+            sex: Sex::Female,
+            genital_bone: "Pelvis".into(),
+            oral_bone: "HEAD".into(),
+            anal_bone: "Pelvis".into(),
+            genital_collision: Some(collision),
+            oral_collision: Some(collision),
+        }
+    }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Bone {
-    pub name: String,
-    pub collision: Option<Collision>
+    pub fn male_default() -> Race {
+        let collision = Collision {
+            outer_distance: 14.5,
+            depth: 10.0,
+            min_stroke: 0.25,
+            error_tolerance: 0.35,
+        };
+        Race {
+            form_id: 0,
+            name: "Default Male".into(),
+            sex: Sex::Male,
+            genital_bone: "Pelvis".into(),
+            oral_bone: "HEAD".into(),
+            anal_bone: "Pelvis".into(),
+            genital_collision: Some(collision),
+            oral_collision: Some(collision),
+        }
+    }
 }
