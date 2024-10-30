@@ -1,4 +1,4 @@
-use bp_scheduler::config::actions::{ActionRef, Strength};
+use bp_scheduler::config::actions::{ActionRef, Variable, Stren};
 use config::{triggers::Trigger, Scene, SceneId, SceneTags};
 
 pub fn default_trigger() -> Vec<Trigger> {
@@ -8,17 +8,16 @@ pub fn default_trigger() -> Vec<Trigger> {
         tags: SceneTags::Any,
         actions: vec![
             ActionRef::new(
-                "vibrate",
-                Strength::RandomFunscript(50, vec!["Blowjob".into(), "Deepthroat".into()]),
+                "vibrate", Stren::Variable(Variable::BoneTrackingRate),
             ),
             ActionRef::new(
-                "linear", Strength::Constant(50)
+                "linear", Stren::Variable(Variable::BoneTrackingRate)
             ),
             ActionRef::new(
-                "constrict", Strength::Constant(50)
+                "oscillate", Stren::Variable(Variable::BoneTrackingRate)
             ),
             ActionRef::new(
-                "oscillate", Strength::Constant(50)
+                "constrict", Stren::Variable(Variable::BoneTrackingDepth)
             ),
         ],
     })];

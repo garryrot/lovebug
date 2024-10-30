@@ -8,31 +8,25 @@
         {
           "action": "vibrate",
           "strength": {
-            "RandomFunscript": [
-              50,
-              [
-                "Blowjob",
-                "Deepthroat"
-              ]
-            ]
+            "Variable": "BoneTrackingRate"
           }
         },
         {
           "action": "linear",
           "strength": {
-            "Constant": 50
-          }
-        },
-        {
-          "action": "constrict",
-          "strength": {
-            "Constant": 50
+            "Variable": "BoneTrackingRate"
           }
         },
         {
           "action": "oscillate",
           "strength": {
-            "Constant": 50
+            "Variable": "BoneTrackingRate"
+          }
+        },
+        {
+          "action": "constrict",
+          "strength": {
+            "Variable": "BoneTrackingDepth"
           }
         }
       ]

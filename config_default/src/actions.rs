@@ -138,6 +138,7 @@ pub fn penetration_actions() -> Vec<Action> {
         },
         Action {
             name: "masturbation".into(),
+            do_bone_tracking: false,
             control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into()]),
@@ -157,10 +158,10 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-            do_bone_tracking: false
         },
         Action {
             name: "footjob".into(),
+            do_bone_tracking: false,
             control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into()]),
@@ -176,7 +177,6 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-            do_bone_tracking: false
         },
         Action::new_with_bone(
             "penetration.vaginal",

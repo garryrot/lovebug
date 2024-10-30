@@ -1,25 +1,25 @@
-use std::{sync::Arc, time::Duration};
-
-use buttplug::core::message::ActuatorType;
-use config::{
-    bodies::Race,
-    body_parts::*,
-};
-use ffi_bones::{ActorVec, GetDistance};
+use std::{sync::{atomic::{AtomicI64, Ordering}, Arc}, time::Duration};
 use tokio::{
     sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
     time::{sleep, Instant},
 };
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, error, info, info_span, Instrument};
+use tracing::{debug, error, info, info_span, trace, Instrument};
 
-use crate::{
-    bridge::{ffi_bridge::*, UnsafeActorPtr, UnsafeAvObjectPtr, UnsafeTESFormPtr},
-    Lovebug,
-};
-
+use buttplug::core::message::ActuatorType;
 use bp_scheduler::{
     actuator::Actuator, config::{actions::Control, actuators::ActuatorSettings}, dynamic_tracking::*, filter::Filter,
+};
+
+use config::{
+    bodies::Race,
+    body_parts::*,
+};
+
+use ffi_bones::*;
+use crate::{
+    bridge::{ffi_bridge::*, *},
+    Lovebug,
 };
 use collision::Collision;
 
@@ -56,6 +56,30 @@ impl UnsafeAvObjectPtr {
             f32::MAX
         } else {
             unsafe { GetDistance(self.ptr, other.ptr) }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct DynamicTrackingHandle {
+    pub cancel: Option<CancellationToken>,
+    pub cur_avg_ms: Arc<AtomicI64>,
+    pub cur_depth: Arc<AtomicI64>
+}
+
+impl DynamicTrackingHandle {
+    pub fn reset(&mut self) {
+        self.cur_avg_ms.store(0, Ordering::Relaxed);
+        self.cur_depth.store(0, Ordering::Relaxed);
+    }
+}
+
+impl Default for DynamicTrackingHandle {
+    fn default() -> Self {
+        Self { 
+            cancel: None, 
+            cur_avg_ms: Arc::new(AtomicI64::new(0)), 
+            cur_depth: Arc::new(AtomicI64::new(0))
         }
     }
 }
@@ -102,24 +126,16 @@ fn get_body_for_actor(
     chosen_race
 }
 
-pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Control) {
+pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, _control: Control) {
     info!("lb_dynamic_tracking Actors={}", actor_vec.Size());
     let actors_in = from_actor_vec(actor_vec);
-    let dynamic_settings = DynamicSettings {
-        move_at_start: true,
-        min_resolution_ms: 80,
-        min_duration_ms: 200,
-        default_stroke_ms: 400,
-        default_stroke_in: 0.0,
-        default_stroke_out: 1.0,
-        stroke_window_ms: 2_000,
-    };
 
-    if let Some(token) = lb.dynamic_task.take() {
+    if let Some(token) = lb.dynamic_task.cancel.take() {
         token.cancel();
     }
     let global_cancel = CancellationToken::new();
-    lb.dynamic_task = Some(global_cancel.clone());
+    lb.dynamic_task.reset();
+    lb.dynamic_task.cancel = Some(global_cancel.clone());
 
     let (sender, receiver) = unbounded_channel::<TrackingSignal>();
 
@@ -202,7 +218,7 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
                         oral_collision,
                         sender.clone(),
                         pen_signal.clone(),
-                        global_cancel.clone(),
+                        global_cancel.clone()
                     );
                     starting_ramps.push((
                         pen_signal,
@@ -225,7 +241,7 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
                         penis_collision,
                         sender.clone(),
                         pen_signal.clone(),
-                        global_cancel.clone(),
+                        global_cancel.clone()
                     );
                     starting_ramps.push((
                         pen_signal,
@@ -239,12 +255,12 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
                 }
             }
         } else {
-            error!("only female actors TODO");
+            error!("F/F not implemented yet");
         }
         // any actor penetration player oral
         //  -> penis, oral
     } else {
-        error!("player male TODO");
+        error!("player male not implemented yet");
         // player penetrates vaginal
         //   -> penis, vaginal, anal
 
@@ -252,8 +268,10 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
         //   -> penis, oral
     }
 
+    let tracking_handle = lb.dynamic_task.clone();
     if !starting_ramps.is_empty() {
-        let setting_clone = lb.client.device_settings.clone();
+        let dynamic_settings_clone = lb.dynamic_settings.clone();
+        let actuator_settings_clone = lb.client.device_settings.clone();
         lb.client.runtime.spawn(async move {
             let mut winner = None;
             while winner.is_none() {
@@ -273,11 +291,13 @@ pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, control: Cont
                 }
             }
             start_control_thread(
-                dynamic_settings,
-                setting_clone,
+                dynamic_settings_clone,
+                actuator_settings_clone,
                 &winner.unwrap().2,
                 receiver,
                 enabled_position_actuators,
+                tracking_handle.clone().cur_avg_ms,
+                tracking_handle.cur_depth
             );
         });
     }
@@ -289,6 +309,8 @@ fn start_control_thread(
     body_parts: &[&str],
     receiver: UnboundedReceiver<TrackingSignal>,
     actuators: Vec<Arc<Actuator>>,
+    cur_avg_ms: Arc<AtomicI64>,
+    cur_depth: Arc<AtomicI64>
 ) {
     let parts = body_parts
         .iter()
@@ -298,10 +320,12 @@ fn start_control_thread(
         let (_, actuators) = Filter::from_actuators(actuator_settings, actuators)
             .with_body_parts(&parts)
             .result();
-        let dynamic = DynamicTracking {
+        let mut dynamic = DynamicTracking {
             settings: dynamic_settings,
             signals: receiver,
             actuators,
+            cur_avg_ms,
+            cur_depth,
         };
         info!(?dynamic.settings, ?parts, "control task started with settings");
         let _ = dynamic.track_mirror().await;
@@ -315,7 +339,7 @@ fn observe_bones(
     collision_sphere: Collision,
     sender: UnboundedSender<TrackingSignal>,
     first_pen: CancellationToken,
-    global_cancel: CancellationToken,
+    global_cancel: CancellationToken
 ) -> CancellationToken {
     let cancel_me = CancellationToken::new();
     let bone1 = a1_bone.clone();
@@ -330,6 +354,9 @@ fn observe_bones(
         return cancellation_token;
     }
 
+    let initial_timeout_ms = lb.dynamic_settings.initial_timeout_ms;
+    let sample_ms = lb.dynamic_settings.sample_ms;
+
     let t_id = lb.tracking_counter;
     lb.tracking_counter += 1;
     lb.client.runtime.spawn(async move {
@@ -339,7 +366,7 @@ fn observe_bones(
                 "observation task {} started. bone1={} - bone2={}. collision_sphere={:?}",
                 t_id, bone1.name, bone2.name, collision_sphere
             );
-            sleep(Duration::from_millis(1200)).await;
+            sleep(Duration::from_millis(initial_timeout_ms)).await;
             let mut last_dist = f32::MAX;
             let mut most_outward = f32::MAX;
             let mut most_inward = f32::MAX;
@@ -348,7 +375,7 @@ fn observe_bones(
             while !cancellation_token.is_cancelled() && !global_cancel.is_cancelled() {
                 let dist = bone1.get_distance(&bone2);
                 let diff = last_dist - dist;
-                debug!("dist = {}", dist);
+                trace!("dist = {}", dist);
                 match state {
                     TrackingState::Init => {
                         if dist < collision_sphere.outer_distance {
@@ -419,7 +446,7 @@ fn observe_bones(
                 };
 
                 last_dist = dist;
-                sleep(Duration::from_millis(50)).await;
+                sleep(Duration::from_millis(sample_ms)).await;
             }
             if global_cancel.is_cancelled() {
                 let _ = sender.send(TrackingSignal::Stop);
@@ -446,7 +473,7 @@ pub fn lb_dynamic_stop() {
     info!("lb_dynamic_stop");
     Lovebug::run_static(
         |lb| {
-            if let Some(token) = lb.dynamic_task.take() {
+            if let Some(token) = lb.dynamic_task.cancel.take() {
                 token.cancel();
             }
         },

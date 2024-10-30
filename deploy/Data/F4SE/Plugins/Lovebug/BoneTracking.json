@@ -1,0 +1,11 @@
+{
+  "move_at_start": true,
+  "min_resolution_ms": 80,
+  "stroke_min_ms": 200,
+  "stroke_max_ms": 2000,
+  "sample_ms": 50,
+  "initial_timeout_ms": 800,
+  "stroke_default_ms": 400,
+  "stroke_default_in": 0.0,
+  "stroke_default_out": 1.0
+}

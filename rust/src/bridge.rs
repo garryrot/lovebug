@@ -29,9 +29,7 @@ pub mod ffi_bridge {
     unsafe extern "C++" {
         include!("Bridge.h");
         pub unsafe fn GetFormID(form: *const TESForm) -> u32;
-
         pub unsafe fn AsForm(form: *const TESRace) -> *const TESForm;
-
         pub unsafe fn IsPlayer(actor: *const Actor) -> bool;
         pub unsafe fn GetSex(actor: *const Actor) -> Sex;
         pub unsafe fn GetRace(actor: *const Actor) -> *const TESRace;

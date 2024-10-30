@@ -13,14 +13,14 @@ pub fn pb70_triggers() -> Vec<Trigger> {
         scene(
             "Blowjob",
             SceneId::Exact(pb70_name("Blowjob")),
-            vec![ActionRef::new("penetration.oral", Strength::Constant(80))],
+            vec![ActionRef::new("penetration.oral", Stren::Constant(80))],
         ),
         scene(
             "Cowgirl",
             SceneId::Exact(pb70_name("Cowgirl")),
             vec![ActionRef::new(
                 "penetration.vaginal",
-                Strength::Constant(70),
+                Stren::Constant(70),
             )],
         ),
         scene(
@@ -28,7 +28,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Cowgirl Sequence 1")),
             vec![ActionRef::new(
                 "penetration.vaginal",
-                Strength::Constant(25),
+                Stren::Constant(25),
             )],
         ),
         scene(
@@ -36,7 +36,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Cowgirl Sequence 2")),
             vec![ActionRef::new(
                 "penetration.vaginal",
-                Strength::Constant(40),
+                Stren::Constant(40),
             )],
         ),
         scene(
@@ -44,7 +44,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Cowgirl Sequence 3")),
             vec![ActionRef::new(
                 "penetration.vaginal.deep",
-                Strength::Constant(60),
+                Stren::Constant(60),
             )],
         ),
         scene(
@@ -52,7 +52,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Cowgirl Sequence 4")),
             vec![ActionRef::new(
                 "penetration.vaginal.deep",
-                Strength::Constant(70),
+                Stren::Constant(70),
             )],
         ),
         scene(
@@ -60,16 +60,16 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Cowgirl Sequence 5")),
             vec![ActionRef::new(
                 "penetration.vaginal.deep",
-                Strength::Constant(90),
+                Stren::Constant(90),
             )],
         ),
         scene(
             "Cunnilungus",
             SceneId::Exact(pb70_name("Cowgirl Sequence 5")),
             vec![
-                ActionRef::new("cunnilungus", Strength::Constant(60)),
-                ActionRef::new("vibrate.nipple", Strength::Constant(20)),
-                ActionRef::new("masturbation", Strength::Constant(30)),
+                ActionRef::new("cunnilungus", Stren::Constant(60)),
+                ActionRef::new("vibrate.nipple", Stren::Constant(20)),
+                ActionRef::new("masturbation", Stren::Constant(30)),
             ],
         ),
         scene(
@@ -77,30 +77,30 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Doggy")),
             vec![ActionRef::new(
                 "penetration.vaginal",
-                Strength::Constant(70),
+                Stren::Constant(70),
             )],
         ),
         scene(
             "Footjob",
             SceneId::Exact(pb70_name("Footjob")),
-            vec![ActionRef::new("footjob", Strength::Constant(25))],
+            vec![ActionRef::new("footjob", Stren::Constant(25))],
         ),
         scene(
             "Footjob Fast",
             SceneId::Exact(pb70_name("Footjob Fast")),
-            vec![ActionRef::new("footjob", Strength::Constant(75))],
+            vec![ActionRef::new("footjob", Stren::Constant(75))],
         ),
         scene(
             "Impregnate Cowgirl Kiss",
             SceneId::Exact(pb70_name("Impregnate Cowgirl Kiss")),
-            vec![ActionRef::new("constrict.penis", Strength::Constant(20))],
+            vec![ActionRef::new("constrict.penis", Stren::Constant(20))],
         ),
         scene(
             "Impregnate Cowgirl Start Fucking",
             SceneId::Exact(pb70_name("Impregnate Cowgirl Start Fucking")),
             vec![ActionRef::new(
                 "penetration.vaginal",
-                Strength::Constant(30),
+                Stren::Constant(30),
             )],
         ),
         scene(
@@ -108,7 +108,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Impregnate Cowgirl Fuck Faster and Deeper")),
             vec![ActionRef::new(
                 "penetration.vaginal.deep",
-                Strength::Constant(50),
+                Stren::Constant(50),
             )],
         ),
         scene(
@@ -116,7 +116,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Impregnate Cowgirl Thrust Into Her")),
             vec![ActionRef::new(
                 "penetration.vaginal.deep",
-                Strength::Constant(75),
+                Stren::Constant(75),
             )],
         ),
         scene(
@@ -124,36 +124,36 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Impregnate Cowgirl Orgasm")),
             vec![ActionRef::new(
                 "penetration.vaginal.deep",
-                Strength::Constant(100),
+                Stren::Constant(100),
             )],
         ),
         scene(
             "Impregnate Missionary Stage Kiss",
             SceneId::Exact(pb70_name("Impregnate Missionary Stage Kiss")),
             vec![
-                ActionRef::new("constrict.penis", Strength::Constant(20)),
-                ActionRef::new("constrict.vaginal", Strength::Constant(20)),
+                ActionRef::new("constrict.penis", Stren::Constant(20)),
+                ActionRef::new("constrict.vaginal", Stren::Constant(20)),
             ],
         ),
         scene(
             "Impregnate Missionary Stage Grab His Back",
             SceneId::Exact(pb70_name("Impregnate Missionary Stage Grab His Back")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(60))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(60))],
         ),
         scene(
             "Impregnate Missionary Stage Grab His Back 2",
             SceneId::Exact(pb70_name("Impregnate Missionary Stage Grab His Back 2")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(70))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(70))],
         ),
         scene(
             "Impregnate Missionary Stage Grab His Back 3",
             SceneId::Exact(pb70_name("Impregnate Missionary Stage Grab His Back 3")),
-            vec![ActionRef::new("penetration.vaginal.deep", Strength::Constant(75))],
+            vec![ActionRef::new("penetration.vaginal.deep", Stren::Constant(75))],
         ),
         scene(
             "Impregnate Missionary Stage Grab His Back 4",
             SceneId::Exact(pb70_name("Impregnate Missionary Stage Grab His Back 4")),
-            vec![ActionRef::new("penetration.vaginal.deep", Strength::Constant(100))],
+            vec![ActionRef::new("penetration.vaginal.deep", Stren::Constant(100))],
         ),
         scene(
             "Kissing",
@@ -163,89 +163,89 @@ pub fn pb70_triggers() -> Vec<Trigger> {
         scene(
             "Laying Blowjob",
             SceneId::Exact(pb70_name("Laying Blowjob")),
-            vec![ActionRef::new("penetration.oral", Strength::Constant(70))],
+            vec![ActionRef::new("penetration.oral", Stren::Constant(70))],
         ),
         scene(
             "Leg Wrap Cunnilungus",
             SceneId::Exact(pb70_name("Leg Wrap Cunnilungus")),
-            vec![ActionRef::new("cunnilungus", Strength::Constant(70))],
+            vec![ActionRef::new("cunnilungus", Stren::Constant(70))],
         ),
         scene(
             "Lotus",
             SceneId::Exact(pb70_name("Lotus")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(60))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(60))],
         ),
         scene(
             "Missionary",
             SceneId::Exact(pb70_name("Missionary")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(60))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(60))],
         ),
         scene(
             "Missionary Grind (tease)",
             SceneId::Exact(pb70_name("Missionary Grind (tease)")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(10))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(10))],
         ),
         scene(
             "Missionary Grind 2",
             SceneId::Exact(pb70_name("Missionary Grind 2")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(40))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(40))],
         ),
         scene(
             "Missionary Grind 3",
             SceneId::Exact(pb70_name("Missionary Grind 3")),
-            vec![ActionRef::new("penetration.vaginal.deep", Strength::Constant(60))],
+            vec![ActionRef::new("penetration.vaginal.deep", Stren::Constant(60))],
         ),
         scene(
             "Missionary Grind 4",
             SceneId::Exact(pb70_name("Missionary Grind 4")),
-            vec![ActionRef::new("penetration.vaginal.deep", Strength::Constant(80))],
+            vec![ActionRef::new("penetration.vaginal.deep", Stren::Constant(80))],
         ),
         scene(
             "Missionary Sequence Stage 1",
             SceneId::Exact(pb70_name("Missionary Sequence Stage 1")),
-            vec![ActionRef::new("masturbation", Strength::Constant(20))],
+            vec![ActionRef::new("masturbation", Stren::Constant(20))],
         ),
         scene(
             "Missionary Sequence Stage 2",
             SceneId::Exact(pb70_name("Missionary Sequence Stage 2")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(60))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(60))],
         ),
         scene(
             "Missionary Sequence Stage 3", // Is this correct?
             SceneId::Exact(pb70_name("Missionary Sequence Stage 2")),
-            vec![ActionRef::new("penetration.vaginal.deep", Strength::Constant(80))],
+            vec![ActionRef::new("penetration.vaginal.deep", Stren::Constant(80))],
         ),
         scene(
             "Mistress",
             SceneId::Exact(pb70_name("Mistress")),
-            vec![ActionRef::new("masturbation", Strength::Constant(85))],
+            vec![ActionRef::new("masturbation", Stren::Constant(85))],
         ),
         scene(
             "Mistress 2",
             SceneId::Exact(pb70_name("Mistress 2")),
-            vec![ActionRef::new("masturbation", Strength::Constant(60))],
+            vec![ActionRef::new("masturbation", Stren::Constant(60))],
         ),
         scene(
             "Mistress 3",
             SceneId::Exact(pb70_name("Mistress 3")),
-            vec![ActionRef::new("cunnilungus", Strength::Constant(50))],
+            vec![ActionRef::new("cunnilungus", Stren::Constant(50))],
         ),
         scene(
             "Mistress 4",
             SceneId::Exact(pb70_name("Mistress 4")),
-            vec![ActionRef::new("penetration.vaginal", Strength::Constant(75))],
+            vec![ActionRef::new("penetration.vaginal", Stren::Constant(75))],
         ),
         scene(
             "Mistress 5",
             SceneId::Exact(pb70_name("Mistress 5")),
-            vec![ActionRef::new("penetration.vaginal.deep", Strength::Constant(80))],
+            vec![ActionRef::new("penetration.vaginal.deep", Stren::Constant(80))],
         ),
         scene(
             "Pit Doggy 01 (fingering, kissing)",
             SceneId::Exact(pb70_name("Pit Doggy 01")),
             vec![
                 ActionRef::new("cunnilungus", 
-                Strength::Constant(40))
+                Stren::Constant(40))
             ],
         ),
         scene(
@@ -253,7 +253,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Pit Doggy 02")),
             vec![
                 ActionRef::new("cunnilungus", 
-                Strength::Constant(60))
+                Stren::Constant(60))
             ],
         ),
         scene(
@@ -261,7 +261,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Pit Doggy 03")),
             vec![
                 ActionRef::new("penetration.vaginal", 
-                Strength::Constant(60))
+                Stren::Constant(60))
             ],
         ),
         scene(
@@ -269,7 +269,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Pit Doggy 04")),
             vec![
                 ActionRef::new("penetration.vaginal.deep", 
-                Strength::Constant(60))
+                Stren::Constant(60))
             ],
         ),
         scene(
@@ -277,7 +277,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Pit Doggy 05")),
             vec![
                 ActionRef::new("penetration.vaginal.deep", 
-                Strength::Constant(80))
+                Stren::Constant(80))
             ],
         ),
         scene(
@@ -285,7 +285,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Pit Doggy 06")),
             vec![
                 ActionRef::new("masturbation", 
-                Strength::Constant(80))
+                Stren::Constant(80))
             ],
         ),
         scene(
@@ -293,7 +293,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Prone Bone 01")),
             vec![
                 ActionRef::new("masturbation", 
-                Strength::Constant(50))
+                Stren::Constant(50))
             ],
         ),
         scene(
@@ -301,7 +301,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Prone Bone 02")),
             vec![
                 ActionRef::new("penetration.vaginal", 
-                Strength::Constant(70))
+                Stren::Constant(70))
             ],
         ),
         scene(
@@ -309,7 +309,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Prone Bone 03")),
             vec![
                 ActionRef::new("penetration.vaginal.deep", 
-                Strength::Constant(90))
+                Stren::Constant(90))
             ],
         ),
         scene(
@@ -317,7 +317,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Prone Bone Anal 02")),
             vec![
                 ActionRef::new("penetration.anal", 
-                Strength::Constant(70))
+                Stren::Constant(70))
             ],
         ),
         scene(
@@ -325,7 +325,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Prone Bone Anal 03")),
             vec![
                 ActionRef::new("penetration.anal.deep", 
-                Strength::Constant(90))
+                Stren::Constant(90))
             ],
         ),
         scene(
@@ -333,7 +333,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Romantic Cowgirl")),
             vec![
                 ActionRef::new("penetration.vaginal", 
-                Strength::Constant(70))
+                Stren::Constant(70))
             ],
         ),
     
@@ -348,7 +348,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Romantic Missionary 02")),
             vec![
                 ActionRef::new("penetration.vaginal", 
-                Strength::Constant(50))
+                Stren::Constant(50))
             ],
         ),
     
@@ -357,7 +357,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Romantic Missionary 03")),
             vec![
                 ActionRef::new("penetration.vaginal", 
-                Strength::Constant(70))
+                Stren::Constant(70))
             ],
         ),
         scene(
@@ -365,7 +365,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Romantic Missionary 04")),
             vec![
                 ActionRef::new("penetration.vaginal.deep", 
-                Strength::Constant(80))
+                Stren::Constant(80))
             ],
         ),
         scene(
@@ -378,7 +378,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Spooning 02")),
             vec![
                 ActionRef::new("penetration.vaginal", 
-                Strength::Constant(40))
+                Stren::Constant(40))
             ],
         ),
         scene(
@@ -386,7 +386,7 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Spooning 03")),
             vec![
                 ActionRef::new("penetration.vaginal.deep", 
-                Strength::Constant(60))
+                Stren::Constant(60))
             ],
         ),
         scene(
@@ -394,15 +394,15 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             SceneId::Exact(pb70_name("Spooning 04")),
             vec![
                 ActionRef::new("penetration.vaginal.deep", 
-                Strength::Constant(80))
+                Stren::Constant(80))
             ],
         ),
         scene(
             "Standing 69",
             SceneId::Exact(pb70_name("Standing 69")),
             vec![
-                ActionRef::new("penetration.oral", Strength::Constant(40)),
-                ActionRef::new("cunnilungus", Strength::Constant(40))
+                ActionRef::new("penetration.oral", Stren::Constant(40)),
+                ActionRef::new("cunnilungus", Stren::Constant(40))
             ],
         ),
         
@@ -416,14 +416,14 @@ pub fn pb70_triggers() -> Vec<Trigger> {
             "Standing Sequence Stage 2",
             SceneId::Exact(pb70_name("Standing Sequence Stage 2")),
             vec![
-                ActionRef::new("penetration.vaginal", Strength::Constant(50))
+                ActionRef::new("penetration.vaginal", Stren::Constant(50))
             ],
         ),
         scene(
             "Standing Sequence Stage 3",
             SceneId::Exact(pb70_name("Standing Sequence Stage 3")),
             vec![
-                ActionRef::new("penetration.vaginal", Strength::Constant(75))
+                ActionRef::new("penetration.vaginal", Stren::Constant(75))
             ],
         )
     ];
