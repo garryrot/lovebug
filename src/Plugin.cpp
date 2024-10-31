@@ -6,9 +6,9 @@
 
 #include "Bridge.h"
 
-#include "lbug/src/logging.rs.h"
-#include "lbug/src/bones.rs.h"
-#include "lbug/src/lib.rs.h"
+#include "tk2/src/logging.rs.h"
+#include "tk2/src/bones.rs.h"
+#include "tk2/src/lib.rs.h"
 
 #include "Version.h"
 

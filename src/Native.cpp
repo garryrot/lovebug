@@ -27,7 +27,7 @@ int Scene(std::monostate, std::string sceneName, std::vector<RE::Actor*> actors,
     return x;
 }
 
-constexpr std::string_view PapyrusClass = "Lb_Native";
+constexpr std::string_view PapyrusClass = "TK2:Telekinesis";
 bool RegisterPapyrusCalls(IVirtualMachine *vm)
 {
     vm->BindNativeMethod(PapyrusClass, "Process_Event", ProcessEvent, false);

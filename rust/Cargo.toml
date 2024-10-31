@@ -1,10 +1,10 @@
 [package]
-name = "lbug"
+name = "tk2"
 version = "0.0.1"
 edition = "2021"
 
 [lib]
-name = "lovebug"
+name = "telekinesis"
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]

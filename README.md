@@ -1,8 +1,8 @@
-# Lovebug
+# Telekinesis
 
-Amorous event processor for Skyrim SE/AE/VR.
+Amorous event processor & bone tracker for Fallout4
 
-Lovebug is a middleware/framework for capturing in-game events (animations or other generic events) 
+Telekinesis is a middleware/framework for capturing in-game events (animations or other generic events) 
 and generating actions for endpoints like bluetooth toy controllers.
 
 ## Features  
@@ -20,7 +20,7 @@ and generating actions for endpoints like bluetooth toy controllers.
 
 ## Bug Reports
 
-If anything fails or behaves in an unexpected way, include the Papyrus logs `Pyprus.0.log` and the Logs of this plugin (`%USERPROFILE%/My Games/Sykrim Special Edition/SKSE/Lovebug.log`)
+If anything fails or behaves in an unexpected way, include the Papyrus logs `Pyprus.0.log` and the Logs of this plugin (`%USERPROFILE%/My Games/Fallout4/F4S4/Telekinesis2.log`)
 
 ## License
 

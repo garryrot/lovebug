@@ -1,7 +1,7 @@
 #pragma once
 #include "Events.h"
 #include "F4SE/API.h"
-#include "lbug/src/logging.rs.h"
+#include "tk2/src/logging.rs.h"
 #include "RE/Bethesda/BSTSmartPointer.h"
 
 // Outgoing Events

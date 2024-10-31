@@ -19,7 +19,7 @@ use config::{
 use ffi_bones::*;
 use crate::{
     bridge::{ffi_bridge::*, *},
-    Lovebug,
+    Telekinesis,
 };
 use collision::Collision;
 
@@ -126,7 +126,7 @@ fn get_body_for_actor(
     chosen_race
 }
 
-pub fn lb_dynamic_tracking(lb: &mut Lovebug, actor_vec: &ActorVec, _control: Control) {
+pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec, _control: Control) {
     info!("lb_dynamic_tracking Actors={}", actor_vec.Size());
     let actors_in = from_actor_vec(actor_vec);
 
@@ -333,7 +333,7 @@ fn start_control_thread(
 }
 
 fn observe_bones(
-    lb: &mut Lovebug,
+    lb: &mut Telekinesis,
     a1_bone: &UnsafeAvObjectPtr,
     a2_bone: &UnsafeAvObjectPtr,
     collision_sphere: Collision,
@@ -471,7 +471,7 @@ fn from_actor_vec(actors: &ActorVec) -> Vec<UnsafeActorPtr> {
 
 pub fn lb_dynamic_stop() {
     info!("lb_dynamic_stop");
-    Lovebug::run_static(
+    Telekinesis::run_static(
         |lb| {
             if let Some(token) = lb.dynamic_task.cancel.take() {
                 token.cancel();

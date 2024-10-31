@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(Lovebug 
+project(Telekinesis 
         VERSION 0.0.1 
         DESCRIPTION "Fallout4 amorous events processor"
         LANGUAGES CXX)
@@ -13,8 +13,8 @@ set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/F4SE/Plugins/)
 
 # Rust
 
-set(RUST_PKG_NAME "lbug")
-set(RUST_LIB_NAME "lovebug")
+set(RUST_PKG_NAME "tk2")
+set(RUST_LIB_NAME "telekinesis")
 
 set(RUST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_LIBRARY_PREFIX}${RUST_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(RUST_CXX_BRIDGE ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/lib.rs.cc 

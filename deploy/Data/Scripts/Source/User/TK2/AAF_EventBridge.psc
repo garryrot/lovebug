@@ -1,13 +1,19 @@
-Scriptname Lb_EventBridge_AAF extends Quest
+ScriptName TK2:AAF_EventBridge extends Quest
 
 Int CurrentHandle = -1
 
-Event OnInit()
-    AAF:AAF_API api = Game.GetFormFromFile(0x00000F99, "AAF.esm") as AAF:AAF_API
-    RegisterForCustomEvent(api, "OnAnimationStart")
-    RegisterForCustomEvent(api, "OnAnimationStop")
-    RegisterForCustomEvent(api, "OnAnimationChange")
-EndEvent
+Function RegisterEvents()
+    Debug("RegisteringEvents")
+    AAF:AAF_API aaf = Game.GetFormFromFile(0x00000F99, "AAF.esm") as AAF:AAF_API
+    If (aaf)
+        Debug("aaf exists")
+        RegisterForCustomEvent(aaf, "OnAnimationStart")
+        RegisterForCustomEvent(aaf, "OnAnimationStop")
+        RegisterForCustomEvent(aaf, "OnAnimationChange")
+    Else
+        Debug.Notification("ERROR AAF NOT FOUND")
+    EndIf
+EndFunction
 
 Event AAF:AAF_API.OnAnimationStart(AAF:AAF_API akSender, Var[] akArgs)
     Debug("AAF:AAF_API.OnAnimationStart")
@@ -58,15 +64,15 @@ Function StartScene(Var[] akArgs)
     Actor[] actors = Utility.VarToVarArray(akArgs[1]) as Actor[]
     String[] tags = Utility.VarToVarArray(akArgs[3]) as String[]         
     If CurrentHandle != -1
-        Lb_Native.Stop(CurrentHandle)
+        TK2:Telekinesis.Stop(CurrentHandle)
     EndIf
-    CurrentHandle = Lb_Native.Scene(sceneName, actors, tags, 100, -1)
+    CurrentHandle = TK2:Telekinesis.Scene(sceneName, actors, tags, 100, -1)
 EndFunction
 
 Function StopScene(Var[] akArgs)
     String sceneName = akArgs[2] as String
     String[] tags = Utility.VarToVarArray(akArgs[3]) as String[]         
-    Lb_Native.Stop(CurrentHandle)
+    TK2:Telekinesis.Stop(CurrentHandle)
     CurrentHandle = -1
 EndFunction
 

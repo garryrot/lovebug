@@ -26,11 +26,11 @@ use body_parts::*;
 use events::start_outgoing_event_thread;
 use triggers::Triggers;
 
-pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug";
-pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Patterns";
-pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Actions";
-pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Triggers";
-pub static RACES_DIR: &str = "Data\\F4SE\\Plugins\\Lovebug\\Races";
+pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2";
+pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Patterns";
+pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Actions";
+pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Triggers";
+pub static RACES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Races";
 
 pub static DEFAULT_RACE_MALE: &str = "DefaultRaceMale.json";
 pub static DEFAULT_RACE_FEMALE: &str = "DefaultRaceFemale.json";
@@ -45,7 +45,7 @@ mod input;
 mod logging;
 
 #[derive(Debug)]
-pub struct Lovebug {
+pub struct Telekinesis {
     client: BpClient,
     triggers: Triggers,
     dynamic_task: DynamicTrackingHandle,
@@ -56,10 +56,10 @@ pub struct Lovebug {
     default_race_female: Option<Race>,
 }
 
-impl Lovebug {
+impl Telekinesis {
     pub fn run_static<F, R>(func: F, default: R) -> R
     where
-        F: FnOnce(&mut Lovebug) -> R,
+        F: FnOnce(&mut Telekinesis) -> R,
         R: std::fmt::Debug,
     {
         if let Ok(mut guard) = LB.state.try_lock() {
@@ -109,7 +109,7 @@ impl Lovebug {
 
 #[derive(Debug)]
 pub struct LbApi {
-    pub state: Arc<Mutex<Option<Lovebug>>>,
+    pub state: Arc<Mutex<Option<Telekinesis>>>,
 }
 
 lazy_static! {
@@ -153,7 +153,7 @@ pub fn lb_init() -> bool {
             read_or_default::<ActuatorSettings>(CONFIG_DIR, DEVICE_SETTINGS),
         )
         .unwrap();
-        let mut lb = Lovebug {
+        let mut lb = Telekinesis {
             client,
             triggers: Triggers::default(),
             dynamic_task: DynamicTrackingHandle::default(),
@@ -181,7 +181,7 @@ pub fn lb_init() -> bool {
 
 pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     info!(action_name, speed, time_secs, "lb_action");
-    Lovebug::run_static(
+    Telekinesis::run_static(
         |lb| {
             let actions = get_actions_from_refs(
                 lb,
@@ -210,7 +210,7 @@ pub fn lb_scene(
     actor_vec: &ActorVec,
 ) -> i32 {
     info!(scene_name, speed, time_secs, "lb_scene");
-    Lovebug::run_static(
+    Telekinesis::run_static(
         |lb| {
             lb.refresh_devices();
 
@@ -255,7 +255,7 @@ pub fn lb_scene(
 
 pub fn lb_stroke(ms: i32, pos: f32) -> bool {
     info!(ms, pos, "lb_stroke");
-    Lovebug::run_static(
+    Telekinesis::run_static(
         |lb| {
             let devices = lb.client.buttplug.devices();
             lb.client.runtime.spawn(async move {
@@ -274,7 +274,7 @@ pub fn lb_stroke(ms: i32, pos: f32) -> bool {
 
 pub fn lb_update(handle: i32, speed: i32) -> bool {
     info!(handle, speed, "lb_update");
-    Lovebug::run_static(
+    Telekinesis::run_static(
         |lb| lb.client.update(handle, Speed::new(speed.into())),
         false,
     )
@@ -282,7 +282,7 @@ pub fn lb_update(handle: i32, speed: i32) -> bool {
 
 pub fn lb_stop(handle: i32) -> bool {
     info!(handle, "lb_stop");
-    Lovebug::run_static(|lb| lb.client.stop(handle), false)
+    Telekinesis::run_static(|lb| lb.client.stop(handle), false)
 }
 
 unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bool {
@@ -295,7 +295,7 @@ unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bo
     false
 }
 
-fn get_actions_from_refs(lb: &mut Lovebug, action_refs: Vec<ActionRef>) -> Vec<(Strength, Action)> {
+fn get_actions_from_refs(lb: &mut Telekinesis, action_refs: Vec<ActionRef>) -> Vec<(Strength, Action)> {
     let mut result = vec![];
     for action_ref in action_refs {
         if let Some(action) = lb

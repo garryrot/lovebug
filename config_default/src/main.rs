@@ -20,7 +20,7 @@ mod scenes_bp70;
 mod scenes_default;
 
 fn main() {
-    let config_dir = "deploy/Data/F4SE/Plugins/Lovebug";
+    let config_dir = "deploy/Data/F4SE/Plugins/Telekinesis2";
 
     // Triggers
     let triggers: Vec<(&str, Vec<Trigger>)> = vec![

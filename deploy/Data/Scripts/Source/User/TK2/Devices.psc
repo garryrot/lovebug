@@ -1,4 +1,4 @@
-Scriptname Lb_ExternalEvents extends Quest
+Scriptname TK2:Devices extends Quest
 
 Event OnInit()
     RegisterForExternalEvent("Tele_DeviceAdded", "OnDeviceAdded")
