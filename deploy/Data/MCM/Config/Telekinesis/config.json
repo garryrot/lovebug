@@ -1,0 +1,240 @@
+{
+    "modName": "Telekinesis",
+    "displayName": "Telekinesis",
+    "minMcmVersion": 2,
+    "pluginRequirements": [
+        "Telekinesis.esp"
+    ],
+    "content": [
+		{
+			"text": "<font size='48'>Telekinesis</font><br /><p align='center'><font size='24'>Version 2.0</font></p>",
+			"type": "text",
+			"html": true
+		},
+        {
+            "text": "Connection Method",
+            "type": "section"
+        },
+        {
+            "id": "iType:Connection",
+            "text": "Type",
+            "type": "stepper",
+            "help": "",
+            "valueOptions": {
+              "sourceType": "ModSettingInt",
+              "options": ["In-Process", "WebSocket", "None"]
+            },
+            "groupControl": 1
+        },
+        {
+            "id": "sHost:Connection",
+            "text": "Host",
+            "type": "textinput",
+            "help": "Hostname of Intiface Central (or other Buttplug server)",
+            "valueOptions": {
+                "sourceType": "ModSettingString"
+            },
+            "groupCondition": 1
+        },
+        {
+            "id": "sPort:Connection",
+            "text": "Port",
+            "type": "textinput",
+            "help": "Port of Intiface Central (0 - 65535)",
+            "valueOptions": {
+                "sourceType": "ModSettingString"
+            },
+            "groupCondition": 1
+        },
+        {
+            "text": "Reconnt Now...",
+            "type": "button",
+            "help": "",
+            "action": {
+                "type": "CallFunction",
+                "form": "Telekinesis.esp|1732",
+                "scriptName": "TK2:Main",
+                "function": "Reconnect"
+            }
+        },
+		{
+			"text": "<p align='center'><font size='18'>Run Intiface Central app, start the server and enter hostname and port.</font></p>",
+			"type": "text",
+			"html": true,
+            "groupCondition": 1
+		},
+        {
+            "text": "Modules",
+            "type": "section"
+        },
+        {
+            "id": "bBluetooth:Connection",
+            "text": "Bluetooth",
+            "help": "",
+            "type": "switcher",
+            "valueOptions": {
+                "sourceType": "ModSettingBool"
+            }
+        },
+        {
+            "id": "bXInput:Connection",
+            "text": "X-Input",
+            "help": "",
+            "type": "switcher",
+            "valueOptions": {
+                "sourceType": "ModSettingBool"
+            }
+        },
+        {
+            "id": "bSerial:Connection",
+            "text": "Serial",
+            "help": "",
+            "type": "switcher",
+            "valueOptions": {
+                "sourceType": "ModSettingBool"
+            }
+        },
+		{
+			"text": "<p align='center'><font size='18'>Controls which hardware can be accessed by In-Process connection. Change this if you don't want certain hardware to be utilized by Telekinesis.</font></p>",
+			"type": "text",
+			"html": true
+		}
+    ],
+    "pages": [
+        {
+            "pageDisplayName": "Devices",
+            "content": [
+                {
+                    "text": "<font size='24'>Device Settings</font><br /><p align='center'><font size='14'>Each device motor can be configured separately and is disabled by default. Use 'Prev' and 'Next' to select device...</font></p>",
+                    "type": "text",
+                    "html": true
+                },
+                {
+                    "text": "Page",
+                    "type": "textinput",
+                    "help": "Use prev/next to navigate pages. Changing this has no effect",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueString",
+                        "propertyName": "Pagination"
+                    }
+                },
+                {
+                    "text": "Prev",
+                    "type": "button",
+                    "help": "Show previous device",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "function": "Prev"
+                    }
+                },
+                {
+                    "text": "Next",
+                    "type": "button",
+                    "help": "Show next device",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "function": "Next"
+                    }
+                },
+                {
+                    "text": "Device",
+                    "type": "section"
+                },
+                {
+                    "text": "Actuator",
+                    "type": "textinput",
+                    "help": "Info about the motor type. May be 'Linear', 'Vibrate', 'Inflate', 'Constrict', 'Oscillate', 'Rotate'. Changing this has no effect",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueString",
+                        "propertyName": "Actuator"
+                    }
+                },
+                {
+                    "id": "enabled:Device",
+                    "text": "Enabled",
+                    "type": "switcher",
+                    "help": "",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueBool",
+                        "propertyName": "Enabled"
+                    }
+                },
+                {
+                    "text": "Associated Body Parts",
+                    "type": "section"
+                },
+                {
+                    "id": "anal:Device",
+                    "text": "Anal",
+                    "type": "switcher",
+                    "help": "",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueBool",
+                        "propertyName": "Anal"
+                    }
+                },
+                {
+                    "id": "clit:Device",
+                    "text": "Clitoral",
+                    "type": "switcher",
+                    "help": "",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueBool",
+                        "propertyName": "Clitoral"
+                    }
+                },
+                {
+                    "id": "nipple:Device",
+                    "text": "Nipple",
+                    "type": "switcher",
+                    "help": "",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueBool",
+                        "propertyName": "Nipple"
+                    }
+                },
+                {
+                    "id": "oral:Device",
+                    "text": "Oral",
+                    "type": "switcher",
+                    "help": "",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueBool",
+                        "propertyName": "Oral"
+                    }
+                },
+                {
+                    "id": "penis:Device",
+                    "text": "Penis",
+                    "type": "switcher",
+                    "help": "",
+                    "valueOptions": {
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "sourceType": "PropertyValueBool",
+                        "propertyName": "Penis"
+                    }
+                },
+                {
+                    "id": "vaginal:Device",
+                    "text": "Vaginal",
+                    "type": "switcher",
+                    "help": "",
+                    "valueOptions": {
+                        "sourceType": "PropertyValueBool",
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "propertyName": "Vaginal"
+                    }
+                }
+            ]
+        }
+    ]
+}

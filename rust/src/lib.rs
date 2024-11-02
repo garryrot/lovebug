@@ -9,16 +9,17 @@ use tracing::{debug, error, info};
 
 use crate::bones::ffi_bones::ActorVec;
 
-use buttplug::client::LinearCommand;
+use buttplug::{client::LinearCommand, core::message::LogLevel};
 
 use bp_scheduler::{
-    actuator::Actuators,
-    client::BpClient,
-    config::{
-        actions::*, actuators::ActuatorSettings, client::ClientSettings, read::*, write::try_write,
-    },
-    dynamic_tracking::DynamicSettings,
-    speed::Speed,
+    actuator::{ActuatorConfigLoader, Actuators}, client::BpClient, config::{
+        actions::*,
+        actuators::ActuatorSettings,
+        client::{ClientSettings, InProcessFeatures},
+        connection::ConnectionType,
+        read::*,
+        write::try_write,
+    }, dynamic_tracking::DynamicSettings, speed::Speed
 };
 
 use ::config::*;
@@ -38,8 +39,9 @@ pub static BONE_TRACKING: &str = "BoneTracking.json";
 pub static CLIENT_SETTINGS: &str = "Connection.json";
 pub static DEVICE_SETTINGS: &str = "Devices.json";
 
-mod bones;
 pub mod bridge;
+mod bones;
+mod mcm;
 mod events;
 mod input;
 mod logging;
@@ -78,24 +80,21 @@ impl Telekinesis {
         default
     }
 
-    pub fn refresh_devices(&mut self) {
-        let devices = self.client.buttplug.devices();
-        for actuator in devices.flatten_actuators() {
-            self.client
-                .device_settings
-                .set_enabled(actuator.identifier(), true);
-            self.client.device_settings.set_body_parts(
-                actuator.identifier(),
-                &[
-                    TAG_ANAL,
-                    TAG_CLIT,
-                    TAG_NIPPLE,
-                    TAG_ORAL,
-                    TAG_PENIS,
-                    TAG_VAGINAL,
-                ],
-            );
+    pub fn run_static_destroy<F>(func: F) 
+    where
+        F: FnOnce(&mut Telekinesis)
+    {
+        if let Ok(mut guard) = LB.state.try_lock() {
+            match guard.take() {
+                Some(mut tk) => {
+                    func(&mut tk);
+                }
+                None => error!("State empty"),
+            }
         }
+    }
+
+    pub fn store_devices(&mut self) {
         try_write(&self.client.device_settings, CONFIG_DIR, DEVICE_SETTINGS);
     }
 
@@ -125,8 +124,17 @@ mod ffi {
     unsafe extern "C++" {
         type ActorVec = crate::bones::ffi_bones::ActorVec;
     }
+
     extern "Rust" {
-        fn lb_init() -> bool;
+        fn lb_connect(
+            connection: i32,
+            port: &str,
+            host: &str,
+            bluetooth: bool,
+            xinput: bool,
+            serial: bool,
+        ) -> bool;
+        fn lb_disconnect();
         fn lb_action(action: &str, speed: i32, time_sec: f32) -> i32;
         fn lb_scene(
             scene: &str,
@@ -142,14 +150,32 @@ mod ffi {
     }
 }
 
-pub fn lb_init() -> bool {
+pub fn lb_connect(
+    connection: i32,
+    port: &str,
+    host: &str,
+    bluetooth: bool,
+    xinput: bool,
+    serial: bool,
+) -> bool {
     if let Ok(mut guard) = LB.state.try_lock() {
-        info!("lb_init");
-        let client = BpClient::connect(
-            ClientSettings {
-                pattern_path: String::from(PATTERNS_DIR),
-                ..read_or_default::<ClientSettings>(CONFIG_DIR, CLIENT_SETTINGS)
+        let settings = ClientSettings {
+            log_level: LogLevel::Debug,
+            connection: match connection {
+                0 => ConnectionType::InProcess,
+                1 => ConnectionType::WebSocket(format!("{}:{}", host, port)),
+                _ => ConnectionType::Test,
             },
+            in_process_features: InProcessFeatures {
+                bluetooth,
+                serial,
+                xinput,
+            },
+            pattern_path: String::from(PATTERNS_DIR),
+        };
+        info!(?settings, "lb_connect");
+        let client = BpClient::connect(
+            settings,
             read_or_default::<ActuatorSettings>(CONFIG_DIR, DEVICE_SETTINGS),
         )
         .unwrap();
@@ -177,6 +203,13 @@ pub fn lb_init() -> bool {
         error!("init failed");
     }
     true
+}
+
+pub fn lb_disconnect() {
+    Telekinesis::run_static_destroy( |lb| {
+        lb.client.stop_all();
+        lb.client.disconnect();
+    } );
 }
 
 pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
@@ -212,8 +245,6 @@ pub fn lb_scene(
     info!(scene_name, speed, time_secs, "lb_scene");
     Telekinesis::run_static(
         |lb| {
-            lb.refresh_devices();
-
             let tags = read_input_string(scene_tags);
             let scene = lb.triggers.find_scene(scene_name, &tags);
             debug!(?scene, "matched scene");
@@ -253,6 +284,7 @@ pub fn lb_scene(
     )
 }
 
+// TODO: unused
 pub fn lb_stroke(ms: i32, pos: f32) -> bool {
     info!(ms, pos, "lb_stroke");
     Telekinesis::run_static(
@@ -295,7 +327,10 @@ unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bo
     false
 }
 
-fn get_actions_from_refs(lb: &mut Telekinesis, action_refs: Vec<ActionRef>) -> Vec<(Strength, Action)> {
+fn get_actions_from_refs(
+    lb: &mut Telekinesis,
+    action_refs: Vec<ActionRef>,
+) -> Vec<(Strength, Action)> {
     let mut result = vec![];
     for action_ref in action_refs {
         if let Some(action) = lb
@@ -319,3 +354,4 @@ fn get_actions_from_refs(lb: &mut Telekinesis, action_refs: Vec<ActionRef>) -> V
     }
     result
 }
+

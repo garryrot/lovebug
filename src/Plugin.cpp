@@ -9,8 +9,12 @@
 #include "tk2/src/logging.rs.h"
 #include "tk2/src/bones.rs.h"
 #include "tk2/src/lib.rs.h"
+#include "tk2/src/mcm.rs.h"
 
 #include "Version.h"
+
+// Last shadowshayd3 commit that is for 163
+// https://github.com/shad0wshayd3-FO4/CommonLibF4/tree/af0993b8bcb7d5e3e1a50c9dd320a9a619475c94
 
 using namespace RE;
 using namespace RE::BSScript;
@@ -18,8 +22,10 @@ using namespace RE::BSScript;
 #define DllExport __declspec(dllexport)
 
 #include "Logs.cpp"
+#include "MCM.cpp"
 #include "Native.cpp"
 #include "Events.cpp"
+
 
 // Messaging
 void InitializeMessaging()
@@ -38,7 +44,6 @@ void InitializeMessaging()
                     if (gameVm) {
                         gameVm->GetVM()->RegisterForLogEvent(LogEventSink::GetSingleton());
                     }
-                    lb_init();
                     break;
                 }
                 case F4SE::MessagingInterface::kGameLoaded:

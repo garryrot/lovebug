@@ -1,10 +1,10 @@
 # Building Native Plugin
 
-This build generates `Telekinesis.dll`, a F4SE plugin based on CommonLibF4 NG.
+This build generates `Telekinesis.dll`, a F4SE plugin based on CommonLibF4.
 
 There should really be no need for you to do this, unless you:
 
-- Want to port the native library to a skyrim version that I currently don't support
+- Want to port the native library to a game version that I currently don't support
 - Want to fork this project and change the native library
 
 ## Build Requirements

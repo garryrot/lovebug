@@ -1,3 +1,7 @@
+bool Connect(std::monostate, int connection, std::string port, std::string host, bool bluetooth, bool xinupt, bool serial)
+{
+    return lb_connect(connection, port, host, bluetooth, xinupt, serial);
+}
 
 bool ProcessEvent(std::monostate, std::string eventName, std::string strArg, float numArg)
 {
@@ -20,6 +24,11 @@ bool Stop(std::monostate, int handle)
     return lb_stop(handle);
 }
 
+void Disconnect(std::monostate)
+{
+    return lb_disconnect();
+}
+
 int Scene(std::monostate, std::string sceneName, std::vector<RE::Actor*> actors, std::vector<std::string> tags, int speed, float secs) 
 {
     auto actorVec = ActorVec::ActorVec(actors);
@@ -27,14 +36,20 @@ int Scene(std::monostate, std::string sceneName, std::vector<RE::Actor*> actors,
     return x;
 }
 
-constexpr std::string_view PapyrusClass = "TK2:Telekinesis";
+constexpr std::string_view TkClass = "Telekinesis";
 bool RegisterPapyrusCalls(IVirtualMachine *vm)
 {
-    vm->BindNativeMethod(PapyrusClass, "Process_Event", ProcessEvent, false);
-    vm->BindNativeMethod(PapyrusClass, "Action", Action, false);
-    vm->BindNativeMethod(PapyrusClass, "Update", Update, false);
-    vm->BindNativeMethod(PapyrusClass, "Stop", Stop, false);
-    vm->BindNativeMethod(PapyrusClass, "Scene", Scene, false);
+    vm->BindNativeMethod(TkClass, "Connect", Connect, false);
+    vm->BindNativeMethod(TkClass, "Process_Event", ProcessEvent, false);
+    vm->BindNativeMethod(TkClass, "Action", Action, false);
+    vm->BindNativeMethod(TkClass, "Update", Update, false);
+    vm->BindNativeMethod(TkClass, "Stop", Stop, false);
+    vm->BindNativeMethod(TkClass, "Scene", Scene, false);
+    vm->BindNativeMethod(TkClass, "Disconnect", Disconnect, false);
+
+    vm->BindNativeMethod(TkClass, "MCM_Devices_Get", MCM_Devices_Get, false);
+    vm->BindNativeMethod(TkClass, "MCM_Devices_Set", MCM_Devices_Set, false);
+    vm->BindNativeMethod(TkClass, "MCM_Devices_Len", MCM_Devices_Len, false);
     return true;
 }
 

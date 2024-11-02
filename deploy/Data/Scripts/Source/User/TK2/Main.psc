@@ -1,26 +1,43 @@
-Scriptname TK2:Main extends Quest
+ScriptName TK2:Main extends Quest
 
 Event OnInit()	
-      Debug.Notification("Tele: OnInit")
+    Debug.Notification("Telekinesis loaded. Make sure to enable devices in MCM...")
 	RegisterForRemoteEvent(Game.GetPlayer(), "OnPlayerLoadGame")
-	RegisterEvents()
+	Startup()
 EndEvent
 
 Event Actor.OnPlayerLoadGame(Actor ActorRef)
-	Debug.Notification("Tele: OnPlayerLoadGame")
-	RegisterEvents()
+	Startup()
 EndEvent
 
-Function RegisterEvents()
-    Debug("Registering Events")
+Function Startup()
+	Connect()
+
 	ScriptObject aafBridge = CastAs("TK2:AAF_EventBridge")
 	If aafBridge
-        Debug("AAF_EventBridge Exists")
-		aafBridge.CallFunction("RegisterEvents", new Var[0])
-    Else
-        Debug("AAF_EventBridge Not Existing")
+		aafBridge.CallFunction("Startup", new Var[0])
 	EndIf
 
+	ScriptObject mcmActuator = CastAs("TK2:MCM_Actuator")
+	If mcmActuator
+		mcmActuator.CallFunction("Startup", new Var[0])
+	EndIf
+EndFunction
+
+Function Reconnect()
+	Telekinesis.Disconnect()
+	Utility.Wait(1.0)
+	Connect()
+EndFunction
+
+Function Connect()
+	Int connection = MCM.GetModSettingInt("Telekinesis", "iType:Connection")
+	String host = MCM.GetModSettingString("Telekinesis", "sHost:Connection")
+	String port = MCM.GetModSettingString("Telekinesis", "sPort:Connection")
+	Bool bluetooth = MCM.GetModSettingInt("Telekinesis", "bBluetooth:Connection")
+	Bool xInput = MCM.GetModSettingInt("Telekinesis", "bXInput:Connection")
+	Bool serial = MCM.GetModSettingInt("Telekinesis", "bSerial:Connection")
+	bool connected = Telekinesis.Connect(connection, port, host, bluetooth, xInput, serial)
 EndFunction
 
 Function Debug(String msg)
