@@ -11,8 +11,7 @@ use crate::bones::ffi_bones::ActorVec;
 
 use buttplug::{client::LinearCommand, core::message::LogLevel};
 
-use bp_scheduler::{
-    actuator::{ActuatorConfigLoader, Actuators}, client::BpClient, config::{
+use bp_scheduler::{client::BpClient, config::{
         actions::*,
         actuators::ActuatorSettings,
         client::{ClientSettings, InProcessFeatures},
@@ -23,7 +22,6 @@ use bp_scheduler::{
 };
 
 use ::config::*;
-use body_parts::*;
 use events::start_outgoing_event_thread;
 use triggers::Triggers;
 
@@ -36,7 +34,7 @@ pub static RACES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Races";
 pub static DEFAULT_RACE_MALE: &str = "DefaultRaceMale.json";
 pub static DEFAULT_RACE_FEMALE: &str = "DefaultRaceFemale.json";
 pub static BONE_TRACKING: &str = "BoneTracking.json";
-pub static CLIENT_SETTINGS: &str = "Connection.json";
+pub static CLIENT_SETTINGS: &str = "Connection.json"; // TODO: Currently useless except logging, Rename to logging
 pub static DEVICE_SETTINGS: &str = "Devices.json";
 
 pub mod bridge;
@@ -158,6 +156,7 @@ pub fn lb_connect(
     xinput: bool,
     serial: bool,
 ) -> bool {
+    // TODO: Do this in to background thread to avoid small UI stutter
     if let Ok(mut guard) = LB.state.try_lock() {
         let settings = ClientSettings {
             log_level: LogLevel::Debug,
@@ -177,10 +176,14 @@ pub fn lb_connect(
         let client = BpClient::connect(
             settings,
             read_or_default::<ActuatorSettings>(CONFIG_DIR, DEVICE_SETTINGS),
-        )
-        .unwrap();
+        );
+        if let Err(a) = client {
+            error!(?a, "connection error");
+            return false;
+        }
+
         let mut lb = Telekinesis {
-            client,
+            client: client.unwrap(),
             triggers: Triggers::default(),
             dynamic_task: DynamicTrackingHandle::default(),
             tracking_counter: 0,
