@@ -14,14 +14,12 @@ Bool Property Oral = True Auto
 Bool Property Penis = True Auto
 Bool Property Vaginal = True Auto
 
-Int Property MyIntProperty = 0 Auto
-
-Telekinesis:Actuator current = none
+Telekinesis:DevicePage current = none
 
 Event OnInit()
     RegisterForExternalEvent("OnMCMSettingChange|Telekinesis", "OnChange")
     RegisterForExternalEvent("Tele_DeviceAdded", "OnDeviceAdded")
-    Telekinesis:Actuator default
+    Telekinesis:DevicePage default
     current = default
 EndEvent
 
@@ -61,7 +59,7 @@ Function Update(int len)
     EndIf
 
     If CurrentIndex >= 0
-        Telekinesis:Actuator x = Telekinesis.MCM_Devices_Get(CurrentIndex)
+        Telekinesis:DevicePage x = Telekinesis.MCM_Devices_Get(CurrentIndex)
         current = x
         If x.Index != -1
             Index = x.Index

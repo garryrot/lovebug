@@ -1,5 +1,4 @@
 #include <stddef.h>
-
 #include <thread>
 #include <chrono>
 #include <codecvt>
@@ -19,13 +18,10 @@
 using namespace RE;
 using namespace RE::BSScript;
 
-#define DllExport __declspec(dllexport)
-
 #include "Logs.cpp"
 #include "MCM.cpp"
 #include "Native.cpp"
 #include "Events.cpp"
-
 
 // Messaging
 void InitializeMessaging()

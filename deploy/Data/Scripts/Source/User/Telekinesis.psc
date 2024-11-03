@@ -8,9 +8,9 @@ Bool Function Update(Int handle, Int speed) Native Global
 Bool Function Stop(Int handle) Native Global
 Function Disconnect() Native Global
 
-; MCM Things
+; MCM Models
 
-Struct Actuator
+Struct DevicePage
     Int Index = -1
     String Actuator = ""
     Bool Enabled = False
@@ -23,5 +23,5 @@ Struct Actuator
 EndStruct
 
 Int Function MCM_Devices_Len() Native Global
-Actuator Function MCM_Devices_Get(Int index) Native Global
-Bool Function MCM_Devices_Set(Actuator actuator) Native Global
+DevicePage Function MCM_Devices_Get(Int index) Native Global
+Bool Function MCM_Devices_Set(DevicePage actuator) Native Global

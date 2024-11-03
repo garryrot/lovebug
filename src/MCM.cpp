@@ -1,8 +1,8 @@
 
-using Actuator = RE::BSScript::structure_wrapper<"Telekinesis", "Actuator">;
-Actuator DataToStruct(DevicePage data)
+using DevicePageStruct = RE::BSScript::structure_wrapper<"Telekinesis", "DevicePage">;
+DevicePageStruct DataToStruct(DevicePage data)
 {
-    Actuator pack;
+    DevicePageStruct pack;
     pack.insert("Index", data.index);
     if (data.index >= 0)
     {
@@ -18,7 +18,7 @@ Actuator DataToStruct(DevicePage data)
     return pack;
 }
 
-DevicePage StructToData(Actuator pack) {
+DevicePage StructToData(DevicePageStruct pack) {
     DevicePage data;
     data.index = pack.find<int32_t>("Index", false).value();
     data.actuator = pack.find<std::string>("Actuator", false).value(); 
@@ -32,12 +32,12 @@ DevicePage StructToData(Actuator pack) {
     return data;
 }
 
-Actuator MCM_Devices_Get(std::monostate, int index)
+DevicePageStruct MCM_Devices_Get(std::monostate, int index)
 {
     return DataToStruct(lb_actuator_get(index));
 }
 
-bool MCM_Devices_Set(std::monostate, Actuator data)
+bool MCM_Devices_Set(std::monostate, DevicePageStruct data)
 {
     return lb_actuator_set( StructToData(data) );
 }

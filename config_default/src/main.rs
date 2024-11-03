@@ -12,7 +12,7 @@ use triggers::Trigger;
 
 use serde::Serialize;
 
-use bp_scheduler::{config::{actuators::ActuatorSettings, client::ClientSettings}, dynamic_tracking::DynamicSettings};
+use bp_scheduler::{config::{client::ClientSettings}, dynamic_tracking::DynamicSettings};
 
 mod actions;
 mod races;
@@ -57,7 +57,7 @@ fn main() {
     write_file(format!("../{}/DefaultRaceFemale.json", config_dir), Race::default());
     write_file(format!("../{}/BoneTracking.json", config_dir) , DynamicSettings::default());
     write_file(format!("../{}/Connection.json", config_dir) , ClientSettings::default());
-    write_file(format!("../{}/Devices.json", config_dir) , ActuatorSettings::default());
+    // write_file(format!("../{}/Devices.json", config_dir) , ActuatorSettings::default());
 }
 
 fn write_file<T>(file: String, content: T)
