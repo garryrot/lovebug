@@ -1,24 +1,35 @@
 use bodies::Race;
 use bones::{lb_dynamic_tracking, DynamicTrackingHandle};
+use config::variables::{ConfigVariable, PlayerActorValue};
 use cxx::{CxxString, CxxVector};
+use dd::start_dd_workaround;
 use input::{read_input_duration, read_input_string};
 use lazy_static::lazy_static;
+use tokio::task::JoinHandle;
+use variables::VariableStore;
 
-use std::sync::{Arc, Mutex};
+use std::{
+    sync::{ Arc, Mutex},
+    time::Duration,
+};
 use tracing::{debug, error, info};
 
 use crate::bones::ffi_bones::ActorVec;
 
 use buttplug::{client::LinearCommand, core::message::LogLevel};
 
-use bp_scheduler::{client::BpClient, config::{
+use bp_scheduler::{
+    client::BpClient,
+    config::{
         actions::*,
         actuators::ActuatorSettings,
         client::{ClientSettings, InProcessFeatures},
         connection::ConnectionType,
         read::*,
         write::try_write,
-    }, dynamic_tracking::DynamicSettings, speed::Speed
+    },
+    dynamic_tracking::DynamicSettings,
+    speed::Speed,
 };
 
 use ::config::*;
@@ -37,12 +48,56 @@ pub static BONE_TRACKING: &str = "BoneTracking.json";
 pub static CLIENT_SETTINGS: &str = "Connection.json"; // TODO: Currently useless except logging, Rename to logging
 pub static DEVICE_SETTINGS: &str = "Devices.json";
 
-pub mod bridge;
 mod bones;
-mod mcm;
+pub mod bridge;
+mod dd;
 mod events;
 mod input;
 mod logging;
+mod mcm;
+mod variables;
+
+pub static VAR_DD_AROUSAL: &str = "DD_AV_Arousal";
+pub static VAR_DD_INFLATE_STATUS_VAGINAL: &str = "DD_AV_InflateStatusVaginal";
+pub static VAR_DD_INFLATE_STATUS_ANAL: &str = "DD_AV_InflateStatusAnal";
+pub static VAR_DD_VIBRATE_STRENGTH_VAGINAL: &str = "DD_AV_VibrateStrengthVaginal";
+pub static VAR_DD_VIBRATE_STRENGTH_ANAL: &str = "DD_AV_VibrateStrengthAnal";
+
+// TODO: Move to config
+fn dd_variables() -> Vec<ConfigVariable> {
+    vec![
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_AROUSAL.into(),
+            editor_id: VAR_DD_AROUSAL.into(),
+            min: 0.0,
+            max: 100.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_INFLATE_STATUS_VAGINAL.into(),
+            editor_id: VAR_DD_INFLATE_STATUS_VAGINAL.into(),
+            min: 0.0,
+            max: 6.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_INFLATE_STATUS_ANAL.into(),
+            editor_id: VAR_DD_INFLATE_STATUS_ANAL.into(),
+            min: 0.0,
+            max: 6.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+            editor_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+            min: 0.0,
+            max: 5.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
+            editor_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
+            min: 0.0,
+            max: 5.0,
+        }),
+    ]
+}
 
 #[derive(Debug)]
 pub struct Telekinesis {
@@ -54,6 +109,8 @@ pub struct Telekinesis {
     races: Vec<Race>,
     default_race_male: Option<Race>,
     default_race_female: Option<Race>,
+    variables: VariableStore,
+    variable_update_thread: Option<JoinHandle<()>>,
 }
 
 impl Telekinesis {
@@ -78,9 +135,26 @@ impl Telekinesis {
         default
     }
 
-    pub fn run_static_destroy<F>(func: F) 
+    pub fn run_static_no_return<F>(func: F)
     where
         F: FnOnce(&mut Telekinesis)
+    {
+        if let Ok(mut guard) = LB.state.try_lock() {
+            match guard.take() {
+                Some(mut tk) => {
+                    func(&mut tk);
+                    guard.replace(tk);
+                }
+                None => error!("State empty"),
+            }
+        } else {
+            error!("failed locking mutex");
+        }
+    }
+
+    pub fn run_static_destroy<F>(func: F)
+    where
+        F: FnOnce(&mut Telekinesis),
     {
         if let Ok(mut guard) = LB.state.try_lock() {
             match guard.take() {
@@ -144,8 +218,19 @@ mod ffi {
         fn lb_stroke(ms: i32, pos: f32) -> bool;
         fn lb_update(id: i32, speed: i32) -> bool;
         fn lb_stop(id: i32) -> bool;
-        unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bool;
+        fn lb_actor_value_changed(form_id: u32, value: f32);
+        fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32;
     }
+}
+
+pub fn lb_actor_value_changed(form_id: u32, value: f32) {
+    Telekinesis::run_static_no_return(|lb| {
+        let var_name = lb.variables.update(form_id, value);
+        if let Some(var) = var_name {
+            if var == VAR_DD_VIBRATE_STRENGTH_VAGINAL || var == VAR_DD_VIBRATE_STRENGTH_ANAL {
+            }
+        }
+    });
 }
 
 pub fn lb_connect(
@@ -182,20 +267,25 @@ pub fn lb_connect(
             return false;
         }
 
+        let dynamic_task = DynamicTrackingHandle::default();
+        let variables = VariableStore::new(dd_variables(), &dynamic_task);
         let mut lb = Telekinesis {
             client: client.unwrap(),
             triggers: Triggers::default(),
-            dynamic_task: DynamicTrackingHandle::default(),
+            dynamic_task,
             tracking_counter: 0,
             races: vec![],
             default_race_male: None,
             default_race_female: None,
             dynamic_settings: DynamicSettings::default(),
+            variables,
+            variable_update_thread: None,
         };
         lb.client.read_actions(ACTIONS_DIR);
         lb.read_races();
 
         start_outgoing_event_thread(&lb.client);
+        start_dd_workaround(&mut lb);
 
         lb.triggers
             .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
@@ -209,10 +299,10 @@ pub fn lb_connect(
 }
 
 pub fn lb_disconnect() {
-    Telekinesis::run_static_destroy( |lb| {
+    Telekinesis::run_static_destroy(|lb| {
         lb.client.stop_all();
         lb.client.disconnect();
-    } );
+    });
 }
 
 pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
@@ -320,14 +410,25 @@ pub fn lb_stop(handle: i32) -> bool {
     Telekinesis::run_static(|lb| lb.client.stop(handle), false)
 }
 
-unsafe fn lb_process_event(event_name: &str, str_arg: &str, num_arg: &f32) -> bool {
-    info!("lb_event");
-    let form_id = 0;
-    debug!(
-        "EventBridge {:#010x} {} {} {}",
-        form_id, event_name, str_arg, num_arg
-    );
-    false
+fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
+    info!(event_name, str_arg, num_arg, "lb_process_event");
+    Telekinesis::run_static(
+        |lb| {
+            let _stopped_event = lb.triggers.find_stopped_events(event_name);
+
+            if let Some(start_event) = lb.triggers.find_started_events(event_name) {
+                let converted = get_actions_from_refs(lb, start_event.actions);
+                return lb.client.dispatch_refs(
+                    converted,
+                    vec![],
+                    Speed::max(),
+                    Duration::from_secs(999999),
+                );
+            }
+            -1
+        },
+        -1,
+    )
 }
 
 fn get_actions_from_refs(
@@ -348,6 +449,7 @@ fn get_actions_from_refs(
                 Stren::Variable(var) => Strength::Variable(match var {
                     Variable::BoneTrackingRate => lb.dynamic_task.cur_avg_ms.clone(),
                     Variable::BoneTrackingDepth => lb.dynamic_task.cur_depth.clone(),
+                    Variable::PlayerActorValue(name) => lb.variables.get(&name).unwrap(), // TODO: unrwap_or
                 }),
                 Stren::Funscript(x, y) => Strength::Funscript(x, y),
                 Stren::RandomFunscript(x, y) => Strength::RandomFunscript(x, y),
@@ -357,4 +459,3 @@ fn get_actions_from_refs(
     }
     result
 }
-

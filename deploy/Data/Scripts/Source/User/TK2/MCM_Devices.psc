@@ -1,4 +1,4 @@
-Scriptname TK2:MCM_Devices extends Quest
+Scriptname TK2:MCM_Devices  extends Quest
 
 String Property Pagination = "" Auto
 
@@ -13,6 +13,12 @@ Bool Property Nipple = True Auto
 Bool Property Oral = True Auto
 Bool Property Penis = True Auto
 Bool Property Vaginal = True Auto
+
+Bool Property AAF_Started = False Auto
+Bool Property AAF_Not_Started = True Auto
+
+Bool Property DD_Started = False Auto
+Bool Property DD_Not_Started = False Auto
 
 Telekinesis:DevicePage current = none
 

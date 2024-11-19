@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
-use serde_hex::{SerHex,StrictPfx};
 
 use bp_scheduler::config::actions::*;
 
+pub mod variables;
 pub mod triggers;
+pub mod events;
 pub mod bodies;
 pub mod body_parts;
 
@@ -13,24 +14,6 @@ pub struct Scene {
     pub scene_id: SceneId,
     pub tags: SceneTags,
     pub actions: Vec<ActionRef>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Event {
-    pub description: String,
-    pub event_start: EventTrigger,
-    pub event_stop: EventTrigger,
-    pub action: Vec<String>,
-    pub body_parts: Selector
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct TimedEvent {
-    pub description: String,
-    pub event_start: EventTrigger,
-    pub duration_ms: u32,
-    pub action: Vec<String>,
-    pub body_parts: Selector
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -87,28 +70,6 @@ pub enum Framework {
     Love
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct EventTrigger {
-    pub form: Form,
-    pub event: String,
-    pub conditions: Vec<EventCondition>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum EventCondition {
-    StrArgEquals(String),
-    NumArgEquals(f32),
-    NumArgGreaterEquals(f32),
-    NumArgSmallerEquals(f32),
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Form {
-    All,
-    Player,
-    #[serde(with = "SerHex::<StrictPfx>")]
-    FormId(u32)
-}
 
 #[cfg(test)]
 mod tests {

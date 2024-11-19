@@ -235,6 +235,58 @@
                     }
                 }
             ]
+        },
+        {
+            "pageDisplayName": "Mods",
+            "content": [
+                {
+                    "type": "hiddenSwitcher",
+                    "groupControl": 1,
+                    "valueOptions": 
+                    {
+                        "sourceType": "PropertyValueBool",
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "propertyName": "AAF_Started"
+                    }
+                },
+                {
+                    "text": "AAF Loaded",
+                    "type": "text",
+                    "html": true,
+                    "groupCondition": 1
+                },
+                {
+                    "type": "hiddenSwitcher",
+                    "groupControl": 2,
+                    "valueOptions": 
+                    {
+                        "sourceType": "PropertyValueBool",
+                        "sourceForm": "Telekinesis.esp|2665",
+                        "propertyName": "DD_Started"
+                    }
+                },
+                {
+                    "text": "DD Loaded",
+                    "type": "text",
+                    "html": true,
+                    "groupCondition": 2
+                }
+            ]
+        },
+        {
+            "pageDisplayName": "Please Read",
+            "content": [
+                {
+                    "text": "<font size='24' align='center'>Where are the configurations?</font><br /><font size='14'>Configuartion of device actions can be done in Data/F4SE/Telekinesis/*. <br /> For more info, read the docs: https://github.com/garryrot/lovebug</font>",
+                    "type": "text",
+                    "html": true
+                },
+                {
+                    "text": "<font size='14'>After changing the configuration files, you need to restart the game, or reconnect on the settings page, otherwise they will not have any effect.</font>",
+                    "type": "text",
+                    "html": true
+                }
+            ]
         }
     ]
 }

@@ -1,14 +1,25 @@
 ScriptName TK2:AAF_EventBridge extends Quest
 
+AAF:AAF_API aaf = None
+TK2:MCM_Devices tkMcm = None
+
 Int CurrentHandle = -1
 
 Function Startup()
-    AAF:AAF_API aaf = Game.GetFormFromFile(0x00000F99, "AAF.esm") as AAF:AAF_API
+    aaf = Game.GetFormFromFile(0x00000F99, "AAF.esm") as AAF:AAF_API
     If (aaf)
         RegisterForCustomEvent(aaf, "OnAnimationStart")
         RegisterForCustomEvent(aaf, "OnAnimationStop")
         RegisterForCustomEvent(aaf, "OnAnimationChange")
     EndIf
+
+    tkMcm = Game.GetFormFromFile(0x2665, "Telekinesis.esp") as TK2:MCM_Devices
+    If ! tkMcm
+        Debug.MessageBox("MCM not found")
+        return
+    EndIf
+
+    tkMcm.AAF_Started = True
 EndFunction
 
 Event AAF:AAF_API.OnAnimationStart(AAF:AAF_API akSender, Var[] akArgs)

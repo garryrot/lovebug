@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use tracing::{debug, info};
+use events::{Event, TimedEvent};
+use tracing::{debug, event, info};
 
 use crate::*;
 
@@ -16,7 +17,9 @@ pub struct Triggers {
     /// maps lowercased scene IDs to a specific trigger
     scenes_exact_index: HashMap<String, Scene>,
     /// all remaining scenes
-    scenes: Vec<Scene>
+    scenes: Vec<Scene>,
+    /// triggered by process_event
+    pub events: Vec<Event>
 }
 
 impl Triggers {
@@ -24,6 +27,7 @@ impl Triggers {
         Triggers {
             scenes_exact_index: HashMap::new(),
             scenes: vec![],
+            events: vec![],
         }
     }
 
@@ -44,13 +48,16 @@ impl Triggers {
                         },
                     }
                 },
-                Trigger::Event(_) => todo!(),
+                Trigger::Event(event) => {
+                    self.events.push(event);
+                },
                 Trigger::Timed(_) => todo!(),
             }
         }
         self.scenes.append(&mut scenes_default);
 
         info!("read {} scenes...", self.scenes.len());
+        info!("read {} events...", self.events.len());
         info!("indexed {} exact scenes...", self.scenes_exact_index.len());
         self.scenes_exact_index.iter().for_each(|(_, scene)| {
             debug!("{:?}", scene);
@@ -58,6 +65,14 @@ impl Triggers {
         for scene in &self.scenes {
             debug!("{:?}", scene);
         }
+    }
+
+    pub fn find_started_events(&self, event_name: &str) -> Option<Event> {
+        self.events.iter().find(|x| x.event_start.event == event_name ).cloned()
+    }
+
+    pub fn find_stopped_events(&self, event_name: &str) -> Option<Event> {
+        self.events.iter().find(|x| x.event_stop.event == event_name ).cloned()
     }
 
     pub fn find_scene(&self, scene_name: &str, tags: &Vec<String>) -> Option<Scene> {

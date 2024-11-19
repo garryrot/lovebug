@@ -2,9 +2,11 @@
 
 #include "rust/cxx.h"
 #include "tk2/src/bridge.rs.h"
+#include "tk2/src/logging.rs.h"
 #include "PCH.h"
 
 // Actor
+const RE::Actor* PlayerCharacter_GetSingleton();
 bool IsPlayer(const RE::Actor *actor);
 Sex GetSex(const RE::Actor *actor);
 const RE::TESRace* GetRace(const RE::Actor *actor);
@@ -19,6 +21,13 @@ class ActorVec {
         int Size() const;
 };
 
-std::uint32_t GetFormID(const RE::TESForm* form);
+// Form
 const RE::TESForm* AsForm(const RE::TESRace* form);
+const RE::TESForm* TESForm_GetFormByEditorID(rust::Str editorId);
+std::uint32_t GetFormID(const RE::TESForm* form);
+std::uint32_t GetSavedFormType(const RE::TESForm* form);
+
+// Actor
 const RE::NiAVObject* GetBone(const RE::Actor *actor, rust::Str bone);
+bool ContainsKeyword(const RE::Actor *actor, rust::Str editorId);
+float GetPlayerActorValue(rust::Str actorValueEditorId);

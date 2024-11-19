@@ -22,6 +22,7 @@ using namespace RE::BSScript;
 #include "MCM.cpp"
 #include "Native.cpp"
 #include "Events.cpp"
+#include "ActorValueSink.cpp"
 
 // Messaging
 void InitializeMessaging()
@@ -44,6 +45,14 @@ void InitializeMessaging()
                 }
                 case F4SE::MessagingInterface::kGameLoaded:
                     lb_log_info("game loaded");
+                    auto playerValueSink = ActorValueSink::GetSingleton();
+                    RE::TESObjectREFR *player = RE::PlayerCharacter::GetSingleton();
+                    player->RegisterSink(playerValueSink);
+
+                    auto pla = RE::PlayerCharacter::GetSingleton();
+                    auto x = pla->GetNPC()->ContainsKeyword( "DD_kw_Event_IsVibrating" );
+                    lb_log_info(std::format("player is vibrating {}", x));
+
                     
                     break;
             }

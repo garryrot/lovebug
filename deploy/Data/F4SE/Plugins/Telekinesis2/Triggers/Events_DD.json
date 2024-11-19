@@ -1,0 +1,68 @@
+[
+  {
+    "Event": {
+      "description": "DD Vibrators (controlled by Actor Value)",
+      "event_start": {
+        "event": "DD.Vibrator",
+        "form": "Any",
+        "conditions": []
+      },
+      "event_stop": {
+        "event": "never",
+        "form": "Any",
+        "conditions": []
+      },
+      "actions": [
+        {
+          "action": "vibrate.anal",
+          "strength": {
+            "Variable": {
+              "PlayerActorValue": "DD_AV_VibrateStrengthAnal"
+            }
+          }
+        },
+        {
+          "action": "vibrate.vaginal",
+          "strength": {
+            "Variable": {
+              "PlayerActorValue": "DD_AV_VibrateStrengthVaginal"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD Inflators (controlled by Actor Value)",
+      "event_start": {
+        "event": "DD.Inflator",
+        "form": "Any",
+        "conditions": []
+      },
+      "event_stop": {
+        "event": "never",
+        "form": "Any",
+        "conditions": []
+      },
+      "actions": [
+        {
+          "action": "inflate.vaginal",
+          "strength": {
+            "Variable": {
+              "PlayerActorValue": "DD_AV_InflateStatusVaginal"
+            }
+          }
+        },
+        {
+          "action": "inflate.anal",
+          "strength": {
+            "Variable": {
+              "PlayerActorValue": "DD_AV_InflateStatusAnal"
+            }
+          }
+        }
+      ]
+    }
+  }
+]

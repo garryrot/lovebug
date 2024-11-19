@@ -1,7 +1,7 @@
 Scriptname Telekinesis extends ScriptObject Native
 
 Bool Function Connect(Int connection, String port, String host, Bool bluetooth, Bool xinupt, Bool serial) Native Global
-Bool Function Process_Event(String eventName, String strArg, float floatArg) Native Global
+Int Function Process_Event(String eventName, String strArg, float floatArg) Native Global
 Int Function Action(String actionName, Int speed, Float secs) Native Global
 Int Function Scene(String sceneName, Actor[] actors, String[] tags, Int speed, Float secs) Native Global
 Bool Function Update(Int handle, Int speed) Native Global

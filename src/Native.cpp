@@ -3,7 +3,7 @@ bool Connect(std::monostate, int connection, std::string port, std::string host,
     return lb_connect(connection, port, host, bluetooth, xinupt, serial);
 }
 
-bool ProcessEvent(std::monostate, std::string eventName, std::string strArg, float numArg)
+int ProcessEvent(std::monostate, std::string eventName, std::string strArg, float numArg)
 {
     return lb_process_event(eventName, strArg, numArg);
 }

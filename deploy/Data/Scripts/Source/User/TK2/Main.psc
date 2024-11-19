@@ -17,6 +17,11 @@ Function Startup()
 	If aafBridge
 		aafBridge.CallFunction("Startup", new Var[0])
 	EndIf
+	
+	ScriptObject ddBridge = CastAs("TK2:DD_EventBridge")
+	If ddBridge
+		ddBridge.CallFunction("Startup", new Var[0])
+	EndIf
 
 	ScriptObject mcmActuator = CastAs("TK2:MCM_Actuator")
 	If mcmActuator

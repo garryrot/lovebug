@@ -13,6 +13,7 @@
         <Import>C:\Program Files (x86)\Steam\steamapps\common\Fallout 4\Data\Scripts\Source\Base</Import>
         <Import>C:\Wabbajack\Downloads\paradise2\mods\Advanced Animation Framework\Scripts\Source\User</Import>
         <Import>C:\Wabbajack\Downloads\paradise2\mods\Mod Configuration Menu\Scripts\Source\User</Import>
+        <Import>C:\Wabbajack\Downloads\paradise2\mods\Devious Devices RC9 Beta2 HotFix\Scripts\Source\User</Import>
     </Imports>
     <Folders>
         <Folder>.</Folder>

@@ -7,6 +7,11 @@
  
  use ffi_bridge::*;
 
+pub mod enum_form_id {
+    /// Actor Value
+    pub const K_AVIF : u32 = 0x62;
+}
+
 #[cxx::bridge]
 pub mod ffi_bridge {
 
@@ -26,14 +31,20 @@ pub mod ffi_bridge {
         pub type NiAVObject;
     }
     
+    #[allow(clippy::missing_safety_doc)]
     unsafe extern "C++" {
         include!("Bridge.h");
+        pub unsafe fn PlayerCharacter_GetSingleton() -> *const Actor;
+        pub unsafe fn TESForm_GetFormByEditorID(editorId: &str) -> *const TESForm;
         pub unsafe fn GetFormID(form: *const TESForm) -> u32;
+        pub unsafe fn GetSavedFormType(form: *const TESForm) -> u32; // enum_form_id
         pub unsafe fn AsForm(form: *const TESRace) -> *const TESForm;
         pub unsafe fn IsPlayer(actor: *const Actor) -> bool;
         pub unsafe fn GetSex(actor: *const Actor) -> Sex;
         pub unsafe fn GetRace(actor: *const Actor) -> *const TESRace;
         pub unsafe fn GetBone(actor: *const Actor, bone: &str) -> *const NiAVObject;
+        pub unsafe fn ContainsKeyword(actor: *const Actor, editorId: &str) -> bool;
+        pub unsafe fn GetPlayerActorValue(actorValueEditorId: &str) -> f32;
     } 
 }
 

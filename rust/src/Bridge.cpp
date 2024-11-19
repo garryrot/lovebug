@@ -4,14 +4,8 @@
 #include "Bridge.h"
 
 // Actor
-ActorVec::ActorVec(std::vector<RE::Actor*> actors) {
-    this->actors = actors;
-}
-const RE::Actor* ActorVec::GetActor( int pos ) const {
-    return this->actors[ pos ];
-}
-int ActorVec::Size() const {
-    return this->actors.size();
+const RE::Actor* PlayerCharacter_GetSingleton() {
+    return RE::PlayerCharacter::GetSingleton();
 }
 bool IsPlayer(const RE::Actor *actor) {
     return actor == RE::PlayerCharacter::GetSingleton();
@@ -35,6 +29,63 @@ const RE::TESRace* GetRace(const RE::Actor *actor) {
     }
     return actor->race;
 }
+
+bool ContainsKeyword(const RE::Actor *actor, rust::Str editorId) {
+    auto isVibratingKeyword = RE::TESForm::GetFormByEditorID( (std::string) editorId);
+    if (isVibratingKeyword && isVibratingKeyword->GetSavedFormType() == RE::ENUM_FORM_ID::kKYWD)
+    {
+        
+        return actor->HasKeyword( (const RE::BGSKeyword *) isVibratingKeyword, nullptr);
+    }
+    return false;
+}
+
+float GetPlayerActorValue(rust::Str editorId) {
+    std::string actorValueEditorId = (std::string) editorId;
+    auto form = RE::TESForm::GetFormByEditorID(actorValueEditorId);
+    if (form)
+    {
+        auto player = RE::PlayerCharacter::GetSingleton();
+
+        RE::ENUM_FORM_ID formType = form->GetSavedFormType();
+        if (formType == RE::ENUM_FORM_ID::kAVIF)
+        {
+            auto a_info = (RE::ActorValueInfo*) form;
+            float actorValue = player->GetActorValue( (*a_info) );
+            lb_log_info(std::format("Read actor value {} from formId={:x}: {}", actorValueEditorId, form->formID, actorValue));
+            return actorValue;
+        }
+        else 
+        {
+            lb_log_error(
+                std::format("Editor id {} with formID={:x} is not actor value, form type: {:x}", 
+                actorValueEditorId, 
+                form->formID, 
+                static_cast<unsigned>(formType)));
+        }
+    }
+    return 0;
+}
+
+// ActorVec
+ActorVec::ActorVec(std::vector<RE::Actor*> actors) {
+    this->actors = actors;
+}
+const RE::Actor* ActorVec::GetActor( int pos ) const {
+    return this->actors[ pos ];
+}
+int ActorVec::Size() const {
+    return this->actors.size();
+}
+
+// Form
+const RE::TESForm* AsForm(const RE::TESRace* form) {
+    return form;
+}
+const RE::TESForm* TESForm_GetFormByEditorID(rust::Str editorId) {
+    std::string editorIdStr = (std::string) editorId;
+    return RE::TESForm::GetFormByEditorID( editorIdStr );
+}
 std::uint32_t GetFormID(const RE::TESForm* form) {
     if (form == NULL)
     {
@@ -42,8 +93,12 @@ std::uint32_t GetFormID(const RE::TESForm* form) {
     }
     return form->GetFormID();
 }
-const RE::TESForm* AsForm(const RE::TESRace* form) {
-    return form;
+std::uint32_t GetSavedFormType(const RE::TESForm* form) {
+    if (form == NULL)
+    {
+        return 0;
+    }
+    return static_cast<std::uint32_t>(form->GetSavedFormType());
 }
 
 // NiAVObject
