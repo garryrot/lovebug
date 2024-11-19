@@ -16,7 +16,7 @@ use serde::Serialize;
 use bp_scheduler::{
     config::{
         actions::{ActionRef, Stren, Variable},
-        client::ClientSettings,
+        client::{ClientSettings, LoggingSettings},
     },
     dynamic_tracking::DynamicSettings,
 };
@@ -47,7 +47,7 @@ fn main() {
     let triggers: Vec<(&str, Vec<Trigger>)> = vec![
         ("Scenes.json", default_trigger()),
         ("Scenes_BP70.json", pb70_triggers()),
-        ("Events_DD.json", dd_events()),
+        ("DD.json", dd_events()),
     ];
     for trigger in triggers {
         let path = format!("../{}/Triggers/{}", config_dir, trigger.0);
@@ -88,8 +88,8 @@ fn main() {
         DynamicSettings::default(),
     );
     write_file(
-        format!("../{}/Connection.json", config_dir),
-        ClientSettings::default(),
+        format!("../{}/Logging.json", config_dir),
+        LoggingSettings::default(),
     );
 }
 
@@ -182,7 +182,7 @@ fn dd_events() -> Vec<Trigger> {
             },
             actions: vec![
                 ActionRef {
-                    action: "vibrate.anal".into(),
+                    action: "vibrate".into(),
                     strength: Stren::Variable(Variable::PlayerActorValue(
                         "DD_AV_VibrateStrengthAnal".into(),
                     )),
@@ -198,7 +198,7 @@ fn dd_events() -> Vec<Trigger> {
         Trigger::Event(Event {
             description: "DD Inflators (controlled by Actor Value)".into(),
             event_start: EventTrigger {
-                event: "dd.inflator".into(),
+                event: "dd.inflate.vaginal".into(),
                 form: Form::Any,
                 conditions: vec![],
             },
@@ -209,19 +209,34 @@ fn dd_events() -> Vec<Trigger> {
             },
             actions: vec![
                 ActionRef {
-                    action: "inflate.vaginal".into(),
+                    action: "inflate".into(),
                     strength: Stren::Variable(Variable::PlayerActorValue(
                         "DD_AV_InflateStatusVaginal".into(),
                     )),
-                },
+                }
+            ],
+        }),
+        Trigger::Event(Event {
+            description: "DD Inflators (controlled by Actor Value)".into(),
+            event_start: EventTrigger {
+                event: "dd.inflate.anal".into(),
+                form: Form::Any,
+                conditions: vec![],
+            },
+            event_stop: EventTrigger {
+                event: "never".into(),
+                form: Form::Any,
+                conditions: vec![],
+            },
+            actions: vec![
                 ActionRef {
-                    action: "inflate.anal".into(),
+                    action: "inflate".into(),
                     strength: Stren::Variable(Variable::PlayerActorValue(
                         "DD_AV_InflateStatusAnal".into(),
                     )),
                 },
             ],
-        }),
+        })
     ];
     vec
 }

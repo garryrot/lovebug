@@ -3,10 +3,10 @@ use std::{
     sync::Mutex,
 };
 
-use bp_scheduler::config::{client::ClientSettings, read::read_or_default};
+use bp_scheduler::config::{client::LoggingSettings, read::read_or_default};
 use tracing::{debug, error, info, Level};
 
-use crate::{CONFIG_DIR, CLIENT_SETTINGS};
+use crate::{CONFIG_DIR, LOGGING_SETTINGS};
 
 #[cxx::bridge]
 mod ffi {
@@ -46,7 +46,7 @@ pub fn lb_init_logging_stdout() -> bool {
 }
 
 pub fn lb_init_logging(file_path: String) -> bool {
-    let log_level =  read_or_default::<ClientSettings>(CONFIG_DIR, CLIENT_SETTINGS).log_level;
+    let log_level =  read_or_default::<LoggingSettings>(CONFIG_DIR, LOGGING_SETTINGS).log_level;
     let file = match File::create(file_path) {
         Ok(file) => file,
         Err(err) => {

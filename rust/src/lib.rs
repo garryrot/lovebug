@@ -8,14 +8,12 @@ use tokio::task::JoinHandle;
 use variables::VariableStore;
 
 use std::{
-    sync::{ Arc, Mutex},
+    sync::{ atomic::AtomicI64, Arc, Mutex},
     time::Duration,
 };
 use tracing::{debug, error, info};
 
 use crate::bones::ffi_bones::ActorVec;
-
-use buttplug::{client::LinearCommand, core::message::LogLevel};
 
 use bp_scheduler::{
     client::BpClient,
@@ -45,7 +43,7 @@ pub static VARIABLES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Variables";
 pub static DEFAULT_RACE_MALE: &str = "DefaultRaceMale.json";
 pub static DEFAULT_RACE_FEMALE: &str = "DefaultRaceFemale.json";
 pub static BONE_TRACKING: &str = "BoneTracking.json";
-pub static CLIENT_SETTINGS: &str = "Connection.json"; // TODO: Currently useless except logging, Rename to logging
+pub static LOGGING_SETTINGS: &str = "Logging.json";
 pub static DEVICE_SETTINGS: &str = "Devices.json";
 
 mod bones;
@@ -173,7 +171,6 @@ mod ffi {
             time_sec: f32,
             actors: &ActorVec,
         ) -> i32;
-        fn lb_stroke(ms: i32, pos: f32) -> bool;
         fn lb_update(id: i32, speed: i32) -> bool;
         fn lb_stop(id: i32) -> bool;
         fn lb_actor_value_changed(form_id: u32, value: f32);
@@ -198,7 +195,6 @@ pub fn lb_connect(
     // TODO: Do this in to background thread to avoid small UI stutter
     if let Ok(mut guard) = LB.state.try_lock() {
         let settings = ClientSettings {
-            log_level: LogLevel::Debug,
             connection: match connection {
                 0 => ConnectionType::InProcess,
                 1 => ConnectionType::WebSocket(format!("{}:{}", host, port)),
@@ -343,26 +339,6 @@ pub fn lb_scene(
     )
 }
 
-// TODO: unused
-pub fn lb_stroke(ms: i32, pos: f32) -> bool {
-    info!(ms, pos, "lb_stroke");
-    Telekinesis::run_static(
-        |lb| {
-            let devices = lb.client.buttplug.devices();
-            lb.client.runtime.spawn(async move {
-                for device in devices {
-                    device
-                        .linear(&LinearCommand::Linear(ms as u32, pos.into()))
-                        .await
-                        .unwrap();
-                }
-            });
-            true
-        },
-        false,
-    )
-}
-
 pub fn lb_update(handle: i32, speed: i32) -> bool {
     info!(handle, speed, "lb_update");
     Telekinesis::run_static(
@@ -415,7 +391,14 @@ fn get_actions_from_refs(
                 Stren::Variable(var) => Strength::Variable(match var {
                     Variable::BoneTrackingRate => lb.dynamic_task.cur_avg_ms.clone(),
                     Variable::BoneTrackingDepth => lb.dynamic_task.cur_depth.clone(),
-                    Variable::PlayerActorValue(name) => lb.variables.get(&name).unwrap(), // TODO: unrwap_or
+                    Variable::PlayerActorValue(name) => {
+                        if let Some(var) =  lb.variables.get(&name) {
+                            var.clone()
+                        } else {
+                            error!(name, "unknown player actor value");
+                            Arc::new(AtomicI64::new(0))
+                        }
+                    },
                 }),
                 Stren::Funscript(x, y) => Strength::Funscript(x, y),
                 Stren::RandomFunscript(x, y) => Strength::RandomFunscript(x, y),

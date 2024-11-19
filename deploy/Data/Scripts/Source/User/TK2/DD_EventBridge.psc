@@ -34,13 +34,13 @@ Function Startup()
         started = True
     EndIf
 
-    ; StartEvents()
+    StartEvents()
 EndFunction
 
 Event Actor.OnItemEquipped(Actor sender, Form object, ObjectReference reference)
     Armor item = object as Armor
     If item && item.HasKeyword( libs.DD_kw_RenderedItem )
-        ; StartEvents()
+        StartEvents()
     EndIf
 EndEvent
 
@@ -49,15 +49,12 @@ Function StartEvents()
 
     If plugInflateHandle == -1
         If player.WornHasKeyword(libs.DD_kw_ItemEffect_PlugInflate)
-            plugInflateHandle = Telekinesis.Process_Event("DD.Inflator", "", 0.0)
-        EndIf
-    EndIf
-
-    If plugVibrateHandle == -1
-        If player.WornHasKeyword(libs.DD_kw_ItemEffect_PlugVibrate)
-            plugVibrateHandle = Telekinesis.Process_Event("DD.Vibrator", "", 0.0)
-        ElseIf player.WornHasKeyword(libs.DD_kw_ItemEffect_PlugVibrate_EdgeOnly)
-            plugVibrateHandle = Telekinesis.Process_Event("DD.Vibrator.Edge", "", 0.0)
+            bool inflatesVaginal = player.WornHasKeyword(libs.DD_kw_ItemSubType_InflatablePlugVaginal) 
+            If inflatesVaginal
+                plugInflateHandle = Telekinesis.Process_Event("dd.inflate.vaginal", "", 0.0)
+            Else
+                plugInflateHandle = Telekinesis.Process_Event("dd.inflate.anal", "", 0.0)
+            EndIf
         EndIf
     EndIf
 EndFunction

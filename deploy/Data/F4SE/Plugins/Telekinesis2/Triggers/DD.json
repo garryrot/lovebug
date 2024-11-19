@@ -64,7 +64,7 @@
       },
       "actions": [
         {
-          "action": "vibrate.anal",
+          "action": "vibrate",
           "strength": {
             "Variable": {
               "PlayerActorValue": "DD_AV_VibrateStrengthAnal"
@@ -86,7 +86,7 @@
     "Event": {
       "description": "DD Inflators (controlled by Actor Value)",
       "event_start": {
-        "event": "dd.inflator",
+        "event": "dd.inflate.vaginal",
         "form": "Any",
         "conditions": []
       },
@@ -97,15 +97,32 @@
       },
       "actions": [
         {
-          "action": "inflate.vaginal",
+          "action": "inflate",
           "strength": {
             "Variable": {
               "PlayerActorValue": "DD_AV_InflateStatusVaginal"
             }
           }
-        },
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD Inflators (controlled by Actor Value)",
+      "event_start": {
+        "event": "dd.inflate.anal",
+        "form": "Any",
+        "conditions": []
+      },
+      "event_stop": {
+        "event": "never",
+        "form": "Any",
+        "conditions": []
+      },
+      "actions": [
         {
-          "action": "inflate.anal",
+          "action": "inflate",
           "strength": {
             "Variable": {
               "PlayerActorValue": "DD_AV_InflateStatusAnal"

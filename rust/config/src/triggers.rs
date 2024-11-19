@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use events::{Event, TimedEvent};
-use tracing::{debug, event, info};
+use tracing::{debug, info};
 
 use crate::*;
 
