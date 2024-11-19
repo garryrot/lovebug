@@ -1,6 +1,5 @@
 use bodies::Race;
 use bones::{lb_dynamic_tracking, DynamicTrackingHandle};
-use config::variables::{ConfigVariable, PlayerActorValue};
 use cxx::{CxxString, CxxVector};
 use dd::start_dd_workaround;
 use input::{read_input_duration, read_input_string};
@@ -41,6 +40,7 @@ pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Patterns";
 pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Actions";
 pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Triggers";
 pub static RACES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Races";
+pub static VARIABLES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Variables";
 
 pub static DEFAULT_RACE_MALE: &str = "DefaultRaceMale.json";
 pub static DEFAULT_RACE_FEMALE: &str = "DefaultRaceFemale.json";
@@ -56,48 +56,6 @@ mod input;
 mod logging;
 mod mcm;
 mod variables;
-
-pub static VAR_DD_AROUSAL: &str = "DD_AV_Arousal";
-pub static VAR_DD_INFLATE_STATUS_VAGINAL: &str = "DD_AV_InflateStatusVaginal";
-pub static VAR_DD_INFLATE_STATUS_ANAL: &str = "DD_AV_InflateStatusAnal";
-pub static VAR_DD_VIBRATE_STRENGTH_VAGINAL: &str = "DD_AV_VibrateStrengthVaginal";
-pub static VAR_DD_VIBRATE_STRENGTH_ANAL: &str = "DD_AV_VibrateStrengthAnal";
-
-// TODO: Move to config
-fn dd_variables() -> Vec<ConfigVariable> {
-    vec![
-        ConfigVariable::PlayerActorValue(PlayerActorValue {
-            variable_id: VAR_DD_AROUSAL.into(),
-            editor_id: VAR_DD_AROUSAL.into(),
-            min: 0.0,
-            max: 100.0,
-        }),
-        ConfigVariable::PlayerActorValue(PlayerActorValue {
-            variable_id: VAR_DD_INFLATE_STATUS_VAGINAL.into(),
-            editor_id: VAR_DD_INFLATE_STATUS_VAGINAL.into(),
-            min: 0.0,
-            max: 6.0,
-        }),
-        ConfigVariable::PlayerActorValue(PlayerActorValue {
-            variable_id: VAR_DD_INFLATE_STATUS_ANAL.into(),
-            editor_id: VAR_DD_INFLATE_STATUS_ANAL.into(),
-            min: 0.0,
-            max: 6.0,
-        }),
-        ConfigVariable::PlayerActorValue(PlayerActorValue {
-            variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
-            editor_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
-            min: 0.0,
-            max: 5.0,
-        }),
-        ConfigVariable::PlayerActorValue(PlayerActorValue {
-            variable_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
-            editor_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
-            min: 0.0,
-            max: 5.0,
-        }),
-    ]
-}
 
 #[derive(Debug)]
 pub struct Telekinesis {
@@ -225,11 +183,7 @@ mod ffi {
 
 pub fn lb_actor_value_changed(form_id: u32, value: f32) {
     Telekinesis::run_static_no_return(|lb| {
-        let var_name = lb.variables.update(form_id, value);
-        if let Some(var) = var_name {
-            if var == VAR_DD_VIBRATE_STRENGTH_VAGINAL || var == VAR_DD_VIBRATE_STRENGTH_ANAL {
-            }
-        }
+        let _ = lb.variables.update(form_id, value);
     });
 }
 
@@ -268,7 +222,10 @@ pub fn lb_connect(
         }
 
         let dynamic_task = DynamicTrackingHandle::default();
-        let variables = VariableStore::new(dd_variables(), &dynamic_task);
+
+        let vars = read_variables();
+
+        let variables = VariableStore::new( vars, &dynamic_task);
         let mut lb = Telekinesis {
             client: client.unwrap(),
             triggers: Triggers::default(),
@@ -296,6 +253,15 @@ pub fn lb_connect(
         error!("init failed");
     }
     true
+}
+
+fn read_variables() -> Vec<config::variables::ConfigVariable> {
+    let vars = read_config_dir(VARIABLES_DIR.into());
+    for var in &vars {
+        debug!(?var, "read variable");
+    }
+    info!("read {} variables...", vars.len());
+    vars
 }
 
 pub fn lb_disconnect() {

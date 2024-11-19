@@ -1,0 +1,42 @@
+[
+  {
+    "PlayerActorValue": {
+      "variable_id": "DD_AV_Arousal",
+      "editor_id": "DD_AV_Arousal",
+      "min": 0.0,
+      "max": 100.0
+    }
+  },
+  {
+    "PlayerActorValue": {
+      "variable_id": "DD_AV_InflateStatusVaginal",
+      "editor_id": "DD_AV_InflateStatusVaginal",
+      "min": 0.0,
+      "max": 6.0
+    }
+  },
+  {
+    "PlayerActorValue": {
+      "variable_id": "DD_AV_InflateStatusAnal",
+      "editor_id": "DD_AV_InflateStatusAnal",
+      "min": 0.0,
+      "max": 6.0
+    }
+  },
+  {
+    "PlayerActorValue": {
+      "variable_id": "DD_AV_VibrateStrengthVaginal",
+      "editor_id": "DD_AV_VibrateStrengthVaginal",
+      "min": 0.0,
+      "max": 5.0
+    }
+  },
+  {
+    "PlayerActorValue": {
+      "variable_id": "DD_AV_VibrateStrengthAnal",
+      "editor_id": "DD_AV_VibrateStrengthAnal",
+      "min": 0.0,
+      "max": 5.0
+    }
+  }
+]

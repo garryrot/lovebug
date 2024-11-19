@@ -44,7 +44,7 @@ pub mod ffi_bridge {
         pub unsafe fn GetRace(actor: *const Actor) -> *const TESRace;
         pub unsafe fn GetBone(actor: *const Actor, bone: &str) -> *const NiAVObject;
         pub unsafe fn ContainsKeyword(actor: *const Actor, editorId: &str) -> bool;
-        pub unsafe fn GetPlayerActorValue(actorValueEditorId: &str) -> f32;
+        // pub unsafe fn GetPlayerActorValue(actorValueEditorId: &str) -> f32;
     } 
 }
 

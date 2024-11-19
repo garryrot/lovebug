@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::atomic::Ordering, time::Duration};
 
 use tokio::time::sleep;
 use tracing::*;
@@ -20,6 +20,7 @@ use crate::{
 pub fn start_dd_workaround(tk: &mut Telekinesis) {
     info!("start_dd_workaround");
     let mut current_handle = -1;
+    let variable_clone = tk.variables.clone();
 
     if let Some(existing) = &tk.variable_update_thread {
         existing.abort();
@@ -35,7 +36,20 @@ pub fn start_dd_workaround(tk: &mut Telekinesis) {
             if is_vibrating && ! was_vibrating {
                 debug!("enabling dd vibrator");
                 was_vibrating = true;
-                current_handle = lb_process_event("DD.Vibrator", "", 0.0);
+
+                let anal_on = variable_clone.get("DD_AV_VibrateStrengthAnal").unwrap().load(Ordering::Relaxed) > 0;
+                let vaginal_on = variable_clone.get("DD_AV_VibrateStrengthVaginal").unwrap().load(Ordering::Relaxed) > 0; 
+
+                // assure that speed 0 does not overwrite the other thread
+                // TODO: this needs a better solution
+                if anal_on && vaginal_on {
+                    current_handle = lb_process_event("dd.vibrator", "", 0.0);
+                } else if anal_on {
+                    current_handle = lb_process_event("dd.vibrator.anal", "", 0.0);
+                } else if vaginal_on {
+                    current_handle = lb_process_event("dd.vibrator.vaginal", "", 0.0);
+                }
+
             } else if !is_vibrating && was_vibrating {
                 debug!("disabling dd vibrator");
                 was_vibrating = false;

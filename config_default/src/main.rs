@@ -1,13 +1,10 @@
-use std::{
-    fs::{self},
-    time::Duration,
-};
+use std::fs::{self};
 
 use bodies::Race;
 
 use actions::*;
 use config::*;
-use events::{Event, EventTrigger, Form, TimedEvent};
+use events::{Event, EventTrigger, Form};
 use races::*;
 use scenes_bp70::pb70_triggers;
 use scenes_default::*;
@@ -30,11 +27,21 @@ mod races;
 mod scenes_bp70;
 mod scenes_default;
 
+pub static VAR_DD_AROUSAL: &str = "DD_AV_Arousal";
+pub static VAR_DD_INFLATE_STATUS_VAGINAL: &str = "DD_AV_InflateStatusVaginal";
+pub static VAR_DD_INFLATE_STATUS_ANAL: &str = "DD_AV_InflateStatusAnal";
+pub static VAR_DD_VIBRATE_STRENGTH_VAGINAL: &str = "DD_AV_VibrateStrengthVaginal";
+pub static VAR_DD_VIBRATE_STRENGTH_ANAL: &str = "DD_AV_VibrateStrengthAnal";
+
 fn main() {
     let config_dir = "deploy/Data/F4SE/Plugins/Telekinesis2";
 
     // Variables
     let variables = vec![("DD.json", dd_variables())];
+    for variable in variables {
+        let path = format!("../{}/Variables/{}", config_dir, variable.0);
+        write_file(path, variable.1);
+    }
 
     // Triggers
     let triggers: Vec<(&str, Vec<Trigger>)> = vec![
@@ -88,7 +95,36 @@ fn main() {
 
 fn dd_variables() -> Vec<ConfigVariable> {
     vec![
-        // TODO
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_AROUSAL.into(),
+            editor_id: VAR_DD_AROUSAL.into(),
+            min: 0.0,
+            max: 100.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_INFLATE_STATUS_VAGINAL.into(),
+            editor_id: VAR_DD_INFLATE_STATUS_VAGINAL.into(),
+            min: 0.0,
+            max: 6.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_INFLATE_STATUS_ANAL.into(),
+            editor_id: VAR_DD_INFLATE_STATUS_ANAL.into(),
+            min: 0.0,
+            max: 6.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+            editor_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+            min: 0.0,
+            max: 5.0,
+        }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            variable_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
+            editor_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
+            min: 0.0,
+            max: 5.0,
+        }),
     ]
 }
 
@@ -97,7 +133,45 @@ fn dd_events() -> Vec<Trigger> {
         Trigger::Event(Event {
             description: "DD Vibrators (controlled by Actor Value)".into(),
             event_start: EventTrigger {
-                event: "DD.Vibrator".into(),
+                event: "dd.vibrator.anal".into(),
+                form: Form::Any,
+                conditions: vec![],
+            },
+            event_stop: EventTrigger {
+                event: "never".into(),
+                form: Form::Any,
+                conditions: vec![],
+            },
+            actions: vec![ActionRef {
+                action: "vibrate.anal".into(),
+                strength: Stren::Variable(Variable::PlayerActorValue(
+                    "DD_AV_VibrateStrengthAnal".into(),
+                )),
+            }],
+        }),
+        Trigger::Event(Event {
+            description: "DD Vibrators (controlled by Actor Value)".into(),
+            event_start: EventTrigger {
+                event: "dd.vibrator.vaginal".into(),
+                form: Form::Any,
+                conditions: vec![],
+            },
+            event_stop: EventTrigger {
+                event: "never".into(),
+                form: Form::Any,
+                conditions: vec![],
+            },
+            actions: vec![ActionRef {
+                action: "vibrate.vaginal".into(),
+                strength: Stren::Variable(Variable::PlayerActorValue(
+                    "DD_AV_VibrateStrengthVaginal".into(),
+                )),
+            }],
+        }),
+        Trigger::Event(Event {
+            description: "DD Vibrators (controlled by Actor Value)".into(),
+            event_start: EventTrigger {
+                event: "dd.vibrator".into(),
                 form: Form::Any,
                 conditions: vec![],
             },
@@ -124,7 +198,7 @@ fn dd_events() -> Vec<Trigger> {
         Trigger::Event(Event {
             description: "DD Inflators (controlled by Actor Value)".into(),
             event_start: EventTrigger {
-                event: "DD.Inflator".into(),
+                event: "dd.inflator".into(),
                 form: Form::Any,
                 conditions: vec![],
             },

@@ -40,32 +40,32 @@ bool ContainsKeyword(const RE::Actor *actor, rust::Str editorId) {
     return false;
 }
 
-float GetPlayerActorValue(rust::Str editorId) {
-    std::string actorValueEditorId = (std::string) editorId;
-    auto form = RE::TESForm::GetFormByEditorID(actorValueEditorId);
-    if (form)
-    {
-        auto player = RE::PlayerCharacter::GetSingleton();
+// float GetPlayerActorValue(rust::Str editorId) {
+//     std::string actorValueEditorId = (std::string) editorId;
+//     auto form = RE::TESForm::GetFormByEditorID(actorValueEditorId);
+//     if (form)
+//     {
+//         auto player = RE::PlayerCharacter::GetSingleton();
 
-        RE::ENUM_FORM_ID formType = form->GetSavedFormType();
-        if (formType == RE::ENUM_FORM_ID::kAVIF)
-        {
-            auto a_info = (RE::ActorValueInfo*) form;
-            float actorValue = player->GetActorValue( (*a_info) );
-            lb_log_info(std::format("Read actor value {} from formId={:x}: {}", actorValueEditorId, form->formID, actorValue));
-            return actorValue;
-        }
-        else 
-        {
-            lb_log_error(
-                std::format("Editor id {} with formID={:x} is not actor value, form type: {:x}", 
-                actorValueEditorId, 
-                form->formID, 
-                static_cast<unsigned>(formType)));
-        }
-    }
-    return 0;
-}
+//         RE::ENUM_FORM_ID formType = form->GetSavedFormType();
+//         if (formType == RE::ENUM_FORM_ID::kAVIF)
+//         {
+//             auto a_info = (RE::ActorValueInfo*) form;
+//             float actorValue = player->GetActorValue( (*a_info) );
+//             lb_log_info(std::format("Read actor value {} from formId={:x}: {}", actorValueEditorId, form->formID, actorValue));
+//             return actorValue;
+//         }
+//         else 
+//         {
+//             lb_log_error(
+//                 std::format("Editor id {} with formID={:x} is not actor value, form type: {:x}", 
+//                 actorValueEditorId, 
+//                 form->formID, 
+//                 static_cast<unsigned>(formType)));
+//         }
+//     }
+//     return 0;
+// }
 
 // ActorVec
 ActorVec::ActorVec(std::vector<RE::Actor*> actors) {
