@@ -1,5 +1,6 @@
 use bodies::Race;
 use bones::{lb_dynamic_tracking, DynamicTrackingHandle};
+use config::events::StopCondition;
 use cxx::{CxxString, CxxVector};
 use dd::start_dd_workaround;
 use input::{read_input_duration, read_input_string};
@@ -234,15 +235,18 @@ pub fn lb_connect(
             variables,
             variable_update_thread: None,
         };
+
+        lb.variables.init_actor_values();
         lb.client.read_actions(ACTIONS_DIR);
         lb.read_races();
 
         start_outgoing_event_thread(&lb.client);
-        start_dd_workaround(&mut lb);
 
         lb.triggers
             .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
         lb.client.scan_for_devices();
+
+        start_dd_workaround(&mut lb);
 
         guard.replace(lb);
     } else {
@@ -356,15 +360,17 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     info!(event_name, str_arg, num_arg, "lb_process_event");
     Telekinesis::run_static(
         |lb| {
-            let _stopped_event = lb.triggers.find_stopped_events(event_name);
-
+            // let _stopped_event = lb.triggers.find_stopped_events(event_name);
             if let Some(start_event) = lb.triggers.find_started_events(event_name) {
                 let converted = get_actions_from_refs(lb, start_event.actions);
                 return lb.client.dispatch_refs(
                     converted,
                     vec![],
                     Speed::max(),
-                    Duration::from_secs(999999),
+                    match start_event.event_stop {
+                        StopCondition::ElapsedMs(ms) => Duration::from_millis(ms.into()),
+                        _ => Duration::MAX,
+                    },
                 );
             }
             -1

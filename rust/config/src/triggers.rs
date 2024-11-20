@@ -1,15 +1,14 @@
 use std::collections::HashMap;
 
-use events::{Event, TimedEvent};
-use tracing::{debug, info};
+use events::{Event, EventTrigger};
+use tracing::{debug, event, info};
 
 use crate::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Trigger {
     Scene(Scene),
-    Event(Event),
-    Timed(TimedEvent)
+    Event(Event)
 }
 
 #[derive(Debug)]
@@ -50,8 +49,7 @@ impl Triggers {
                 },
                 Trigger::Event(event) => {
                     self.events.push(event);
-                },
-                Trigger::Timed(_) => todo!(),
+                }
             }
         }
         self.scenes.append(&mut scenes_default);
@@ -72,7 +70,12 @@ impl Triggers {
     }
 
     pub fn find_stopped_events(&self, event_name: &str) -> Option<Event> {
-        self.events.iter().find(|x| x.event_stop.event == event_name ).cloned()
+        self.events.iter().find(|x| {
+            match &x.event_stop {
+                events::StopCondition::Event(event_trigger) => event_trigger.event == event_name,
+                _ => false
+            }
+        }).cloned()
     }
 
     pub fn find_scene(&self, scene_name: &str, tags: &Vec<String>) -> Option<Scene> {

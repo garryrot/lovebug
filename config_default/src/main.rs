@@ -4,7 +4,7 @@ use bodies::Race;
 
 use actions::*;
 use config::*;
-use events::{Event, EventTrigger, Form};
+use events::{Event, EventTrigger, Form, StopCondition};
 use races::*;
 use scenes_bp70::pb70_triggers;
 use scenes_default::*;
@@ -16,7 +16,7 @@ use serde::Serialize;
 use bp_scheduler::{
     config::{
         actions::{ActionRef, Stren, Variable},
-        client::{ClientSettings, LoggingSettings},
+        client::LoggingSettings,
     },
     dynamic_tracking::DynamicSettings,
 };
@@ -35,24 +35,6 @@ pub static VAR_DD_VIBRATE_STRENGTH_ANAL: &str = "DD_AV_VibrateStrengthAnal";
 
 fn main() {
     let config_dir = "deploy/Data/F4SE/Plugins/Telekinesis2";
-
-    // Variables
-    let variables = vec![("DD.json", dd_variables())];
-    for variable in variables {
-        let path = format!("../{}/Variables/{}", config_dir, variable.0);
-        write_file(path, variable.1);
-    }
-
-    // Triggers
-    let triggers: Vec<(&str, Vec<Trigger>)> = vec![
-        ("Scenes.json", default_trigger()),
-        ("Scenes_BP70.json", pb70_triggers()),
-        ("DD.json", dd_events()),
-    ];
-    for trigger in triggers {
-        let path = format!("../{}/Triggers/{}", config_dir, trigger.0);
-        write_file(path, trigger.1);
-    }
 
     // Actions
     let actions = vec![
@@ -75,6 +57,25 @@ fn main() {
         let path = format!("../{}/Races/{}", config_dir, body.0);
         write_file(path, body.1);
     }
+    
+    // Variables
+    let variables = vec![("DD.json", dd_variables())];
+    for variable in variables {
+        let path = format!("../{}/Variables/{}", config_dir, variable.0);
+        write_file(path, variable.1);
+    }
+    
+    // Triggers
+    let triggers: Vec<(&str, Vec<Trigger>)> = vec![
+        ("Scenes.json", default_trigger()),
+        ("Scenes_BP70.json", pb70_triggers()),
+        ("DD.json", dd_events()),
+    ];
+    for trigger in triggers {
+        let path = format!("../{}/Triggers/{}", config_dir, trigger.0);
+        write_file(path, trigger.1);
+    }
+
     write_file(
         format!("../{}/DefaultRaceMale.json", config_dir),
         Race::default(),
@@ -137,11 +138,7 @@ fn dd_events() -> Vec<Trigger> {
                 form: Form::Any,
                 conditions: vec![],
             },
-            event_stop: EventTrigger {
-                event: "never".into(),
-                form: Form::Any,
-                conditions: vec![],
-            },
+            event_stop: StopCondition::ElapsedMs(65_000),
             actions: vec![ActionRef {
                 action: "vibrate.anal".into(),
                 strength: Stren::Variable(Variable::PlayerActorValue(
@@ -156,11 +153,7 @@ fn dd_events() -> Vec<Trigger> {
                 form: Form::Any,
                 conditions: vec![],
             },
-            event_stop: EventTrigger {
-                event: "never".into(),
-                form: Form::Any,
-                conditions: vec![],
-            },
+            event_stop: StopCondition::ElapsedMs(65_000),
             actions: vec![ActionRef {
                 action: "vibrate.vaginal".into(),
                 strength: Stren::Variable(Variable::PlayerActorValue(
@@ -175,11 +168,7 @@ fn dd_events() -> Vec<Trigger> {
                 form: Form::Any,
                 conditions: vec![],
             },
-            event_stop: EventTrigger {
-                event: "never".into(),
-                form: Form::Any,
-                conditions: vec![],
-            },
+            event_stop: StopCondition::ElapsedMs(65_000),
             actions: vec![
                 ActionRef {
                     action: "vibrate".into(),
@@ -202,11 +191,7 @@ fn dd_events() -> Vec<Trigger> {
                 form: Form::Any,
                 conditions: vec![],
             },
-            event_stop: EventTrigger {
-                event: "never".into(),
-                form: Form::Any,
-                conditions: vec![],
-            },
+            event_stop: StopCondition::Never,
             actions: vec![
                 ActionRef {
                     action: "inflate".into(),
@@ -223,11 +208,7 @@ fn dd_events() -> Vec<Trigger> {
                 form: Form::Any,
                 conditions: vec![],
             },
-            event_stop: EventTrigger {
-                event: "never".into(),
-                form: Form::Any,
-                conditions: vec![],
-            },
+            event_stop: StopCondition::Never,
             actions: vec![
                 ActionRef {
                     action: "inflate".into(),

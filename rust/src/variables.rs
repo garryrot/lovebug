@@ -9,7 +9,7 @@ use std::{
 use config::variables::{BuiltIn, ConfigVariable};
 use tracing::{debug, error, info};
 
-use crate::{bones::DynamicTrackingHandle, bridge::ffi_bridge::{GetFormID, TESForm_GetFormByEditorID}, Telekinesis};
+use crate::{bones::DynamicTrackingHandle, bridge::ffi_bridge::{GetFormID, GetPlayerActorValue, TESForm_GetFormByEditorID}, Telekinesis};
 
 pub trait VariableSource {
     fn read(&self, tk: &mut Telekinesis) -> Option<i64>;
@@ -59,17 +59,25 @@ impl VariableStore {
         VariableStore { variables: hashmap }
     }
 
+    pub fn init_actor_values(&self) {
+        for entry in &self.variables {
+            if let ConfigVariable::PlayerActorValue(val) = &entry.1.2 {
+                let editor_id = &entry.1.0;
+                let initial_val = normalize(val.min, val.max, unsafe { GetPlayerActorValue(editor_id) });
+                debug!(initial_val, val.variable_id, "monitored actor value initialized");
+                entry.1.1.store(initial_val, Ordering::Relaxed);
+            }
+        }
+    }
+
     pub fn update(&self, form_id: u32, value: f32) -> Option<String> {
         let fid = form_id as i64;
-        if let Some(av) = self.variables.get(&fid) {
-            match &av.2 {
-                ConfigVariable::PlayerActorValue(val) => {
-                    let new_val = normalize(val.min, val.max, value);
-                    debug!(new_val, ?av, "monitored actor value changed");
-                    av.1.store(new_val, Ordering::Relaxed);
-                    return Some(val.variable_id.clone());
-                },
-                ConfigVariable::Internal(_) => {}, // updated somehwere else
+        if let Some(entry) = self.variables.get(&fid) {
+            if let ConfigVariable::PlayerActorValue(val) = &entry.2 {
+                let new_val = normalize(val.min, val.max, value);
+                debug!(new_val, val.variable_id, "monitored actor value changed");
+                entry.1.store(new_val, Ordering::Relaxed);
+                return Some(val.variable_id.clone());
             }
         }
         None

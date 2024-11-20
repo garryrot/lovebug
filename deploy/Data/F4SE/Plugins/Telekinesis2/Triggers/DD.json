@@ -8,9 +8,7 @@
         "conditions": []
       },
       "event_stop": {
-        "event": "never",
-        "form": "Any",
-        "conditions": []
+        "ElapsedMs": 65000
       },
       "actions": [
         {
@@ -33,9 +31,7 @@
         "conditions": []
       },
       "event_stop": {
-        "event": "never",
-        "form": "Any",
-        "conditions": []
+        "ElapsedMs": 65000
       },
       "actions": [
         {
@@ -58,9 +54,7 @@
         "conditions": []
       },
       "event_stop": {
-        "event": "never",
-        "form": "Any",
-        "conditions": []
+        "ElapsedMs": 65000
       },
       "actions": [
         {
@@ -90,11 +84,7 @@
         "form": "Any",
         "conditions": []
       },
-      "event_stop": {
-        "event": "never",
-        "form": "Any",
-        "conditions": []
-      },
+      "event_stop": "Never",
       "actions": [
         {
           "action": "inflate",
@@ -115,11 +105,7 @@
         "form": "Any",
         "conditions": []
       },
-      "event_stop": {
-        "event": "never",
-        "form": "Any",
-        "conditions": []
-      },
+      "event_stop": "Never",
       "actions": [
         {
           "action": "inflate",

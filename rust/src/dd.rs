@@ -4,7 +4,7 @@ use tokio::time::sleep;
 use tracing::*;
 
 use crate::{
-    bridge::ffi_bridge::{ContainsKeyword, PlayerCharacter_GetSingleton}, lb_process_event, lb_stop, Telekinesis
+    bridge::ffi_bridge::{ContainsKeyword, PlayerCharacter_GetSingleton}, lb_action, lb_process_event, lb_stop, Telekinesis
 };
 
 
@@ -26,13 +26,15 @@ pub fn start_dd_workaround(tk: &mut Telekinesis) {
         existing.abort();
     }
     tk.variable_update_thread = Some(tk.client.runtime.spawn(async move {
+        sleep(Duration::from_secs(10)).await; // give devices some time to connect
         info!("dd workaround thread");
         let mut was_vibrating = false;
         loop {
-            sleep(Duration::from_millis(200)).await;
+            sleep(Duration::from_millis(250)).await;
             let is_vibrating = unsafe {
                 ContainsKeyword(PlayerCharacter_GetSingleton(), "DD_kw_Event_IsVibrating")
             };
+            debug!(is_vibrating);
             if is_vibrating && ! was_vibrating {
                 debug!("enabling dd vibrator");
                 was_vibrating = true;
@@ -48,6 +50,9 @@ pub fn start_dd_workaround(tk: &mut Telekinesis) {
                     current_handle = lb_process_event("dd.vibrator.anal", "", 0.0);
                 } else if vaginal_on {
                     current_handle = lb_process_event("dd.vibrator.vaginal", "", 0.0);
+                } else {
+                    error!("neither anal nor vaginal vibrator strength, just do generic vibration on everything");
+                    current_handle = lb_action("vibrate", 20, 65.0);
                 }
 
             } else if !is_vibrating && was_vibrating {

@@ -46,7 +46,6 @@ bool RegisterPapyrusCalls(IVirtualMachine *vm)
     vm->BindNativeMethod(TkClass, "Stop", Stop, false);
     vm->BindNativeMethod(TkClass, "Scene", Scene, false);
     vm->BindNativeMethod(TkClass, "Disconnect", Disconnect, false);
-
     vm->BindNativeMethod(TkClass, "MCM_Devices_Get", MCM_Devices_Get, false);
     vm->BindNativeMethod(TkClass, "MCM_Devices_Set", MCM_Devices_Set, false);
     vm->BindNativeMethod(TkClass, "MCM_Devices_Len", MCM_Devices_Len, false);
