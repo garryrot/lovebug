@@ -5,11 +5,11 @@ project(Telekinesis
         DESCRIPTION "Fallout4 amorous events processor"
         LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17) 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
-set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/Data/F4SE/Plugins/)
+set(DLL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deploy/${FOMOD_PACKAGE}/F4SE/Plugins/)
 
 # Rust
 
@@ -42,7 +42,7 @@ add_custom_command(
 
 set(BUILD_TESTS OFF)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/CommonLibF4 CommonLibF4 EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/${COMMONLIB_DIR} CommonLibF4 EXCLUDE_FROM_ALL)
 
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/Version.h.in

@@ -13,7 +13,7 @@ pub fn default_actions() -> Vec<Action> {
         Action::new(
             "constrict",
             vec![Control::Scalar(
-                Selector::All, 
+                Selector::All,
                 vec![ScalarActuator::Constrict],
             )],
         ),
@@ -58,7 +58,7 @@ pub fn default_actions() -> Vec<Action> {
     ]
 }
 
-pub fn scalar_actions() -> Vec<Action> {
+pub fn devices() -> Vec<Action> {
     vec![
         Action::new(
             "vibrate.nipple",
@@ -126,7 +126,7 @@ pub fn scalar_actions() -> Vec<Action> {
     ]
 }
 
-pub fn penetration_actions() -> Vec<Action> {
+pub fn sex_acts(do_bone_tracking: bool) -> Vec<Action> {
     vec![
         Action {
             name: "cunnilungus".into(),
@@ -178,9 +178,10 @@ pub fn penetration_actions() -> Vec<Action> {
                 ),
             ],
         },
-        Action::new_with_bone(
-            "penetration.vaginal",
-            vec![
+        Action {
+            name: "penetration.vaginal".into(),
+            do_bone_tracking,
+            control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
                     vec![
@@ -199,10 +200,11 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-        ),
-        Action::new_with_bone(
-            "penetration.vaginal.deep",
-            vec![
+        },
+        Action {
+            name: "penetration.vaginal.deep".into(),
+            do_bone_tracking,
+            control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
                     vec![
@@ -221,10 +223,11 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-        ),
-        Action::new_with_bone(
-            "penetration.oral.shallow",
-            vec![
+        },
+        Action {
+            name: "penetration.oral.shallow".into(),
+            do_bone_tracking,
+            control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
@@ -243,10 +246,11 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-        ),
-        Action::new_with_bone(
-            "penetration.oral",
-            vec![
+        },
+        Action {
+            name: "penetration.oral".into(),
+            do_bone_tracking,
+            control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
@@ -265,10 +269,11 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-        ),
-        Action::new_with_bone(
-            "penetration.oral.deep",
-            vec![
+        },
+        Action {
+            name: "penetration.oral.deep".into(),
+            do_bone_tracking,
+            control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
@@ -287,10 +292,11 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-        ),
-        Action::new_with_bone(
-            "penetration.anal",
-            vec![
+        },
+        Action {
+            name: "penetration.anal".into(),
+            do_bone_tracking,
+            control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
@@ -309,10 +315,11 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-        ),
-        Action::new_with_bone(
-            "penetration.anal.deep",
-            vec![
+        },
+        Action {
+            name: "penetration.anal.deep".into(),
+            do_bone_tracking,
+            control: vec![
                 Control::Scalar(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
@@ -331,6 +338,6 @@ pub fn penetration_actions() -> Vec<Action> {
                     },
                 ),
             ],
-        ),
+        },
     ]
 }

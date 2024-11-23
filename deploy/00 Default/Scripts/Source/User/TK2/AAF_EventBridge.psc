@@ -18,7 +18,7 @@ Function Startup()
         Debug.MessageBox("MCM not found")
         return
     EndIf
-
+    
     tkMcm.AAF_Started = True
 EndFunction
 

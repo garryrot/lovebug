@@ -3,7 +3,7 @@
 	url = https://github.com/alandtse/CommonLibVR
 	branch = ng
 [submodule "extern/CommonLibF4"]
-	path = extern/CommonLibF4
+	path = extern/CommonLibF4-163
 	url = https://github.com/garryrot/CommonLibF4
 	branch = 1.10.163
 [submodule "rust/bp_scheduler"]
@@ -12,3 +12,6 @@
 [submodule "rust/bp_fakes"]
 	path = rust/bp_fakes
 	url = https://github.com/garryrot/bp_fakes
+[submodule "extern/CommonLibF4-984"]
+	path = extern/CommonLibF4-984
+	url = https://github.com/shad0wshayd3-FO4/CommonLibF4

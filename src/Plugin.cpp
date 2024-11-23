@@ -12,9 +12,6 @@
 
 #include "Version.h"
 
-// Last shadowshayd3 commit that is for 163
-// https://github.com/shad0wshayd3-FO4/CommonLibF4/tree/af0993b8bcb7d5e3e1a50c9dd320a9a619475c94
-
 using namespace RE;
 using namespace RE::BSScript;
 
@@ -79,7 +76,7 @@ extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::Query
 	}
 
 	const auto ver = f4se->RuntimeVersion();
-	if (ver < F4SE::RUNTIME_1_10_162) {
+	if (ver < F4SE::RUNTIME_LATEST) {
 		lb_log_error(std::format("unsupported runtime v{}", ver.string()));
 		return false;
 	}

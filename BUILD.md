@@ -32,9 +32,18 @@ git submodule update --init --recursive
 
 3. Build the project
 
+Build the v163 DLL
+
 ```sh
 cmake --preset build
 cmake --build --preset build --config Release
+```
+
+Build the v983 DLL
+
+```sh
+cmake --preset build-984
+cmake --build --preset build-984 --config Release
 ```
 
 # Building Papyrus Scripts

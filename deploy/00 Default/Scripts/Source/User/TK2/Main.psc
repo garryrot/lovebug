@@ -23,7 +23,7 @@ Function Startup()
 		ddBridge.CallFunction("Startup", new Var[0])
 	EndIf
 
-	ScriptObject mcmActuator = CastAs("TK2:MCM_Actuator")
+	ScriptObject mcmActuator = CastAs("TK2:MCM_Devices")
 	If mcmActuator
 		mcmActuator.CallFunction("Startup", new Var[0])
 	EndIf

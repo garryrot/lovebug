@@ -1,24 +1,32 @@
-use bp_scheduler::config::actions::{ActionRef, Variable, Stren};
+use bp_scheduler::config::actions::{ActionRef, Stren, Variable};
 use config::{triggers::Trigger, Scene, SceneId, SceneTags};
 
-pub fn default_trigger() -> Vec<Trigger> {
+pub fn default_scene_bone_tracking() -> Vec<Trigger> {
     let default_config: Vec<Trigger> = vec![Trigger::Scene(Scene {
         description: "Scene Default".into(),
         scene_id: SceneId::Any,
         tags: SceneTags::Any,
         actions: vec![
-            ActionRef::new(
-                "vibrate", Stren::Variable(Variable::BoneTrackingRate),
-            ),
-            ActionRef::new(
-                "linear", Stren::Variable(Variable::BoneTrackingRate)
-            ),
-            ActionRef::new(
-                "oscillate", Stren::Variable(Variable::BoneTrackingRate)
-            ),
-            ActionRef::new(
-                "constrict", Stren::Variable(Variable::BoneTrackingDepth)
-            ),
+            ActionRef::new("vibrate", Stren::Variable(Variable::BoneTrackingRate)),
+            ActionRef::new("linear", Stren::Variable(Variable::BoneTrackingRate)),
+            ActionRef::new("oscillate", Stren::Variable(Variable::BoneTrackingRate)),
+            ActionRef::new("constrict", Stren::Variable(Variable::BoneTrackingDepth)),
+        ],
+    })];
+
+    default_config
+}
+
+pub fn default_scene_no_bone_tracking() -> Vec<Trigger> {
+    let default_config: Vec<Trigger> = vec![Trigger::Scene(Scene {
+        description: "Scene Default".into(),
+        scene_id: SceneId::Any,
+        tags: SceneTags::Any,
+        actions: vec![
+            ActionRef::new("vibrate", Stren::Constant(80)),
+            ActionRef::new("linear", Stren::Constant(80)),
+            ActionRef::new("oscillate", Stren::Constant(80)),
+            ActionRef::new("constrict", Stren::Constant(50)),
         ],
     })];
 

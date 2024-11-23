@@ -14,7 +14,8 @@ Sex GetSex(const RE::Actor *actor) {
     auto npc = actor->GetNPC();
     if (npc != NULL)
     {
-        if (npc->GetSex() == 1) {
+        auto sex = static_cast<std::uint32_t>( npc->GetSex() );
+        if (sex == 1) {
             return Sex::Female;
         } else {
             return Sex::Male;

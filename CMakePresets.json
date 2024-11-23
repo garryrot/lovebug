@@ -29,12 +29,12 @@
             }
         },
         {
-            "name": "build",
+            "name": "base",
             "displayName": "Release Build",
             "description": "Release Build for VS2022",
             "inherits": ["msvc"],
-            "generator": "Visual Studio 17 2022",
             "binaryDir": "${sourceDir}/build",
+            "generator": "Visual Studio 17 2022",
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "CMAKE_BUILD_TYPE": {
@@ -42,13 +42,37 @@
                     "value": "Release"
                 }
             }
+        },
+        {
+            "name": "build",
+            "inherits": ["base"],
+            "binaryDir": "${sourceDir}/build-163",
+            "cacheVariables": {
+                "FOMOD_PACKAGE": "01 DLL_163",
+                "COMMONLIB_DIR": "CommonLibF4-163"
+            }
+        },
+        {
+            "name": "build-984",
+            "inherits": ["base"],
+            "binaryDir": "${sourceDir}/build-984",
+            "cacheVariables": {
+                "FOMOD_PACKAGE": "01 DLL_984",
+                "COMMONLIB_DIR": "CommonLibF4-984"
+            }
         }
     ],
     "buildPresets": [
         {
             "name": "build",
-            "displayName": "Release (MSVC)",
             "configurePreset": "build",
+            "displayName": "Build DLL for FO4 ",
+            "description": "Optimized release build."
+        },
+        {
+            "name": "build-984",
+            "configurePreset": "build-984",
+            "displayName": "Release (MSVC)",
             "description": "Optimized release build."
         }
     ]

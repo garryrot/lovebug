@@ -360,7 +360,6 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     info!(event_name, str_arg, num_arg, "lb_process_event");
     Telekinesis::run_static(
         |lb| {
-            // let _stopped_event = lb.triggers.find_stopped_events(event_name);
             if let Some(start_event) = lb.triggers.find_started_events(event_name) {
                 let converted = get_actions_from_refs(lb, start_event.actions);
                 return lb.client.dispatch_refs(

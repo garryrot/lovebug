@@ -1,0 +1,35 @@
+[
+  {
+    "Scene": {
+      "description": "Scene Default",
+      "scene_id": "Any",
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "vibrate",
+          "strength": {
+            "Constant": 80
+          }
+        },
+        {
+          "action": "linear",
+          "strength": {
+            "Constant": 80
+          }
+        },
+        {
+          "action": "oscillate",
+          "strength": {
+            "Constant": 80
+          }
+        },
+        {
+          "action": "constrict",
+          "strength": {
+            "Constant": 50
+          }
+        }
+      ]
+    }
+  }
+]

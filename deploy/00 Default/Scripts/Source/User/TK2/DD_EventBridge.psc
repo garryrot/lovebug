@@ -7,7 +7,6 @@ Bool started = False
 
 ; Inflate
 Int plugInflateHandle = -1
-
 ; Vibrate
 Int plugVibrateHandle = -1
 

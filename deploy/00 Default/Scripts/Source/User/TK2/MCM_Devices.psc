@@ -25,6 +25,7 @@ Telekinesis:DevicePage current = none
 Event OnInit()
     RegisterForExternalEvent("OnMCMSettingChange|Telekinesis", "OnChange")
     RegisterForExternalEvent("Tele_DeviceAdded", "OnDeviceAdded")
+    RegisterForExternalEvent("Tele_DeviceRemoved", "OnDeviceRemoved")
     Telekinesis:DevicePage default
     current = default
 EndEvent
@@ -32,6 +33,10 @@ EndEvent
 Function OnDeviceAdded(String strArg, Float numArg)
    Startup()
 EndFunction
+
+Function OnDeviceRemoved(String strArg, Float numArg)
+    Startup()
+EndFunction 
 
 Function Startup()
     int len = Telekinesis.MCM_Devices_Len()
