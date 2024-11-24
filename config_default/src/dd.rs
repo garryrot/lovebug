@@ -51,7 +51,7 @@ pub fn dd_events() -> Vec<Trigger> {
                 form: Form::Any,
                 conditions: vec![],
             },
-            event_stop: StopCondition::ElapsedMs(65_000),
+            event_stop: StopCondition::ElapsedMs(80_000), // 65 is max, we do a bit extra
             actions: vec![ActionRef {
                 action: "vibrate.anal".into(),
                 strength: Stren::Variable(Variable::PlayerActorValue(
@@ -66,7 +66,7 @@ pub fn dd_events() -> Vec<Trigger> {
                 form: Form::Any,
                 conditions: vec![],
             },
-            event_stop: StopCondition::ElapsedMs(65_000),
+            event_stop: StopCondition::ElapsedMs(70_000),
             actions: vec![ActionRef {
                 action: "vibrate.vaginal".into(),
                 strength: Stren::Variable(Variable::PlayerActorValue(
@@ -107,7 +107,7 @@ pub fn dd_events() -> Vec<Trigger> {
             event_stop: StopCondition::Never,
             actions: vec![
                 ActionRef {
-                    action: "inflate".into(),
+                    action: "inflate.vaginal".into(),
                     strength: Stren::Variable(Variable::PlayerActorValue(
                         "DD_AV_InflateStatusVaginal".into(),
                     )),
@@ -124,13 +124,36 @@ pub fn dd_events() -> Vec<Trigger> {
             event_stop: StopCondition::Never,
             actions: vec![
                 ActionRef {
-                    action: "inflate".into(),
+                    action: "inflate.anal".into(),
                     strength: Stren::Variable(Variable::PlayerActorValue(
                         "DD_AV_InflateStatusAnal".into(),
                     )),
                 },
             ],
-        })
+        }),
+        // Trigger::Event(Event {
+        //     description: "DD Inflators (controlled by Actor Value)".into(),
+        //     event_start: EventTrigger {
+        //         event: "dd.inflate".into(),
+        //         form: Form::Any,
+        //         conditions: vec![],
+        //     },
+        //     event_stop: StopCondition::Never,
+        //     actions: vec![
+        //         ActionRef {
+        //             action: "inflate.anal".into(),
+        //             strength: Stren::Variable(Variable::PlayerActorValue(
+        //                 "DD_AV_InflateStatusAnal".into(),
+        //             )),
+        //         },
+        //         ActionRef {
+        //             action: "inflate.vaginal".into(),
+        //             strength: Stren::Variable(Variable::PlayerActorValue(
+        //                 "DD_AV_InflateStatusVaginal".into(),
+        //             )),
+        //         },
+        //     ],
+        // })
     ];
     vec
 }

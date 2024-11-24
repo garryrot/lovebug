@@ -34,9 +34,8 @@ pub fn start_dd_workaround(tk: &mut Telekinesis) {
             let is_vibrating = unsafe {
                 ContainsKeyword(PlayerCharacter_GetSingleton(), "DD_kw_Event_IsVibrating")
             };
-            debug!(is_vibrating);
             if is_vibrating && ! was_vibrating {
-                debug!("enabling dd vibrator");
+                debug!("is_vibrating start");
                 was_vibrating = true;
 
                 let anal_on = variable_clone.get("DD_AV_VibrateStrengthAnal").unwrap().load(Ordering::Relaxed) > 0;
@@ -56,7 +55,7 @@ pub fn start_dd_workaround(tk: &mut Telekinesis) {
                 }
 
             } else if !is_vibrating && was_vibrating {
-                debug!("disabling dd vibrator");
+                debug!("is_vibrating stop");
                 was_vibrating = false;
                 lb_stop(current_handle);
             }

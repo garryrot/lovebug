@@ -15,16 +15,19 @@ Function Startup()
 
 	ScriptObject aafBridge = CastAs("TK2:AAF_EventBridge")
 	If aafBridge
+		Debug("Starting AAF Event Bridge")
 		aafBridge.CallFunction("Startup", new Var[0])
 	EndIf
 	
 	ScriptObject ddBridge = CastAs("TK2:DD_EventBridge")
 	If ddBridge
+		Debug("Starting DD Event Bridge")
 		ddBridge.CallFunction("Startup", new Var[0])
 	EndIf
 
 	ScriptObject mcmActuator = CastAs("TK2:MCM_Devices")
 	If mcmActuator
+		Debug("Initializing Devices")
 		mcmActuator.CallFunction("Startup", new Var[0])
 	EndIf
 EndFunction
@@ -46,6 +49,6 @@ Function Connect()
 EndFunction
 
 Function Debug(String msg)
-    Debug.Notification(msg)
-    Debug.Trace(msg)
+    Debug.Notification("[Tele] " + msg)
+    Debug.Trace("[Tele] " + msg)
 EndFunction

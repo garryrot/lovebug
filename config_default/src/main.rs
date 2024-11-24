@@ -12,8 +12,6 @@ use races::*;
 use scenes_bp70::pb70_triggers;
 use scenes_default::*;
 
-use triggers::Trigger;
-
 use serde::Serialize;
 
 use bp_scheduler::{config::client::LoggingSettings, dynamic_tracking::DynamicSettings};

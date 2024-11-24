@@ -1,7 +1,7 @@
 use bp_scheduler::actuator::*;
 use config::body_parts::*;
 use ffi_mcm::DevicePage;
-use tracing::{debug, info};
+use tracing::{debug, error, info};
 
 use crate::Telekinesis;
 
@@ -46,8 +46,8 @@ pub fn lb_actuator_get(index: u32) -> DevicePage {
             let settings = actuator.config.clone().unwrap();
             DevicePage {
                 index: index as i32,
-                actuator: actuator.identifier().to_owned(),
-                enabled: actuator.config.clone().unwrap().enabled,
+                actuator: settings.actuator_config_id,
+                enabled: settings.enabled,
                 error: "".to_owned(),
                 anal: settings.body_parts.contains(&TAG_ANAL.to_owned()),
                 clitoral: settings.body_parts.contains(&TAG_CLIT.to_owned()),
@@ -65,30 +65,52 @@ pub fn lb_actuator_get(index: u32) -> DevicePage {
 pub fn lb_actuator_set(data: DevicePage) -> bool {
     info!(?data, "lb_actuator_set");
     Telekinesis::run_static(|lb| {
-        let mut settings = lb.client.device_settings.get_or_create(&data.actuator);
-        settings.enabled = data.enabled;
-        let mut body_parts = vec![];
-        if data.anal {
-            body_parts.push(TAG_ANAL.to_owned());
+        let actuators = lb.client.buttplug.devices().flatten_actuators().load_config( &mut lb.client.device_settings );
+
+        let i = data.index;
+        if let Some(ref mut actuator) = actuators.get(i as usize) {
+            if actuator.config.is_none() {
+                error!("no config");
+                return false;
+            }
+
+            let mut actuator_clone = actuator.as_ref().clone();
+            if actuator_clone.config.clone().unwrap().actuator_config_id != data.actuator {
+                error!("name mismatch, index changed?");
+                return false;
+            }
+
+            match actuator_clone.config {
+                Some(ref mut setting) => {
+                    setting.enabled = data.enabled;
+                    let mut body_parts = vec![];
+                    if data.anal {
+                        body_parts.push(TAG_ANAL.to_owned());
+                    }
+                    if data.clitoral {
+                        body_parts.push(TAG_CLIT.to_owned());
+                    }
+                    if data.nipple {
+                        body_parts.push(TAG_NIPPLE.to_owned());
+                    }
+                    if data.oral {
+                        body_parts.push(TAG_ORAL.to_owned());
+                    }
+                    if data.vaginal {
+                        body_parts.push(TAG_VAGINAL.to_owned());
+                    }
+                    if data.penis {
+                        body_parts.push(TAG_PENIS.to_owned());
+                    }
+                    setting.body_parts = body_parts;
+                    lb.client.device_settings.update_device(setting.clone());
+                    lb.store_devices();
+                },
+                None => {
+                    error!( actuator.index_in_device, identifier=actuator.identifier(), "actuator has no config");
+                },
+            }
         }
-        if data.clitoral {
-            body_parts.push(TAG_CLIT.to_owned());
-        }
-        if data.nipple {
-            body_parts.push(TAG_NIPPLE.to_owned());
-        }
-        if data.oral {
-            body_parts.push(TAG_ORAL.to_owned());
-        }
-        if data.vaginal {
-            body_parts.push(TAG_VAGINAL.to_owned());
-        }
-        if data.penis {
-            body_parts.push(TAG_PENIS.to_owned());
-        }
-        settings.body_parts = body_parts;
-        lb.client.device_settings.update_device(settings);
-        lb.store_devices();
         true
     }, false)
 }

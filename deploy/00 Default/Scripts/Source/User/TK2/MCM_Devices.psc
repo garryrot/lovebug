@@ -40,9 +40,7 @@ EndFunction
 
 Function Startup()
     int len = Telekinesis.MCM_Devices_Len()
-    If len > 0
-        CurrentIndex = 0
-    EndIf
+    CurrentIndex = 0
     Update(len)
 EndFunction
 
@@ -63,7 +61,7 @@ Function Prev()
 EndFunction
 
 Function Update(int len)
-    If CurrentIndex < 0
+    If len < 1
         Pagination = "No devices loaded..."
     Else
         Pagination = (CurrentIndex + 1) + " / " + len
