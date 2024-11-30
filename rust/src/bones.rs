@@ -60,29 +60,6 @@ impl UnsafeAvObjectPtr {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct DynamicTrackingHandle {
-    pub cancel: Option<CancellationToken>,
-    pub cur_avg_ms: Arc<AtomicI64>,
-    pub cur_depth: Arc<AtomicI64>
-}
-
-impl DynamicTrackingHandle {
-    pub fn reset(&mut self) {
-        self.cur_avg_ms.store(0, Ordering::Relaxed);
-        self.cur_depth.store(0, Ordering::Relaxed);
-    }
-}
-
-impl Default for DynamicTrackingHandle {
-    fn default() -> Self {
-        Self { 
-            cancel: None, 
-            cur_avg_ms: Arc::new(AtomicI64::new(0)), 
-            cur_depth: Arc::new(AtomicI64::new(0))
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub enum TrackingState {
@@ -296,8 +273,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec, _control:
                 &winner.unwrap().2,
                 receiver,
                 enabled_position_actuators,
-                tracking_handle.clone().cur_avg_ms,
-                tracking_handle.cur_depth
+                tracking_handle
             );
         });
     }
@@ -309,23 +285,24 @@ fn start_control_thread(
     body_parts: &[&str],
     receiver: UnboundedReceiver<TrackingSignal>,
     actuators: Vec<Arc<Actuator>>,
-    cur_avg_ms: Arc<AtomicI64>,
-    cur_depth: Arc<AtomicI64>
+    tracking_handle: DynamicTrackingHandle
 ) {
     let parts = body_parts
         .iter()
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
+
+    let mut actuator_settings_clone = actuator_settings.clone();
     tokio::spawn(async move {
         let (_, actuators) = Filter::from_actuators(actuator_settings, actuators)
+            .load_config(&mut actuator_settings_clone)
             .with_body_parts(&parts)
             .result();
         let mut dynamic = DynamicTracking {
             settings: dynamic_settings,
             signals: receiver,
             actuators,
-            cur_avg_ms,
-            cur_depth,
+            status: tracking_handle
         };
         info!(?dynamic.settings, ?parts, "control task started with settings");
         let _ = dynamic.track_mirror().await;

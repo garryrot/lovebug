@@ -6,10 +6,11 @@ use std::{
     },
 };
 
+use bp_scheduler::dynamic_tracking::DynamicTrackingHandle;
 use config::variables::{BuiltIn, ConfigVariable};
 use tracing::{debug, error, info};
 
-use crate::{bones::DynamicTrackingHandle, bridge::ffi_bridge::{GetFormID, GetPlayerActorValue, TESForm_GetFormByEditorID}, Telekinesis};
+use crate::{ bridge::ffi_bridge::{GetFormID, GetPlayerActorValue, TESForm_GetFormByEditorID}, Telekinesis};
 
 pub trait VariableSource {
     fn read(&self, tk: &mut Telekinesis) -> Option<i64>;
@@ -52,7 +53,7 @@ impl VariableStore {
             (
               
                 "BoneTrackingDepth".into(),
-                tracking_handles.cur_depth.clone(),
+                tracking_handles.cur_avg_depth.clone(),
                 ConfigVariable::Internal(BuiltIn::BoneTrackingDepth),
             ),
         );

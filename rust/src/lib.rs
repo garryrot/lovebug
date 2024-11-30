@@ -1,5 +1,5 @@
 use bodies::Race;
-use bones::{lb_dynamic_tracking, DynamicTrackingHandle};
+use bones::lb_dynamic_tracking;
 use config::events::StopCondition;
 use cxx::{CxxString, CxxVector};
 use dd::start_dd_workaround;
@@ -26,7 +26,7 @@ use bp_scheduler::{
         read::*,
         write::try_write,
     },
-    dynamic_tracking::DynamicSettings,
+    dynamic_tracking::{DynamicSettings, DynamicTrackingHandle},
     speed::Speed,
 };
 
@@ -395,7 +395,8 @@ fn get_actions_from_refs(
                 Stren::Constant(x) => Strength::Constant(x),
                 Stren::Variable(var) => Strength::Variable(match var {
                     Variable::BoneTrackingRate => lb.dynamic_task.cur_avg_ms.clone(),
-                    Variable::BoneTrackingDepth => lb.dynamic_task.cur_depth.clone(),
+                    Variable::BoneTrackingDepth => lb.dynamic_task.cur_avg_depth.clone(),
+                    Variable::BoneTrackingPos => lb.dynamic_task.cur_pos.clone(),
                     Variable::PlayerActorValue(name) => {
                         if let Some(var) =  lb.variables.get(&name) {
                             var.clone()

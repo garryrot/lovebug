@@ -8,7 +8,7 @@
         "conditions": []
       },
       "event_stop": {
-        "ElapsedMs": 65000
+        "ElapsedMs": 80000
       },
       "actions": [
         {
@@ -31,7 +31,7 @@
         "conditions": []
       },
       "event_stop": {
-        "ElapsedMs": 65000
+        "ElapsedMs": 70000
       },
       "actions": [
         {
@@ -80,35 +80,22 @@
     "Event": {
       "description": "DD Inflators (controlled by Actor Value)",
       "event_start": {
-        "event": "dd.inflate.vaginal",
+        "event": "dd.inflate",
         "form": "Any",
         "conditions": []
       },
       "event_stop": "Never",
       "actions": [
         {
-          "action": "inflate",
+          "action": "inflate.vaginal",
           "strength": {
             "Variable": {
               "PlayerActorValue": "DD_AV_InflateStatusVaginal"
             }
           }
-        }
-      ]
-    }
-  },
-  {
-    "Event": {
-      "description": "DD Inflators (controlled by Actor Value)",
-      "event_start": {
-        "event": "dd.inflate.anal",
-        "form": "Any",
-        "conditions": []
-      },
-      "event_stop": "Never",
-      "actions": [
+        },
         {
-          "action": "inflate",
+          "action": "inflate.anal",
           "strength": {
             "Variable": {
               "PlayerActorValue": "DD_AV_InflateStatusAnal"

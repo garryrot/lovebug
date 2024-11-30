@@ -15,3 +15,10 @@ Copy-Item -v -r "deploy\00 Default\F4SE\Plugins\Telekinesis2\Actions\*.json" "$M
 Copy-Item -v -r "deploy\00 Default\F4SE\Plugins\Telekinesis2\Races\*.json" "$ModDeployPath\F4SE\Plugins\Telekinesis2\Races\" -Force
 Copy-Item -v -r "deploy\00 Default\F4SE\Plugins\Telekinesis2\Variables\*.json" "$ModDeployPath\F4SE\Plugins\Telekinesis2\Variables\" -Force
 Copy-Item -v -r "deploy\00 Default\F4SE\Plugins\Telekinesis2\Patterns\*.funscript" "$ModDeployPath\F4SE\Plugins\Telekinesis2\Patterns\" -Force
+
+# Default Scene (Bone Tracking Enabled)
+Copy-Item -v -r "deploy\10 BoneTrackingDefaultScene\F4SE\Plugins\Telekinesis2\Triggers\*.json" "$ModDeployPath\F4SE\Plugins\Telekinesis2\Triggers\" -Force
+
+# BodyTalk + Fusion Girl
+Copy-Item -v -r "deploy\20 FemaleBodyFusionGirls\F4SE\Plugins\Telekinesis2\Races\*.json" "$ModDeployPath\F4SE\Plugins\Telekinesis2\Races\" -Force
+Copy-Item -v -r "deploy\30 MaleBodyBodyTalk\F4SE\Plugins\Telekinesis2\Races\*.json" "$ModDeployPath\F4SE\Plugins\Telekinesis2\Races\" -Force

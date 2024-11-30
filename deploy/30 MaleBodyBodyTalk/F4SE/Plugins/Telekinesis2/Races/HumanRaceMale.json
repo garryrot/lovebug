@@ -7,13 +7,13 @@
     "oral_bone": "HEAD",
     "anal_bone": "Anus_01",
     "genital_collision": {
-      "outer_distance": 14.5,
-      "depth": 10.0,
+      "outer_distance": 12.5,
+      "depth": 8.0,
       "min_stroke": 0.25,
       "error_tolerance": 0.35
     },
     "oral_collision": {
-      "outer_distance": 25.0,
+      "outer_distance": 20.0,
       "depth": 12.0,
       "min_stroke": 0.25,
       "error_tolerance": 0.35

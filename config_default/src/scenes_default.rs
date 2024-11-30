@@ -7,13 +7,12 @@ pub fn default_scene_bone_tracking() -> Vec<Trigger> {
         scene_id: SceneId::Any,
         tags: SceneTags::Any,
         actions: vec![
-            ActionRef::new("vibrate", Stren::Variable(Variable::BoneTrackingRate)),
-            ActionRef::new("linear", Stren::Variable(Variable::BoneTrackingRate)),
+            ActionRef::new("vibrate", Stren::Variable(Variable::BoneTrackingPos)),
+            ActionRef::new("linear", Stren::Variable(Variable::BoneTrackingRate)), // TODO: <- This is misleading
             ActionRef::new("oscillate", Stren::Variable(Variable::BoneTrackingRate)),
             ActionRef::new("constrict", Stren::Variable(Variable::BoneTrackingDepth)),
         ],
     })];
-
     default_config
 }
 

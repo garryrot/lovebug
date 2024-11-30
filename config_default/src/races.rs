@@ -16,9 +16,14 @@ pub fn human_race_female_fusion_girl() -> Vec<Race> {
         genital_bone: "Pelvis_skin".into(),
         oral_bone: "HEAD".into(),
         anal_bone: "Pelvis_skin".into(),
-        genital_collision: Some(DEFAULT_COLLISION),
+        genital_collision: Some(Collision {
+            outer_distance: 12.5,
+            depth: 8.0,
+            min_stroke: 0.25,
+            error_tolerance: 0.35,
+        }),
         oral_collision: Some(Collision {
-            outer_distance: 25.0,
+            outer_distance: 20.0,
             depth: 12.0,
             min_stroke: 0.25,
             error_tolerance: 0.35,
@@ -34,9 +39,14 @@ pub fn human_race_male_body_talk() -> Vec<Race> {
         genital_bone: "Penis_01".into(),
         oral_bone: "HEAD".into(),
         anal_bone: "Anus_01".into(),
-        genital_collision: Some(DEFAULT_COLLISION),
+        genital_collision: Some(Collision {
+            outer_distance: 12.5,
+            depth: 8.0,
+            min_stroke: 0.25,
+            error_tolerance: 0.35,
+        }),
         oral_collision: Some(Collision {
-            outer_distance: 25.0,
+            outer_distance: 20.0,
             depth: 12.0,
             min_stroke: 0.25,
             error_tolerance: 0.35,

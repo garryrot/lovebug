@@ -8,7 +8,7 @@
         {
           "action": "vibrate",
           "strength": {
-            "Variable": "BoneTrackingRate"
+            "Variable": "BoneTrackingPos"
           }
         },
         {

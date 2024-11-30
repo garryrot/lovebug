@@ -50,7 +50,6 @@ EndFunction
 
 Event Actor.OnItemEquipped(Actor sender, Form object, ObjectReference reference)
     Armor item = object as Armor
-    Debug.MessageBox("Item Equipped " + object)
     Debug.Trace("Item.GetKeywords: : " + item.GetKeywords())
     If item && item.HasKeyword( libs.DD_kw_RenderedItem )
         StartEvents()
@@ -59,21 +58,11 @@ EndEvent
 
 Function StartEvents()
     Actor player = Game.GetPlayer()
-
     Debug("Initializing Events")
     Debug.Trace("Player Keywords: " + player.GetKeywords())
     If plugInflateHandle == -1
         If player.WornHasKeyword(libs.DD_kw_ItemEffect_PlugInflate)
-            Debug("PlugInflate")
-            If player.WornHasKeyword(libs.DD_kw_ItemSubType_InflatablePlugVaginal) 
-                Debug("Vaginal Inflator")
-                plugInflateHandle = Telekinesis.Process_Event("dd.inflate.vaginal", "", 0.0)
-            EndIf
-            If player.WornHasKeyword(libs.DD_kw_ItemSubType_InflatablePlugVaginal) 
-                Debug("Anal Inflator")
-                plugInflateHandle = Telekinesis.Process_Event("dd.inflate.anal", "", 0.0)
-                return
-            EndIf
+            plugInflateHandle = Telekinesis.Process_Event("dd.inflate", "", 0.0)
         EndIf
     EndIf
 EndFunction
