@@ -11,8 +11,6 @@ Event Actor.OnPlayerLoadGame(Actor ActorRef)
 EndEvent
 
 Function Startup()
-	Connect()
-
 	ScriptObject aafBridge = CastAs("TK2:AAF_EventBridge")
 	If aafBridge
 		Debug("Starting AAF Event Bridge")
@@ -24,17 +22,6 @@ Function Startup()
 		Debug("Starting DD Event Bridge")
 		ddBridge.CallFunction("Startup", new Var[0])
 	EndIf
-
-	ScriptObject mcmActuator = CastAs("TK2:MCM_Devices")
-	If mcmActuator
-		Debug("Initializing Devices")
-		mcmActuator.CallFunction("Startup", new Var[0])
-	EndIf
-EndFunction
-
-Function Reconnect()
-	Telekinesis.Disconnect()
-	Utility.Wait(1.0)
 	Connect()
 EndFunction
 
@@ -45,6 +32,7 @@ Function Connect()
 	Bool bluetooth = MCM.GetModSettingInt("Telekinesis", "bBluetooth:Connection")
 	Bool xInput = MCM.GetModSettingInt("Telekinesis", "bXInput:Connection")
 	Bool serial = MCM.GetModSettingInt("Telekinesis", "bSerial:Connection")
+	; Debug.MessageBox(bluetooth + " xi " + xInput + " se " + serial)
 	bool connected = Telekinesis.Connect(connection, port, host, bluetooth, xInput, serial)
 EndFunction
 

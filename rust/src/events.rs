@@ -2,10 +2,10 @@ use crate::events::ffi_event::*;
 use bp_scheduler::client::BpClient;
 use buttplug::client::ButtplugClientEvent;
 use futures_util::StreamExt;
-use tracing::info;
+use tracing::{error, info};
 
 #[cxx::bridge]
-mod ffi_event {
+pub mod ffi_event {
     #[derive(Debug)]
     pub struct ModEvent {
         pub event_name: String,
@@ -30,6 +30,17 @@ impl ModEvent {
     }
 }
 
+pub fn send_mod_event(event: ModEvent) {
+    AddTask_ModEvent(
+        |context| {
+            unsafe {
+                SendEvent(context);
+            }
+        },
+        event,
+    );
+}
+
 /// Sends outgoing events which can be consumed in-game by
 ///  - RegisterForModEvent (standard signature) on SKSE
 ///  - RegisterForExternalEvent on F4SE
@@ -38,16 +49,7 @@ pub fn start_outgoing_event_thread(client: &BpClient) {
     let mut events = client.buttplug.event_stream();
 
     client.runtime.spawn(async move {
-        fn send_mod_event(event: ModEvent) {
-            AddTask_ModEvent(
-                |context| {
-                    unsafe {
-                        SendEvent(context);
-                    }
-                },
-                event,
-            );
-        }
+        
 
         while let Some(evt) = events.next().await {
             info!("got event: {:?}", evt);

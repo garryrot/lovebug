@@ -11,6 +11,18 @@
 			"type": "text",
 			"html": true
 		},
+		{
+			"text": "<p align='center'><b>Status: Connected</b></p>",
+			"type": "text",
+			"html": true,
+            "groupCondition": 2
+		},
+		{
+			"text": "<p align='center'><b>Status: Connection Error</b></p><p align='center'>Check if Intiface is running and host and port are correct.</p>",
+			"type": "text",
+			"html": true,
+            "groupCondition": 3
+		},
         {
             "text": "Connection Method",
             "type": "section"
@@ -25,6 +37,26 @@
               "options": ["In-Process", "WebSocket", "None"]
             },
             "groupControl": 1
+        },
+        {
+            "type": "hiddenSwitcher",
+            "groupControl": 2,
+            "valueOptions": 
+            {
+                "sourceType": "PropertyValueBool",
+                "sourceForm": "Telekinesis.esp|2665",
+                "propertyName": "Connected"
+            }
+        },
+        {
+            "type": "hiddenSwitcher",
+            "groupControl": 3,
+            "valueOptions": 
+            {
+                "sourceType": "PropertyValueBool",
+                "sourceForm": "Telekinesis.esp|2665",
+                "propertyName": "ConnectionError"
+            }
         },
         {
             "id": "sHost:Connection",
@@ -52,8 +84,8 @@
             "help": "",
             "action": {
                 "type": "CallFunction",
-                "form": "Telekinesis.esp|1732",
-                "scriptName": "TK2:Main",
+                "form": "Telekinesis.esp|2665",
+                "scriptName": "TK2:MCM_Devices",
                 "function": "Reconnect"
             }
         },

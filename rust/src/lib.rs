@@ -31,7 +31,7 @@ use bp_scheduler::{
 };
 
 use ::config::*;
-use events::start_outgoing_event_thread;
+use events::{ffi_event::ModEvent, send_mod_event, start_outgoing_event_thread};
 use triggers::Triggers;
 
 pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2";
@@ -219,9 +219,7 @@ pub fn lb_connect(
         }
 
         let dynamic_task = DynamicTrackingHandle::default();
-
         let vars = read_variables();
-
         let variables = VariableStore::new( vars, &dynamic_task);
         let mut lb = Telekinesis {
             client: client.unwrap(),
@@ -244,7 +242,21 @@ pub fn lb_connect(
 
         lb.triggers
             .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
-        lb.client.scan_for_devices();
+        if lb.client.scan_for_devices() {
+            send_mod_event(ModEvent::new(
+                "Tele_ConnectionSuccess",
+                "",
+                0.0,
+            ));
+        }
+        else 
+        { 
+            send_mod_event(ModEvent::new(
+                "Tele_ConnectionError",
+                "",
+                0.0,
+            ));
+        };
 
         start_dd_workaround(&mut lb);
 

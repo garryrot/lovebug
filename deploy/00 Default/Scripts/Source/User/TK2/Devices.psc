@@ -7,13 +7,13 @@ Event OnInit()
 EndEvent
 
 Function OnDeviceAdded(String strArg, Float numArg)
-    Debug.Notification("Device '" + strArg + "' connected.")
+    Debug.Notification("[Tele] '" + strArg + "' connected.")
 EndFunction
 
 Function OnDeviceRemoved(String strArg, Float numArg)
-    Debug.Notification("Device '" + strArg + "' disconnected.")
+    Debug.Notification("[Tele] '" + strArg + "' disconnected.")
 EndFunction
 
 Function OnConnectionError(String strArg, Float numArg)
-    Debug.Notification("Connection error: '" + strArg + "'")
+    Debug.Notification("[Tele] Connection Error")
 EndFunction

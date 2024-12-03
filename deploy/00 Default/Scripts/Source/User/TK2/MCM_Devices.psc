@@ -20,14 +20,26 @@ Bool Property AAF_Not_Started = True Auto
 Bool Property DD_Started = False Auto
 Bool Property DD_Not_Started = False Auto
 
+Bool Property Connected = False Auto 
+Bool Property ConnectionError = True Auto
+
 Telekinesis:DevicePage current = none
 
 Event OnInit()
     RegisterForExternalEvent("OnMCMSettingChange|Telekinesis", "OnChange")
     RegisterForExternalEvent("Tele_DeviceAdded", "OnDeviceAdded")
     RegisterForExternalEvent("Tele_DeviceRemoved", "OnDeviceRemoved")
+    RegisterForExternalEvent("Tele_ConnectionSuccess", "OnConnectionSuccess")
+    RegisterForExternalEvent("Tele_ConnectionError", "OnConnectionError")
     Telekinesis:DevicePage default
     current = default
+
+	RegisterForRemoteEvent(Game.GetPlayer(), "OnPlayerLoadGame")
+    Startup()
+EndEvent
+
+Event Actor.OnPlayerLoadGame(Actor ActorRef)
+	Startup()
 EndEvent
 
 Function OnDeviceAdded(String strArg, Float numArg)
@@ -38,9 +50,32 @@ Function OnDeviceRemoved(String strArg, Float numArg)
     Startup()
 EndFunction 
 
+Function OnConnectionSuccess(String strArg, Float numArg)
+    Connected = True 
+    ConnectionError = False
+EndFunction
+
+Function OnConnectionError(String strArg, Float numArg)
+    Connected = False
+    ConnectionError = True
+EndFunction
+
+Function Reconnect()
+	TK2:Main main = Game.GetFormFromFile(0x1732, "Telekinesis.esp") as TK2:Main
+	Telekinesis.Disconnect()
+    Connected = False
+    ConnectionError = False
+	MCM.RefreshMenu()
+	Debug.MessageBox("Reconnecting")
+	Utility.Wait(1.0)
+	main.Connect()
+	MCM.RefreshMenu()
+EndFunction
+
 Function Startup()
     int len = Telekinesis.MCM_Devices_Len()
     CurrentIndex = 0
+    ConnectionError = False
     Update(len)
 EndFunction
 
@@ -106,8 +141,6 @@ Function OnChange(string modName, string id)
             current.Oral = Oral
             current.Penis = Penis
             current.Vaginal = Vaginal
-
-            Debug.MessageBox("storing")
             Telekinesis.MCM_Devices_Set(current)
         EndIf
     EndIf
