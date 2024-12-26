@@ -27,26 +27,25 @@ Function Startup()
 
     RegisterForRemoteEvent(Game.GetPlayer(), "OnItemEquipped")
 
-    ; TODO: RemoveMe
-    StartTimer(5.0)
+    ; StartTimer(5.0)
 
     StartEvents()
 EndFunction
 
-Event OnTimer(Int TimerID)
-    DumpPlayerStatus()
-    StartTimer(5.0)
-EndEvent
+; Event OnTimer(Int TimerID)
+;     DumpPlayerStatus()
+;     StartTimer(5.0)
+; EndEvent
 
-Function DumpPlayerStatus()
-    Actor player = Game.GetPlayer()
-    Debug.Trace("Player.IsVibrating " + player.HasKeyword(libs.DD_kw_Event_IsVibrating))
-    Debug.Trace("Player.InflateVaginal " + player.GetValue(libs.DD_AV_InflateStatusVaginal))
-    Debug.Trace("Player.InflateAnal    " + player.GetValue(libs.DD_AV_InflateStatusAnal))
-    Debug.Trace("Player.VibrateVaginal " + player.GetValue(libs.DD_AV_VibrateStrengthVaginal))
-    Debug.Trace("Player.VibrateAnal    " + player.GetValue(libs.DD_AV_VibrateStrengthAnal))
-    Debug.Trace("Player Keywords: " + player.GetKeywords())
-EndFunction
+; Function DumpPlayerStatus()
+;     Actor player = Game.GetPlayer()
+;     Debug.Trace("Player.IsVibrating " + player.HasKeyword(libs.DD_kw_Event_IsVibrating))
+;     Debug.Trace("Player.InflateVaginal " + player.GetValue(libs.DD_AV_InflateStatusVaginal))
+;     Debug.Trace("Player.InflateAnal    " + player.GetValue(libs.DD_AV_InflateStatusAnal))
+;     Debug.Trace("Player.VibrateVaginal " + player.GetValue(libs.DD_AV_VibrateStrengthVaginal))
+;     Debug.Trace("Player.VibrateAnal    " + player.GetValue(libs.DD_AV_VibrateStrengthAnal))
+;     Debug.Trace("Player Keywords: " + player.GetKeywords())
+; EndFunction
 
 Event Actor.OnItemEquipped(Actor sender, Form object, ObjectReference reference)
     Armor item = object as Armor
