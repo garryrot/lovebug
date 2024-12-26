@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(Telekinesis 
-        VERSION 0.0.1 
+        VERSION 2.0.0
         DESCRIPTION "Fallout4 amorous events processor"
         LANGUAGES CXX)
 

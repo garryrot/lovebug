@@ -21,7 +21,6 @@ using namespace RE::BSScript;
 #include "Events.cpp"
 #include "ActorValueSink.cpp"
 
-// Messaging
 void InitializeMessaging()
 {
     const auto messaging = F4SE::GetMessagingInterface();
@@ -45,12 +44,6 @@ void InitializeMessaging()
                     auto playerValueSink = ActorValueSink::GetSingleton();
                     RE::TESObjectREFR *player = RE::PlayerCharacter::GetSingleton();
                     player->RegisterSink(playerValueSink);
-
-                    auto pla = RE::PlayerCharacter::GetSingleton();
-                    auto x = pla->GetNPC()->ContainsKeyword( "DD_kw_Event_IsVibrating" );
-                    lb_log_info(std::format("player is vibrating {}", x));
-
-                    
                     break;
             }
         })) {
@@ -60,6 +53,25 @@ void InitializeMessaging()
         lb_log_info("Registered messaging interface");
     }
 }
+
+#ifdef F4SEPluginVersion
+F4SE_EXPORT constinit auto F4SEPlugin_Version = []() noexcept {
+	F4SE::PluginVersionData data{};
+	data.PluginName(Version::PROJECT.data());
+	data.PluginVersion({
+		Version::MAJOR,
+		Version::MINOR,
+		Version::PATCH,
+    });
+	data.AuthorName("garryrot");
+	data.UsesAddressLibrary(true);
+	data.UsesSigScanning(false);
+	data.IsLayoutDependent(true);
+	data.HasNoStructUse(false);
+	data.CompatibleVersions({ F4SE::RUNTIME_LATEST }); // F4SE::RUNTIME_LATEST_VR might work but I don't know
+	return data;
+}();
+#endif
 
 extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* f4se, F4SE::PluginInfo* info)
 {
