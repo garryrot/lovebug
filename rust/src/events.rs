@@ -2,7 +2,7 @@ use crate::events::ffi_event::*;
 use bp_scheduler::client::BpClient;
 use buttplug::client::ButtplugClientEvent;
 use futures_util::StreamExt;
-use tracing::{error, info};
+use tracing::info;
 
 #[cxx::bridge]
 pub mod ffi_event {

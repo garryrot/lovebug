@@ -1,4 +1,4 @@
-use std::{sync::{atomic::{AtomicI64, Ordering}, Arc}, time::Duration};
+use std::{sync::Arc, time::Duration};
 use tokio::{
     sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
     time::{sleep, Instant},
@@ -367,7 +367,7 @@ fn observe_bones(
                         if diff < 0.0 {
                             state = TrackingState::InnerTurn;
                             most_inward = dist;
-                            info!(?state, dist, most_inward);
+                            debug!(?state, dist, most_inward);
                         }
                         if !penetrated && dist < collision_sphere.outer_distance {
                             penetrated = true;
@@ -384,7 +384,7 @@ fn observe_bones(
                             ));
                             info!("sending inner turn!");
                             state = TrackingState::MovingOut;
-                            info!(?state, dist, most_inward);
+                            debug!(?state, dist, most_inward);
                         } else if dist - most_inward < -collision_sphere.error_tolerance {
                             state = TrackingState::MovingIn;
                             error!(
@@ -397,7 +397,7 @@ fn observe_bones(
                         if diff > 0.0 {
                             state = TrackingState::OuterTurn;
                             most_outward = dist;
-                            info!(?state, dist, most_outward);
+                            debug!(?state, dist, most_outward);
                         }
                     }
                     TrackingState::OuterTurn => {
@@ -411,7 +411,7 @@ fn observe_bones(
                             info!("sending outer turn!");
                             penetrated = false;
                             state = TrackingState::MovingIn;
-                            info!(?state, dist, most_outward);
+                            debug!(?state, dist, most_outward);
                         } else if most_outward - dist < -collision_sphere.error_tolerance {
                             state = TrackingState::MovingOut;
                             error!(

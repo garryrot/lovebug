@@ -104,5 +104,15 @@ std::uint32_t GetSavedFormType(const RE::TESForm* form) {
 // NiAVObject
 const RE::NiAVObject* GetBone(const RE::Actor *actor, rust::Str bone) 
 {
+    if (actor == NULL)
+    {
+        lb_log_error("actor null");
+        return NULL;
+    }
+    if (actor->Get3D() == NULL)
+    {
+        lb_log_error("3d null");
+        return NULL;
+    }
     return actor->Get3D()->GetObjectByName( (std::string) bone );   
 }
