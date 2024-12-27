@@ -376,11 +376,11 @@ fn observe_bones(
                     }
                     TrackingState::InnerTurn => {
                         if dist - most_inward > collision_sphere.error_tolerance {
-                            let (from, to) =
+                            let (most_in, most_out) =
                                 collision_sphere.get_stroke_range(most_outward, most_inward);
                             let _ = sender.send(TrackingSignal::InnerTurn(
                                 Instant::now(),
-                                Margins::new(from, to),
+                                Margins::new(most_in, most_out),
                             ));
                             info!("sending inner turn!");
                             state = TrackingState::MovingOut;

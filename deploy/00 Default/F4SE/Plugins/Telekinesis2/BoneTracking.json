@@ -6,6 +6,5 @@
   "sample_ms": 50,
   "initial_timeout_ms": 800,
   "stroke_default_ms": 400,
-  "stroke_default_in": 0.0,
-  "stroke_default_out": 1.0
+  "starting_position": 1.0
 }

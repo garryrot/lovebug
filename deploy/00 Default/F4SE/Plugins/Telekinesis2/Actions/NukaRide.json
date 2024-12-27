@@ -1,0 +1,24 @@
+[
+  {
+    "name": "nr.shockchair.penetration",
+    "do_bone_tracking": false,
+    "control": [
+      {
+        "Stroke": [
+          {
+            "BodyParts": [
+              "penis",
+              "vaginal"
+            ]
+          },
+          {
+            "min_ms": 400,
+            "max_ms": 400,
+            "min_pos": 0.9,
+            "max_pos": 1.0
+          }
+        ]
+      }
+    ]
+  }
+]

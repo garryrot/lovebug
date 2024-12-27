@@ -1,0 +1,74 @@
+[
+  {
+    "Scene": {
+      "description": "Nuka Ride: Mule Anal Insertion",
+      "scene_id": {
+        "Exact": "NR_FMM_Human_Couch02_PT"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "penetration.anal.deep",
+          "strength": {
+            "Funscript": [
+              80,
+              "Square"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Nuka Ride: Institute Shocking Device",
+      "scene_id": {
+        "Exact": "NR_Institute_PT"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "vibrate",
+          "strength": {
+            "Funscript": [
+              50,
+              "Sawtooth"
+            ]
+          }
+        },
+        {
+          "action": "constrict",
+          "strength": {
+            "Funscript": [
+              40,
+              "On-Off"
+            ]
+          }
+        },
+        {
+          "action": "nr.shockchair.penetration",
+          "strength": {
+            "Constant": 100
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Scene": {
+      "description": "Nuka Ride: FMM Human Couch 2",
+      "scene_id": {
+        "Exact": "NR_FMM_Human_Couch02_PT"
+      },
+      "tags": "Any",
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ]
+    }
+  }
+]

@@ -8,6 +8,7 @@ use bodies::Race;
 use actions::*;
 use config::*;
 use dd::{dd_events, dd_variables};
+use nuka_ride::{nr_actions, nr_events};
 use races::*;
 use scenes_bp70::pb70_triggers;
 use scenes_default::*;
@@ -21,6 +22,7 @@ mod dd;
 mod races;
 mod scenes_bp70;
 mod scenes_default;
+mod nuka_ride;
 
 fn main() {
     fn package_dir(fomod_package: &str) -> String {
@@ -77,6 +79,7 @@ fn mod_default(config_dir: &str) {
     for action in [
         ("Default.json", default_actions()),
         ("Devices.json", devices()),
+        ("NukaRide.json", nr_actions())
     ] {
         let path = format!("{}/Actions/{}", config_dir, action.0);
         write_file(path, action.1);
@@ -98,6 +101,7 @@ fn mod_default(config_dir: &str) {
     let triggers = vec![
         ("Scenes_BP70.json", pb70_triggers()),
         ("DD.json", dd_events()),
+        ("NukaRide.json", nr_events())
     ];
     for trigger in triggers {
         let path = format!("{}/Triggers/{}", config_dir, trigger.0);
