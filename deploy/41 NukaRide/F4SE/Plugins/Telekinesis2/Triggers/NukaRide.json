@@ -3,7 +3,7 @@
     "Scene": {
       "description": "Nuka Ride: Mule Anal Insertion",
       "scene_id": {
-        "Exact": "NR_FMM_Human_Couch02_PT"
+        "Exact": "NR_Mule_Clothed_PT"
       },
       "tags": "Any",
       "actions": [
@@ -31,8 +31,8 @@
           "action": "vibrate",
           "strength": {
             "Funscript": [
-              50,
-              "Sawtooth"
+              100,
+              "Sawtooth-Fast"
             ]
           }
         },

@@ -19,10 +19,10 @@ use bp_scheduler::{config::client::LoggingSettings, dynamic_tracking::DynamicSet
 
 mod actions;
 mod dd;
+mod nuka_ride;
 mod races;
 mod scenes_bp70;
 mod scenes_default;
-mod nuka_ride;
 
 fn main() {
     fn package_dir(fomod_package: &str) -> String {
@@ -30,79 +30,45 @@ fn main() {
     }
 
     mod_default(&package_dir("00 Default"));
-
-    package_default_scene_bone_tracking(&package_dir("10 BoneTrackingDefaultScene"));
-    package_default_scene_no_bone_tracking(&package_dir("11 NoBoneTrackingDefaultScene"));
+    package_nuka_ride(&package_dir("41 NukaRide"));
+    package_devious_devices(&package_dir("42 DD"));
+    package_bp70(&package_dir("51 AAF BP70"));
 
     package_female_body_fusion_girl(&package_dir("20 FemaleBodyFusionGirls"));
     package_male_body_body_talk(&package_dir("30 MaleBodyBodyTalk"));
 }
 
-fn package_female_body_fusion_girl(config_dir: &str) {
+fn package_nuka_ride(config_dir: &str) {
     write_file(
-        format!("{}/Races/HumanRaceFemale.json", config_dir),
-        human_race_female_fusion_girl(),
+        format!("{}/Actions/NukaRide.json", config_dir),
+        nr_actions(),
+    );
+    write_file(
+        format!("{}/Triggers/NukaRide.json", config_dir),
+        nr_events(),
     );
 }
 
-fn package_male_body_body_talk(config_dir: &str) {
-    write_file(
-        format!("{}/Races/HumanRaceMale.json", config_dir),
-        human_race_male_body_talk(),
-    );
-}
-
-fn package_default_scene_bone_tracking(config_dir: &str) {
-    write_file(
-        format!("{}/Triggers/Default.json", config_dir),
-        default_scene_bone_tracking(),
-    );
-    write_file(
-        format!("{}/Actions/SexActs.json", config_dir),
-        sex_acts(true),
-    );
-}
-
-fn package_default_scene_no_bone_tracking(config_dir: &str) {
-    write_file(
-        format!("{}/Triggers/Default.json", config_dir),
-        default_scene_no_bone_tracking(),
-    );
-    write_file(
-        format!("{}/Actions/SexActs.json", config_dir),
-        sex_acts(false),
-    );
+fn package_devious_devices(config_dir: &str) {
+    write_file(format!("{}/Triggers/DD.json", config_dir), dd_events());
+    write_file(format!("{}/Variables/DD.json", config_dir), dd_variables());
 }
 
 fn mod_default(config_dir: &str) {
-    // Actions
     for action in [
         ("Default.json", default_actions()),
-        ("Devices.json", devices()),
-        ("NukaRide.json", nr_actions())
+        ("BodyParts.json", body_part_actions()),
+        ("SexActs.json", sex_acts(true)),
     ] {
         let path = format!("{}/Actions/{}", config_dir, action.0);
         write_file(path, action.1);
     }
 
-    // Races
-    for body in [
-        ("OtherRaces.json", ultimate_aaf_patch_races())
-    ] {
+    for body in [("OtherRaces.json", ultimate_aaf_patch_races())] {
         write_file(format!("{}/Races/{}", config_dir, body.0), body.1);
     }
 
-    // Variables
-    for variable in [("DD.json", dd_variables())] {
-        write_file(format!("{}/Variables/{}", config_dir, variable.0), variable.1);
-    }
-
-    // Triggers
-    let triggers = vec![
-        ("Scenes_BP70.json", pb70_triggers()),
-        ("DD.json", dd_events()),
-        ("NukaRide.json", nr_events())
-    ];
+    let triggers = vec![("Default.json", default_scene_bone_tracking())];
     for trigger in triggers {
         let path = format!("{}/Triggers/{}", config_dir, trigger.0);
         write_file(path, trigger.1);
@@ -123,6 +89,27 @@ fn mod_default(config_dir: &str) {
     write_file(
         format!("{}/Logging.json", config_dir),
         LoggingSettings::default(),
+    );
+}
+
+fn package_bp70(config_dir: &str) {
+    write_file(
+        format!("{}/Triggers/Scenes_BP70.json", config_dir),
+        pb70_triggers(),
+    );
+}
+
+fn package_female_body_fusion_girl(config_dir: &str) {
+    write_file(
+        format!("{}/Races/HumanRaceFemale.json", config_dir),
+        human_race_female_fusion_girl(),
+    );
+}
+
+fn package_male_body_body_talk(config_dir: &str) {
+    write_file(
+        format!("{}/Races/HumanRaceMale.json", config_dir),
+        human_race_male_body_talk(),
     );
 }
 

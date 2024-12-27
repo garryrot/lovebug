@@ -58,7 +58,7 @@ pub fn default_actions() -> Vec<Action> {
     ]
 }
 
-pub fn devices() -> Vec<Action> {
+pub fn body_part_actions() -> Vec<Action> {
     vec![
         Action::new(
             "vibrate.nipple",

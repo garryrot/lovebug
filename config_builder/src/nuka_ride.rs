@@ -1,5 +1,5 @@
 use bp_scheduler::config::actions::{Action, ActionRef, Control, Selector, Stren, StrokeRange};
-use config::{body_parts::{TAG_PENIS, TAG_VAGINAL}, triggers::Trigger, Scene, SceneId, SceneTags};
+use config::{body_parts::{TAG_PENIS, TAG_VAGINAL}, triggers::Trigger, SceneId};
 
 use crate::scene;
 
@@ -7,7 +7,7 @@ pub fn nr_events() -> Vec<Trigger> {
     vec![
         scene(
             "Nuka Ride: Mule Anal Insertion",
-            SceneId::Exact("NR_FMM_Human_Couch02_PT".into()),
+            SceneId::Exact("NR_Mule_Clothed_PT".into()),
             vec![ActionRef {
                 action: "penetration.anal.deep".into(),
                 strength: Stren::Funscript(80, "Square".into()),
