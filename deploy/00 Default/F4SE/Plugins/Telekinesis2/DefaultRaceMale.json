@@ -2,10 +2,11 @@
   "form_id": 0,
   "name": "Default Race",
   "sex": "Female",
-  "genital_bone": "Pelvis",
+  "penetrator_bone": "Pelvis",
+  "strapon_extra_length": 8.0,
   "oral_bone": "HEAD",
   "anal_bone": "Pelvis",
-  "genital_collision": {
+  "anal_collision": {
     "outer_distance": 14.5,
     "depth": 10.0,
     "min_stroke": 0.25,

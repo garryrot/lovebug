@@ -30,6 +30,7 @@ use bp_scheduler::{
     speed::Speed,
 };
 
+
 use ::config::*;
 use events::{ffi_event::ModEvent, send_mod_event, start_outgoing_event_thread};
 use triggers::Triggers;
@@ -68,6 +69,7 @@ pub struct Telekinesis {
     default_race_female: Option<Race>,
     variables: VariableStore,
     variable_update_thread: Option<JoinHandle<()>>,
+    consider_player_passive: bool,
 }
 
 impl Telekinesis {
@@ -232,6 +234,7 @@ pub fn lb_connect(
             dynamic_settings: DynamicSettings::default(),
             variables,
             variable_update_thread: None,
+            consider_player_passive: true,
         };
 
         lb.variables.init_actor_values();
@@ -242,6 +245,7 @@ pub fn lb_connect(
 
         lb.triggers
             .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
+
         if lb.client.scan_for_devices() {
             send_mod_event(ModEvent::new(
                 "Tele_ConnectionSuccess",
@@ -313,16 +317,16 @@ pub fn lb_scene(
     time_secs: f32,
     actor_vec: &ActorVec,
 ) -> i32 {
-    info!(scene_name, speed, time_secs, "lb_scene");
+    let tags = read_input_string(scene_tags);
+    info!(scene_name, speed, time_secs, ?tags, "lb_scene 2");
     Telekinesis::run_static(
         |lb| {
-            let tags = read_input_string(scene_tags);
             let scene = lb.triggers.find_scene(scene_name, &tags);
-            debug!(?scene, "matched scene");
+            debug!(?scene, ?tags, "matched scene");
 
             if let Some(scene) = scene {
                 let mut actions = get_actions_from_refs(lb, scene.actions);
-                let mut do_stroke = None;
+                let mut do_stroke: Option<Control> = None;
                 for action in actions.iter_mut() {
                     if action.1.do_bone_tracking {
                         let has_stroker = action
@@ -355,19 +359,6 @@ pub fn lb_scene(
     )
 }
 
-pub fn lb_update(handle: i32, speed: i32) -> bool {
-    info!(handle, speed, "lb_update");
-    Telekinesis::run_static(
-        |lb| lb.client.update(handle, Speed::new(speed.into())),
-        false,
-    )
-}
-
-pub fn lb_stop(handle: i32) -> bool {
-    info!(handle, "lb_stop");
-    Telekinesis::run_static(|lb| lb.client.stop(handle), false)
-}
-
 fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     info!(event_name, str_arg, num_arg, "lb_process_event");
     Telekinesis::run_static(
@@ -388,6 +379,19 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
         },
         -1,
     )
+}
+
+pub fn lb_update(handle: i32, speed: i32) -> bool {
+    info!(handle, speed, "lb_update");
+    Telekinesis::run_static(
+        |lb| lb.client.update(handle, Speed::new(speed.into())),
+        false,
+    )
+}
+
+pub fn lb_stop(handle: i32) -> bool {
+    info!(handle, "lb_stop");
+    Telekinesis::run_static(|lb| lb.client.stop(handle), false)
 }
 
 fn get_actions_from_refs(

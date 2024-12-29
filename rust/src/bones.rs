@@ -6,22 +6,22 @@ use tokio::{
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, info, info_span, trace, Instrument};
 
-use buttplug::core::message::ActuatorType;
 use bp_scheduler::{
-    actuator::Actuator, config::{actions::Control, actuators::ActuatorSettings}, dynamic_tracking::*, filter::Filter,
+    actuator::Actuator,
+    config::{actions::Control, actuators::ActuatorSettings},
+    dynamic_tracking::*,
+    filter::Filter,
 };
+use buttplug::core::message::ActuatorType;
 
-use config::{
-    bodies::Race,
-    body_parts::*,
-};
+use config::{bodies::Race, body_parts::*};
 
-use ffi_bones::*;
 use crate::{
     bridge::{ffi_bridge::*, *},
     Telekinesis,
 };
 use collision::Collision;
+use ffi_bones::*;
 
 use config::bodies::Sex as RaceSex;
 
@@ -60,7 +60,6 @@ impl UnsafeAvObjectPtr {
     }
 }
 
-
 #[derive(Clone, Debug)]
 pub enum TrackingState {
     Init,
@@ -70,10 +69,7 @@ pub enum TrackingState {
     InnerTurn,
 }
 
-fn get_body_for_actor(
-    actor: &UnsafeActorPtr,
-    races: &Vec<Race>
-) -> Option<Race> {
+fn get_body_for_actor(actor: &UnsafeActorPtr, races: &Vec<Race>) -> Option<Race> {
     let race_form: UnsafeTESFormPtr = actor.get_race().into();
     let race_id = race_form.get_form_id();
     let sex = actor.get_sex();
@@ -87,14 +83,12 @@ fn get_body_for_actor(
     let actor_sex = match actor.get_sex() {
         Sex::Female => RaceSex::Female,
         Sex::Male => RaceSex::Male,
-        _ => RaceSex::None
+        _ => RaceSex::None,
     };
-    
+
     let mut chosen_race = None;
     for race in races {
-        if race.form_id == race_id &&
-           race.sex == actor_sex
-        {
+        if race.form_id == race_id && race.sex == actor_sex {
             chosen_race = Some(race.clone());
             debug!("found race {:?}", chosen_race);
         }
@@ -136,7 +130,8 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec, _control:
         .filter(|x| !x.is_player())
         .collect::<Vec<&UnsafeActorPtr>>();
     if npc_actors.is_empty() {
-        error!("no other actors, stop bone tracking");
+        info!("player only scene");
+        return;
     }
 
     let devices = lb.client.buttplug.devices();
@@ -148,101 +143,135 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec, _control:
             .result();
     lb.client.device_settings = settings;
 
-    let npc_male_actors = actors_in
-        .iter()
-        .filter(|x| !x.is_player() && x.get_sex() == Sex::Male)
-        .collect::<Vec<&UnsafeActorPtr>>();
-
     let mut starting_ramps = vec![];
     let player_actor = player_actor_opt.unwrap();
     let mut t_id = 0;
-    if player_actor.get_sex() == Sex::Female {
-        let player_body = match get_body_for_actor(player_actor, &lb.races) {
+
+    let player_body = match get_body_for_actor(player_actor, &lb.races) {
+        Some(race) => race,
+        None => {
+            error!(?lb.default_race_female, "player body not found using default");
+            lb.default_race_female.clone().unwrap()
+        }
+    };
+
+    // starts bone threads that monitor if any bone penetrates the player vaginally
+    // (anal is simply included due to lack of distance, maybe this will be differentiated
+    // at some point in the feature but I doubt it)
+
+    for npc in npc_actors {
+        t_id += 1;
+
+        let npc_body = match get_body_for_actor(npc, &lb.races) {
             Some(race) => race,
             None => {
-                error!(?lb.default_race_female, "player body not found using default");
-                lb.default_race_female.clone().unwrap()
-            },
+                error!(?lb.default_race_male, "player body not found using default");
+                lb.default_race_male.clone().unwrap()
+            }
         };
 
-        // starts bone threads that monitor if any bone penetrates the player vaginally
-        // (anal is simply included due to lack of distance, maybe this will be differentiated
-        // at some point in the feature but I doubt it)
-        if !npc_male_actors.is_empty() {
-            for npc in npc_male_actors {
-                t_id += 1;
+        let mut monitor_threads = vec![];
 
-                let npc_body = match get_body_for_actor(npc, &lb.races ) {
-                    Some(race) => race,
-                    None => { 
-                        error!(?lb.default_race_male, "player body not found using default");
-                        lb.default_race_male.clone().unwrap() 
-                    },
-                };
+        if lb.consider_player_passive {
+            // TODO: right now we always assume there is a strap-on, should we check that?
 
-                let player_pelvis = &player_body.genital_bone;
-                let player_head = &player_body.oral_bone;
-                let npc_penis = &npc_body.genital_bone;
+            let pen_bone = player_actor.get_bone(&player_body.penetrator_bone);
+            info!("pen_bone is_null={}", pen_bone.ptr.is_null());
 
-                if let Some(oral_collision) = player_body.oral_collision {
-                    // F/M oral collision
-                    // Use collision sphere of player head
-                    let pen_signal = CancellationToken::new();
-                    let cancel_observation = observe_bones(
-                        lb,
-                        &player_actor.get_bone(player_head),
-                        &npc.get_bone(npc_penis),
-                        oral_collision,
-                        sender.clone(),
-                        pen_signal.clone(),
-                        global_cancel.clone()
-                    );
-                    starting_ramps.push((
-                        pen_signal,
-                        cancel_observation,
-                        vec![TAG_PENIS, TAG_ORAL],
-                        t_id,
-                    ));
+            let uses_strapon =
+                player_actor.get_sex() == Sex::Female && npc.get_sex() == Sex::Female;
+
+            fn get_actual_collision(
+                use_strapon: bool,
+                collision: Collision,
+                penetrator_body: &Race,
+            ) -> Collision {
+                if use_strapon {
+                    let mut c2 = collision;
+                    c2.outer_distance += penetrator_body.strapon_extra_length;
+                    c2
                 } else {
-                    error!(?player_head, "actor has no head collision");
-                }
-
-                if let Some(penis_collision) = npc_body.genital_collision {
-                    // F/M genital collision
-                    // use collision sphere of male and genital collision
-                    let pen_signal = CancellationToken::new();
-                    let cancel_observation = observe_bones(
-                        lb,
-                        &player_actor.get_bone(player_pelvis),
-                        &npc.get_bone(npc_penis),
-                        penis_collision,
-                        sender.clone(),
-                        pen_signal.clone(),
-                        global_cancel.clone()
-                    );
-                    starting_ramps.push((
-                        pen_signal,
-                        cancel_observation,
-                        vec![TAG_PENIS, TAG_VAGINAL, TAG_ANAL],
-                        t_id,
-                    ));
-
-                } else {
-                    error!(?npc_penis, "actor has no penis collision");
+                    collision
                 }
             }
-        } else {
-            error!("F/F not implemented yet");
-        }
-        // any actor penetration player oral
-        //  -> penis, oral
-    } else {
-        error!("player male not implemented yet");
-        // player penetrates vaginal
-        //   -> penis, vaginal, anal
 
-        // player penetraties oral
-        //   -> penis, oral
+            // player on npc oral
+            if npc_body.oral_collision.is_some() {
+                monitor_threads.push((
+                    get_actual_collision(
+                        uses_strapon,
+                        npc_body.oral_collision.unwrap(),
+                        &player_body,
+                    ),
+                    npc.get_bone(&npc_body.oral_bone),
+                    player_actor.get_bone(&player_body.penetrator_bone),
+                    vec![TAG_PENIS, TAG_ORAL],
+                    "oral active",
+                ));
+            }
+
+            // player on npc anal
+            if npc_body.anal_collision.is_some() {
+                monitor_threads.push((
+                    get_actual_collision(
+                        uses_strapon,
+                        npc_body.anal_collision.unwrap(),
+                        &player_body,
+                    ),
+                    npc.get_bone(&npc_body.anal_bone),
+                    player_actor.get_bone(&player_body.penetrator_bone),
+                    vec![TAG_PENIS, TAG_VAGINAL, TAG_ANAL],
+                    "anal/vaginal active",
+                ));
+            }
+
+            // npc on player oral
+            if player_body.oral_collision.is_some() {
+                monitor_threads.push((
+                    get_actual_collision(
+                        uses_strapon,
+                        player_body.oral_collision.unwrap(),
+                        &npc_body,
+                    ),
+                    player_actor.get_bone(&player_body.oral_bone),
+                    npc.get_bone(&npc_body.penetrator_bone),
+                    vec![TAG_PENIS, TAG_ORAL],
+                    "oral passive",
+                ));
+            }
+
+            // npc on player anal
+            if player_body.anal_collision.is_some() {
+                monitor_threads.push((
+                    get_actual_collision(
+                        uses_strapon,
+                        player_body.anal_collision.unwrap(),
+                        &npc_body,
+                    ),
+                    player_actor.get_bone(&player_body.anal_bone),
+                    npc.get_bone(&npc_body.penetrator_bone),
+                    vec![TAG_PENIS, TAG_VAGINAL, TAG_ANAL],
+                    "anal/vaginal passive",
+                ));
+            }
+        }
+        if monitor_threads.is_empty() {
+            error!("no viable monitoring combination for scene actors")
+        }
+        for monitor_target in monitor_threads {
+            let pen_signal = CancellationToken::new();
+            let cancel_observation = observe_bones(
+                lb,
+                &monitor_target.1,
+                &monitor_target.2,
+                monitor_target.0,
+                sender.clone(),
+                pen_signal.clone(),
+                global_cancel.clone(),
+                monitor_target.4.into(),
+            );
+            starting_ramps.push((pen_signal, cancel_observation, monitor_target.3, t_id));
+        }
     }
 
     let tracking_handle = lb.dynamic_task.clone();
@@ -273,7 +302,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec, _control:
                 &winner.unwrap().2,
                 receiver,
                 enabled_position_actuators,
-                tracking_handle
+                tracking_handle,
             );
         });
     }
@@ -285,7 +314,7 @@ fn start_control_thread(
     body_parts: &[&str],
     receiver: UnboundedReceiver<TrackingSignal>,
     actuators: Vec<Arc<Actuator>>,
-    tracking_handle: DynamicTrackingHandle
+    tracking_handle: DynamicTrackingHandle,
 ) {
     let parts = body_parts
         .iter()
@@ -302,7 +331,7 @@ fn start_control_thread(
             settings: dynamic_settings,
             signals: receiver,
             actuators,
-            status: tracking_handle
+            status: tracking_handle,
         };
         info!(?dynamic.settings, ?parts, "control task started with settings");
         let _ = dynamic.track_mirror().await;
@@ -316,23 +345,24 @@ fn observe_bones(
     collision_sphere: Collision,
     sender: UnboundedSender<TrackingSignal>,
     first_pen: CancellationToken,
-    global_cancel: CancellationToken
+    global_cancel: CancellationToken,
+    thread_name: String,
 ) -> CancellationToken {
     let cancel_me = CancellationToken::new();
     let bone1 = a1_bone.clone();
     let bone2 = a2_bone.clone();
     let cancellation_token = cancel_me.clone();
     if bone1.ptr.is_null() {
-        error!( bone1.name, "bone null, stopping");
+        error!(bone1.name, "bone null, stopping");
         return cancellation_token;
     }
     if bone2.ptr.is_null() {
-        error!( bone2.name, "bone null, stopping");
+        error!(bone2.name, "bone null, stopping");
         return cancellation_token;
     }
 
     let initial_timeout_ms = lb.dynamic_settings.initial_timeout_ms;
-    let sample_ms = lb.dynamic_settings.sample_ms;
+    let sampling_rate_ms = lb.dynamic_settings.sampling_rate_ms;
 
     let t_id = lb.tracking_counter;
     lb.tracking_counter += 1;
@@ -340,8 +370,8 @@ fn observe_bones(
         let span = info_span!("observe_bones", id = t_id);
         async move {
             info!(
-                "observation task {} started. bone1={} - bone2={}. collision_sphere={:?}",
-                t_id, bone1.name, bone2.name, collision_sphere
+                "observation task {} '{}' started. bone1={} - bone2={}. collision_sphere={:?}",
+                t_id, thread_name, bone1.name, bone2.name, collision_sphere
             );
             sleep(Duration::from_millis(initial_timeout_ms)).await;
             let mut last_dist = f32::MAX;
@@ -423,7 +453,7 @@ fn observe_bones(
                 };
 
                 last_dist = dist;
-                sleep(Duration::from_millis(sample_ms)).await;
+                sleep(Duration::from_millis(sampling_rate_ms)).await;
             }
             if global_cancel.is_cancelled() {
                 let _ = sender.send(TrackingSignal::Stop);

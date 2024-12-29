@@ -3,10 +3,11 @@
     "form_id": 79686,
     "name": "Fusion Girl",
     "sex": "Female",
-    "genital_bone": "Pelvis_skin",
+    "penetrator_bone": "Pelvis_skin",
+    "strapon_extra_length": 7.0,
     "oral_bone": "HEAD",
     "anal_bone": "Pelvis_skin",
-    "genital_collision": {
+    "anal_collision": {
       "outer_distance": 12.5,
       "depth": 8.0,
       "min_stroke": 0.25,

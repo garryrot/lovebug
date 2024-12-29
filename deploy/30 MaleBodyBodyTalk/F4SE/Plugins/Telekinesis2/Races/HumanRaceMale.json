@@ -3,10 +3,11 @@
     "form_id": 79686,
     "name": "Body Talk",
     "sex": "Male",
-    "genital_bone": "Penis_01",
+    "penetrator_bone": "Penis_01",
+    "strapon_extra_length": 7.0,
     "oral_bone": "HEAD",
     "anal_bone": "Anus_01",
-    "genital_collision": {
+    "anal_collision": {
       "outer_distance": 12.5,
       "depth": 8.0,
       "min_stroke": 0.25,

@@ -3,10 +3,11 @@
     "form_id": 106505,
     "name": "Super Mutant",
     "sex": "Male",
-    "genital_bone": "Penis1",
+    "penetrator_bone": "Penis1",
+    "strapon_extra_length": 0.0,
     "oral_bone": "HEAD",
     "anal_bone": "Pelvis",
-    "genital_collision": {
+    "anal_collision": {
       "outer_distance": 14.5,
       "depth": 10.0,
       "min_stroke": 0.25,

@@ -13,10 +13,11 @@ pub struct Race {
     pub form_id: u32,
     pub name: String,
     pub sex: Sex,
-    pub genital_bone: String,
+    pub penetrator_bone: String,
+    pub strapon_extra_length: f32, // hacky but whatever
     pub oral_bone: String,
     pub anal_bone: String,
-    pub genital_collision: Option<Collision>,
+    pub anal_collision: Option<Collision>,
     pub oral_collision: Option<Collision>
 }
 
@@ -32,11 +33,12 @@ impl Default for Race {
             form_id: 0,
             name: "Default Race".into(),
             sex: Sex::Female,
-            genital_bone: "Pelvis".into(),
+            penetrator_bone: "Pelvis".into(),
             oral_bone: "HEAD".into(),
             anal_bone: "Pelvis".into(),
-            genital_collision: Some(collision),
+            anal_collision: Some(collision),
             oral_collision: Some(collision),
+            strapon_extra_length: 8.0,
         }
     }
 }
@@ -53,11 +55,12 @@ impl Race {
             form_id: 0,
             name: "Default Female".into(),
             sex: Sex::Female,
-            genital_bone: "Pelvis".into(),
+            penetrator_bone: "Pelvis".into(),
             oral_bone: "HEAD".into(),
             anal_bone: "Pelvis".into(),
-            genital_collision: Some(collision),
+            anal_collision: Some(collision),
             oral_collision: Some(collision),
+            strapon_extra_length: 8.0,
         }
     }
 
@@ -72,11 +75,12 @@ impl Race {
             form_id: 0,
             name: "Default Male".into(),
             sex: Sex::Male,
-            genital_bone: "Pelvis".into(),
+            penetrator_bone: "Pelvis".into(),
             oral_bone: "HEAD".into(),
             anal_bone: "Pelvis".into(),
-            genital_collision: Some(collision),
+            anal_collision: Some(collision),
             oral_collision: Some(collision),
+            strapon_extra_length: 8.0,
         }
     }
 }
