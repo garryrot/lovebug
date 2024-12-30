@@ -25,7 +25,8 @@
             "Constant": 30
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -42,7 +43,8 @@
             "Constant": 25
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -59,7 +61,8 @@
             "Constant": 75
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -82,7 +85,8 @@
             "Constant": 20
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -92,7 +96,8 @@
         "Exact": "[UAP] BP70 - Kissing"
       },
       "tags": "Any",
-      "actions": []
+      "actions": [],
+      "track_bones": false
     }
   },
   {
@@ -109,7 +114,8 @@
             "Constant": 70
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -126,7 +132,8 @@
             "Constant": 10
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -143,7 +150,8 @@
             "Constant": 20
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -160,7 +168,8 @@
             "Constant": 85
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -177,7 +186,8 @@
             "Constant": 60
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -194,7 +204,8 @@
             "Constant": 50
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -211,7 +222,8 @@
             "Constant": 40
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -228,7 +240,8 @@
             "Constant": 60
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -245,7 +258,8 @@
             "Constant": 80
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -262,7 +276,8 @@
             "Constant": 50
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -279,7 +294,8 @@
             "Constant": 70
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -296,7 +312,8 @@
             "Constant": 90
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -313,7 +330,8 @@
             "Constant": 70
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -323,7 +341,8 @@
         "Exact": "[UAP] BP70 - Romantic Missionary 01"
       },
       "tags": "Any",
-      "actions": []
+      "actions": [],
+      "track_bones": false
     }
   },
   {
@@ -333,7 +352,8 @@
         "Exact": "[UAP] BP70 - Spooning 01"
       },
       "tags": "Any",
-      "actions": []
+      "actions": [],
+      "track_bones": false
     }
   },
   {
@@ -343,7 +363,8 @@
         "Exact": "[UAP] BP70 - Standing Sequence Stage 1"
       },
       "tags": "Any",
-      "actions": []
+      "actions": [],
+      "track_bones": false
     }
   }
 ]

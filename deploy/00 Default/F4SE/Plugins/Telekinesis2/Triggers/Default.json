@@ -1,7 +1,7 @@
 [
   {
     "Scene": {
-      "description": "Scene Default",
+      "description": "Default Scene",
       "scene_id": "Any",
       "tags": "Any",
       "actions": [
@@ -9,12 +9,6 @@
           "action": "vibrate",
           "strength": {
             "Variable": "BoneTrackingPos"
-          }
-        },
-        {
-          "action": "linear",
-          "strength": {
-            "Variable": "BoneTrackingRate"
           }
         },
         {
@@ -29,7 +23,26 @@
             "Variable": "BoneTrackingDepth"
           }
         }
-      ]
+      ],
+      "track_bones": true
+    }
+  },
+  {
+    "Scene": {
+      "description": "Masturbation Scene",
+      "scene_id": "Any",
+      "tags": {
+        "Tag": "masturbation"
+      },
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ],
+      "track_bones": true
     }
   }
 ]

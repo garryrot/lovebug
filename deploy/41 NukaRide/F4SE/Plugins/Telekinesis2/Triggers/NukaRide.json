@@ -16,7 +16,8 @@
             ]
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -51,7 +52,8 @@
             "Constant": 100
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   },
   {
@@ -68,7 +70,8 @@
             "Constant": 40
           }
         }
-      ]
+      ],
+      "track_bones": false
     }
   }
 ]

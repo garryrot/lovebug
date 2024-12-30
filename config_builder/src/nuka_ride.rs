@@ -34,7 +34,6 @@ pub fn nr_actions() -> Vec<Action> {
     vec![
         Action {
             name: "nr.shockchair.penetration".into(),
-            do_bone_tracking: false,
             control: vec![
                 Control::Stroke(
                     Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),

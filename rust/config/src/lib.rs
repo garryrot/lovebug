@@ -2,11 +2,11 @@ use serde::{Deserialize, Serialize};
 
 use bp_scheduler::config::actions::*;
 
-pub mod variables;
-pub mod triggers;
-pub mod events;
 pub mod bodies;
 pub mod body_parts;
+pub mod events;
+pub mod triggers;
+pub mod variables;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Scene {
@@ -14,6 +14,7 @@ pub struct Scene {
     pub scene_id: SceneId,
     pub tags: SceneTags,
     pub actions: Vec<ActionRef>,
+    pub track_bones: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -51,12 +52,12 @@ impl SceneTags {
     pub fn or(items: Vec<Box<SceneTags>>) -> Box<SceneTags> {
         Box::new(SceneTags::Or(items))
     }
-    pub fn matches( &self, tags: &Vec<String>) -> bool {
+    pub fn matches(&self, tags: &Vec<String>) -> bool {
         match self {
             SceneTags::Any => true,
             SceneTags::Tag(tag) => tags.contains(tag),
-            SceneTags::And(items) => items.iter().all( |x| x.matches(tags)),
-            SceneTags::Or(items) => items.iter().any( |x| x.matches(tags)),
+            SceneTags::And(items) => items.iter().all(|x| x.matches(tags)),
+            SceneTags::Or(items) => items.iter().any(|x| x.matches(tags)),
         }
     }
 }
@@ -67,9 +68,8 @@ pub enum Framework {
     AAF,
     Sexlab,
     Ostim,
-    Love
+    Love,
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -90,14 +90,8 @@ mod tests {
                     event: "MilkQuest.MilkingStage".into(),
                     conditions: vec![],
                 },
-                action: vec![
-                    "milkmod.feedingstage".into()
-                ],
-                body_parts: BodyParts::Tags(
-                    vec![
-                        "Anal".into()
-                    ]
-                )
+                action: vec!["milkmod.feedingstage".into()],
+                body_parts: BodyParts::Tags(vec!["Anal".into()]),
             }),
             Trigger::Event(Event {
                 description: "Milk Mod: Milking Stage".into(),
@@ -111,15 +105,8 @@ mod tests {
                     event: "MilkQuest.FuckMachineStage".into(),
                     conditions: vec![],
                 },
-                action: vec![
-                    "milkmod.milkingstage".into()
-                ],
-                body_parts: BodyParts::Tags(
-                    vec![
-                        "Anal".into(),
-                        "Nipple".into()
-                    ]
-                )
+                action: vec!["milkmod.milkingstage".into()],
+                body_parts: BodyParts::Tags(vec!["Anal".into(), "Nipple".into()]),
             }),
             Trigger::Event(Event {
                 description: "Milk Mod: Fucking Machine Stage".into(),
@@ -133,15 +120,8 @@ mod tests {
                     event: "MilkQuest.StartMilkingMachine".into(),
                     conditions: vec![],
                 },
-                action: vec![
-                    "milkmod.fuckingmachinestage".into()
-                ],
-                body_parts: BodyParts::Tags(
-                    vec![
-                        "Anal".into(),
-                        "Vaginal".into()
-                    ]
-                )
+                action: vec!["milkmod.fuckingmachinestage".into()],
+                body_parts: BodyParts::Tags(vec!["Anal".into(), "Vaginal".into()]),
             }),
             Trigger::Timed(TimedEvent {
                 description: "Milk Mod: Start Milking Machine".into(),
@@ -152,13 +132,7 @@ mod tests {
                 },
                 duration_ms: 10_000,
                 action: vec![],
-                body_parts: BodyParts::Tags(
-                    vec![
-                        "Anal".into(),
-                        "Vaginal".into(),
-                        "Nipple".into()
-                    ]
-                )
+                body_parts: BodyParts::Tags(vec!["Anal".into(), "Vaginal".into(), "Nipple".into()]),
             }),
             Trigger::Scene(Scene {
                 description: "Default scene".into(),
@@ -166,12 +140,10 @@ mod tests {
                 tags: SceneTags::Or(vec![
                     SceneTags::tag("Anal"),
                     SceneTags::tag("Vaginal"),
-                    SceneTags::and(vec![
-                        SceneTags::tag("Foo"),
-                        SceneTags::tag("Bar")
-                    ]),
+                    SceneTags::and(vec![SceneTags::tag("Foo"), SceneTags::tag("Bar")]),
                 ]),
-                actions: vec![ "something".into() ],
+                actions: vec!["something".into()],
+                track_bones: false,
             }),
         ];
         let strn = serde_json::to_string_pretty(&default_config).unwrap();

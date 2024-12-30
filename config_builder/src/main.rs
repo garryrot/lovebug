@@ -25,40 +25,24 @@ mod scenes_bp70;
 mod scenes_default;
 
 fn main() {
-    fn package_dir(fomod_package: &str) -> String {
+    fn get_dir(fomod_package: &str) -> String {
         format!("../deploy/{}/F4SE/Plugins/Telekinesis2", fomod_package)
     }
 
-    mod_default(&package_dir("00 Default"));
-    package_nuka_ride(&package_dir("41 NukaRide"));
-    package_devious_devices(&package_dir("42 DD"));
-    package_bp70(&package_dir("51 AAF BP70"));
+    pack_default(&get_dir("00 Default"));
+    pack_nr(&get_dir("41 NukaRide"));
+    pack_dd(&get_dir("42 DD"));
+    pack_bp70(&get_dir("51 AAF BP70"));
 
-    package_female_body_fusion_girl(&package_dir("20 FemaleBodyFusionGirls"));
-    package_male_body_body_talk(&package_dir("30 MaleBodyBodyTalk"));
+    pack_fusion_girl(&get_dir("20 FemaleBodyFusionGirls"));
+    pack_body_talk(&get_dir("30 MaleBodyBodyTalk"));
 }
 
-fn package_nuka_ride(config_dir: &str) {
-    write_file(
-        format!("{}/Actions/NukaRide.json", config_dir),
-        nr_actions(),
-    );
-    write_file(
-        format!("{}/Triggers/NukaRide.json", config_dir),
-        nr_events(),
-    );
-}
-
-fn package_devious_devices(config_dir: &str) {
-    write_file(format!("{}/Triggers/DD.json", config_dir), dd_events());
-    write_file(format!("{}/Variables/DD.json", config_dir), dd_variables());
-}
-
-fn mod_default(config_dir: &str) {
+fn pack_default(config_dir: &str) {
     for action in [
         ("Default.json", default_actions()),
         ("BodyParts.json", body_part_actions()),
-        ("SexActs.json", sex_acts(true)),
+        ("SexActs.json", sex_acts()),
     ] {
         let path = format!("{}/Actions/{}", config_dir, action.0);
         write_file(path, action.1);
@@ -92,21 +76,37 @@ fn mod_default(config_dir: &str) {
     );
 }
 
-fn package_bp70(config_dir: &str) {
+fn pack_nr(config_dir: &str) {
+    write_file(
+        format!("{}/Actions/NukaRide.json", config_dir),
+        nr_actions(),
+    );
+    write_file(
+        format!("{}/Triggers/NukaRide.json", config_dir),
+        nr_events(),
+    );
+}
+
+fn pack_dd(config_dir: &str) {
+    write_file(format!("{}/Triggers/DD.json", config_dir), dd_events());
+    write_file(format!("{}/Variables/DD.json", config_dir), dd_variables());
+}
+
+fn pack_bp70(config_dir: &str) {
     write_file(
         format!("{}/Triggers/Scenes_BP70.json", config_dir),
         pb70_triggers(),
     );
 }
 
-fn package_female_body_fusion_girl(config_dir: &str) {
+fn pack_fusion_girl(config_dir: &str) {
     write_file(
         format!("{}/Races/HumanRaceFemale.json", config_dir),
         human_race_female_fusion_girl(),
     );
 }
 
-fn package_male_body_body_talk(config_dir: &str) {
+fn pack_body_talk(config_dir: &str) {
     write_file(
         format!("{}/Races/HumanRaceMale.json", config_dir),
         human_race_male_body_talk(),

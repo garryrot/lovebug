@@ -8,7 +8,7 @@ use tracing::{debug, error, info, info_span, trace, Instrument};
 
 use bp_scheduler::{
     actuator::Actuator,
-    config::{actions::Control, actuators::ActuatorSettings},
+    config::actuators::ActuatorSettings,
     dynamic_tracking::*,
     filter::Filter,
 };
@@ -97,7 +97,7 @@ fn get_body_for_actor(actor: &UnsafeActorPtr, races: &Vec<Race>) -> Option<Race>
     chosen_race
 }
 
-pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec, _control: Control) {
+pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
     info!("lb_dynamic_tracking Actors={}", actor_vec.Size());
     let actors_in = from_actor_vec(actor_vec);
 

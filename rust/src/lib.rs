@@ -325,26 +325,9 @@ pub fn lb_scene(
             debug!(?scene, ?tags, "matched scene");
 
             if let Some(scene) = scene {
-                let mut actions = get_actions_from_refs(lb, scene.actions);
-                let mut do_stroke: Option<Control> = None;
-                for action in actions.iter_mut() {
-                    if action.1.do_bone_tracking {
-                        let has_stroker = action
-                            .1
-                            .control
-                            .iter()
-                            .find(|x| matches!(x, Control::Stroke(_, _)));
-                        if has_stroker.is_some() {
-                            do_stroke = has_stroker.cloned();
-                        }
-                        action
-                            .1
-                            .control
-                            .retain(|x| matches!(x, Control::Scalar(_, _)));
-                    }
-                }
-                if let Some(stroke) = do_stroke {
-                    lb_dynamic_tracking(lb, actor_vec, stroke);
+                let actions = get_actions_from_refs(lb, scene.actions);
+                if scene.track_bones {
+                    lb_dynamic_tracking(lb, actor_vec);
                 }
                 return lb.client.dispatch_refs(
                     actions,

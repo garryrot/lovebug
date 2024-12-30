@@ -1,7 +1,6 @@
 [
   {
     "name": "vibrate.nipple",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -19,7 +18,6 @@
   },
   {
     "name": "vibrate.vaginal",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -37,7 +35,6 @@
   },
   {
     "name": "vibrate.clitoral",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -55,7 +52,6 @@
   },
   {
     "name": "vibrate.anal",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -73,7 +69,6 @@
   },
   {
     "name": "constrict.penis",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -91,7 +86,6 @@
   },
   {
     "name": "constrict.vaginal",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -109,7 +103,6 @@
   },
   {
     "name": "constrict.anal",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -127,7 +120,6 @@
   },
   {
     "name": "inflate.vaginal",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [
@@ -145,7 +137,6 @@
   },
   {
     "name": "inflate.anal",
-    "do_bone_tracking": false,
     "control": [
       {
         "Scalar": [

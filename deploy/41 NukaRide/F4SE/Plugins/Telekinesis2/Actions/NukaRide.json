@@ -1,7 +1,6 @@
 [
   {
     "name": "nr.shockchair.penetration",
-    "do_bone_tracking": false,
     "control": [
       {
         "Stroke": [
