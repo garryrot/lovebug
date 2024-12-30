@@ -306,6 +306,38 @@
             ]
         },
         {
+            "pageDisplayName": "Debugging",
+            "content": [
+                {
+                    "id": "bActions:Debugging",
+                    "text": "Debug Device Actions",
+                    "help": "Show each device action as a notification",
+                    "type": "switcher",
+                    "valueOptions": {
+                        "sourceType": "ModSettingBool"
+                    }
+                },
+                {
+                    "id": "bScenes:Debugging",
+                    "text": "Debug Scenes",
+                    "help": "Show each scene triggers as notification",
+                    "type": "switcher",
+                    "valueOptions": {
+                        "sourceType": "ModSettingBool"
+                    }
+                },
+                {
+                    "id": "bEvents:Debugging",
+                    "text": "Debug Events",
+                    "help": "Show each event triggers as notification",
+                    "type": "switcher",
+                    "valueOptions": {
+                        "sourceType": "ModSettingBool"
+                    }
+                }
+            ]
+        },
+        {
             "pageDisplayName": "Please Read",
             "content": [
                 {

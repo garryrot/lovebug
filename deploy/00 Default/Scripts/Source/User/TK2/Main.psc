@@ -22,7 +22,29 @@ Function Startup()
 		Debug("Starting DD Event Bridge")
 		ddBridge.CallFunction("Startup", new Var[0])
 	EndIf
+
+	RegisterForExternalEvent("Tele_Action", "OnAction")
+    RegisterForExternalEvent("Tele_Event", "OnEvent")
+    RegisterForExternalEvent("Tele_Scene", "OnScene")
 	Connect()
+EndFunction
+
+Function OnAction(String description, Float handle)
+	If MCM.GetModSettingInt("Telekinesis", "bDebug:Actions")
+		Debug("Action: " + description + " " + handle)
+	EndIf
+EndFunction
+
+Function OnEvent(String description, Float handle)
+	If MCM.GetModSettingInt("Telekinesis", "bDebug:Scenes")
+		Debug("Triggered Scene: " + description + " " + handle)
+	EndIf
+EndFunction
+
+Function OnScene(String description, Float handle)
+	If MCM.GetModSettingInt("Telekinesis", "bDebug:Events")
+		Debug("Triggered Event: " + description + " " + handle)
+	EndIf
 EndFunction
 
 Function Connect()

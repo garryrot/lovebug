@@ -49,8 +49,6 @@ pub fn start_outgoing_event_thread(client: &BpClient) {
     let mut events = client.buttplug.event_stream();
 
     client.runtime.spawn(async move {
-        
-
         while let Some(evt) = events.next().await {
             info!("got event: {:?}", evt);
             match evt {

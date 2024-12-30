@@ -9,7 +9,7 @@ use tokio::task::JoinHandle;
 use variables::VariableStore;
 
 use std::{
-    sync::{ atomic::AtomicI64, Arc, Mutex},
+    sync::{atomic::AtomicI64, Arc, Mutex},
     time::Duration,
 };
 use tracing::{debug, error, info};
@@ -17,7 +17,7 @@ use tracing::{debug, error, info};
 use crate::bones::ffi_bones::ActorVec;
 
 use bp_scheduler::{
-    client::BpClient,
+    client::{BpClient, DispatchResult},
     config::{
         actions::*,
         actuators::ActuatorSettings,
@@ -29,7 +29,6 @@ use bp_scheduler::{
     dynamic_tracking::{DynamicSettings, DynamicTrackingHandle},
     speed::Speed,
 };
-
 
 use ::config::*;
 use events::{ffi_event::ModEvent, send_mod_event, start_outgoing_event_thread};
@@ -96,7 +95,7 @@ impl Telekinesis {
 
     pub fn run_static_no_return<F>(func: F)
     where
-        F: FnOnce(&mut Telekinesis)
+        F: FnOnce(&mut Telekinesis),
     {
         if let Ok(mut guard) = LB.state.try_lock() {
             match guard.take() {
@@ -222,7 +221,7 @@ pub fn lb_connect(
 
         let dynamic_task = DynamicTrackingHandle::default();
         let vars = read_variables();
-        let variables = VariableStore::new( vars, &dynamic_task);
+        let variables = VariableStore::new(vars, &dynamic_task);
         let mut lb = Telekinesis {
             client: client.unwrap(),
             triggers: Triggers::default(),
@@ -247,37 +246,16 @@ pub fn lb_connect(
             .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
 
         if lb.client.scan_for_devices() {
-            send_mod_event(ModEvent::new(
-                "Tele_ConnectionSuccess",
-                "",
-                0.0,
-            ));
-        }
-        else 
-        { 
-            send_mod_event(ModEvent::new(
-                "Tele_ConnectionError",
-                "",
-                0.0,
-            ));
+            send_mod_event(ModEvent::new("Tele_ConnectionSuccess", "", 0.0));
+        } else {
+            send_mod_event(ModEvent::new("Tele_ConnectionError", "", 0.0));
         };
-
         start_dd_workaround(&mut lb);
-
         guard.replace(lb);
     } else {
         error!("init failed");
     }
     true
-}
-
-fn read_variables() -> Vec<config::variables::ConfigVariable> {
-    let vars = read_config_dir(VARIABLES_DIR.into());
-    for var in &vars {
-        debug!(?var, "read variable");
-    }
-    info!("read {} variables...", vars.len());
-    vars
 }
 
 pub fn lb_disconnect() {
@@ -298,12 +276,14 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
                     strength: Stren::Constant(100),
                 }],
             );
-            lb.client.dispatch_refs(
+            let results = lb.client.dispatch_refs(
                 actions,
                 vec![],
                 Speed::new(speed.into()),
                 read_input_duration(time_secs),
-            )
+            );
+            send_action_events(&results);
+            results.handle
         },
         -1,
     );
@@ -325,16 +305,20 @@ pub fn lb_scene(
             debug!(?scene, ?tags, "matched scene");
 
             if let Some(scene) = scene {
+                send_mod_event(ModEvent::new("Tele_Scene", &scene.description, 0.0));
+
                 let actions = get_actions_from_refs(lb, scene.actions);
                 if scene.track_bones {
                     lb_dynamic_tracking(lb, actor_vec);
                 }
-                return lb.client.dispatch_refs(
+                let results = lb.client.dispatch_refs(
                     actions,
                     vec![],
                     Speed::new(speed.into()),
                     read_input_duration(time_secs),
                 );
+                send_action_events(&results);
+                return results.handle;
             }
             -1
         },
@@ -347,8 +331,9 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     Telekinesis::run_static(
         |lb| {
             if let Some(start_event) = lb.triggers.find_started_events(event_name) {
+                send_mod_event(ModEvent::new("Tele_Event", &start_event.description, 0.0));
                 let converted = get_actions_from_refs(lb, start_event.actions);
-                return lb.client.dispatch_refs(
+                let results = lb.client.dispatch_refs(
                     converted,
                     vec![],
                     Speed::max(),
@@ -357,6 +342,8 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
                         _ => Duration::MAX,
                     },
                 );
+                send_action_events(&results);
+                return results.handle;
             }
             -1
         },
@@ -375,6 +362,40 @@ pub fn lb_update(handle: i32, speed: i32) -> bool {
 pub fn lb_stop(handle: i32) -> bool {
     info!(handle, "lb_stop");
     Telekinesis::run_static(|lb| lb.client.stop(handle), false)
+}
+
+fn read_variables() -> Vec<config::variables::ConfigVariable> {
+    let vars = read_config_dir(VARIABLES_DIR.into());
+    for var in &vars {
+        debug!(?var, "read variable");
+    }
+    info!("read {} variables...", vars.len());
+    vars
+}
+
+fn send_action_events(results: &DispatchResult) {
+    for result in &results.actions {
+        let action_name = result.0.clone();
+        if !result.1.is_empty() {
+            let devices = result
+                .1
+                .iter()
+                .map(|x| {
+                    x.config
+                        .as_ref()
+                        .map(|y| y.actuator_config_id.clone())
+                        .unwrap_or(x.identifier().to_owned())
+                })
+                .collect::<Vec<String>>()
+                .join(", ");
+
+            send_mod_event(ModEvent::new(
+                "Tele_Action",
+                &format!("{}: {}", action_name, devices),
+                results.handle as f64,
+            ));
+        }
+    }
 }
 
 fn get_actions_from_refs(
@@ -397,13 +418,13 @@ fn get_actions_from_refs(
                     Variable::BoneTrackingDepth => lb.dynamic_task.cur_avg_depth.clone(),
                     Variable::BoneTrackingPos => lb.dynamic_task.cur_pos.clone(),
                     Variable::PlayerActorValue(name) => {
-                        if let Some(var) =  lb.variables.get(&name) {
+                        if let Some(var) = lb.variables.get(&name) {
                             var.clone()
                         } else {
                             error!(name, "unknown player actor value");
                             Arc::new(AtomicI64::new(0))
                         }
-                    },
+                    }
                 }),
                 Stren::Funscript(x, y) => Strength::Funscript(x, y),
                 Stren::RandomFunscript(x, y) => Strength::RandomFunscript(x, y),

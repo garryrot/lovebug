@@ -26,29 +26,42 @@ Bool Property ConnectionError = True Auto
 Telekinesis:DevicePage current = none
 
 Event OnInit()
+    Telekinesis:DevicePage default
+    current = default
+
     RegisterForExternalEvent("OnMCMSettingChange|Telekinesis", "OnChange")
+	RegisterForRemoteEvent(Game.GetPlayer(), "OnPlayerLoadGame")
+
+    Startup()
+    Refresh()
+EndEvent
+
+Event Actor.OnPlayerLoadGame(Actor actor)
+	Startup()
+    Refresh()
+EndEvent
+
+Function Startup()
     RegisterForExternalEvent("Tele_DeviceAdded", "OnDeviceAdded")
     RegisterForExternalEvent("Tele_DeviceRemoved", "OnDeviceRemoved")
     RegisterForExternalEvent("Tele_ConnectionSuccess", "OnConnectionSuccess")
     RegisterForExternalEvent("Tele_ConnectionError", "OnConnectionError")
-    Telekinesis:DevicePage default
-    current = default
+EndFunction
 
-	RegisterForRemoteEvent(Game.GetPlayer(), "OnPlayerLoadGame")
-    Startup()
-EndEvent
-
-Event Actor.OnPlayerLoadGame(Actor ActorRef)
-	Startup()
-EndEvent
+Function Refresh()
+    int len = Telekinesis.MCM_Devices_Len()
+    CurrentIndex = 0
+    ConnectionError = False
+    Update(len)
+Endfunction
 
 Function OnDeviceAdded(String strArg, Float numArg)
-   Startup()
+    Refresh()
 EndFunction
 
 Function OnDeviceRemoved(String strArg, Float numArg)
-    Startup()
-EndFunction 
+    Refresh()
+EndFunction
 
 Function OnConnectionSuccess(String strArg, Float numArg)
     Connected = True 
@@ -70,13 +83,6 @@ Function Reconnect()
 	Utility.Wait(1.0)
 	main.Connect()
 	MCM.RefreshMenu()
-EndFunction
-
-Function Startup()
-    int len = Telekinesis.MCM_Devices_Len()
-    CurrentIndex = 0
-    ConnectionError = False
-    Update(len)
 EndFunction
 
 Function Next()

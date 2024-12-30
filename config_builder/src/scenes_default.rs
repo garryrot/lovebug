@@ -15,7 +15,7 @@ pub fn default_scene_bone_tracking() -> Vec<Trigger> {
             track_bones: true,
         }),
         Trigger::Scene(Scene {
-            description: "Masturbation Scene".into(),
+            description: "Default Masturbation Scene".into(),
             scene_id: SceneId::Any,
             tags: SceneTags::Tag("masturbation".into()),
             actions: vec![
