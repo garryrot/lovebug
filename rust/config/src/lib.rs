@@ -12,7 +12,7 @@ pub mod variables;
 pub struct Scene {
     pub description: String,
     pub scene_id: SceneId,
-    pub tags: SceneTags,
+    pub scene_tags: Selector,
     pub actions: Vec<ActionRef>,
     pub track_bones: bool,
 }
@@ -30,34 +30,6 @@ impl SceneId {
             SceneId::Any => true,
             SceneId::Exact(scene) => scene == scene_name,
             SceneId::Contains(needle) => scene_name.contains(needle),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum SceneTags {
-    Any,
-    Tag(String),
-    And(Vec<Box<SceneTags>>),
-    Or(Vec<Box<SceneTags>>),
-}
-
-impl SceneTags {
-    pub fn tag(name: &str) -> Box<SceneTags> {
-        Box::new(SceneTags::Tag(name.into()))
-    }
-    pub fn and(items: Vec<Box<SceneTags>>) -> Box<SceneTags> {
-        Box::new(SceneTags::And(items))
-    }
-    pub fn or(items: Vec<Box<SceneTags>>) -> Box<SceneTags> {
-        Box::new(SceneTags::Or(items))
-    }
-    pub fn matches(&self, tags: &Vec<String>) -> bool {
-        match self {
-            SceneTags::Any => true,
-            SceneTags::Tag(tag) => tags.contains(tag),
-            SceneTags::And(items) => items.iter().all(|x| x.matches(tags)),
-            SceneTags::Or(items) => items.iter().any(|x| x.matches(tags)),
         }
     }
 }
@@ -133,20 +105,10 @@ mod tests {
                 duration_ms: 10_000,
                 action: vec![],
                 body_parts: BodyParts::Tags(vec!["Anal".into(), "Vaginal".into(), "Nipple".into()]),
-            }),
-            Trigger::Scene(Scene {
-                description: "Default scene".into(),
-                scene_id: SceneId::Any,
-                tags: SceneTags::Or(vec![
-                    SceneTags::tag("Anal"),
-                    SceneTags::tag("Vaginal"),
-                    SceneTags::and(vec![SceneTags::tag("Foo"), SceneTags::tag("Bar")]),
-                ]),
-                actions: vec!["something".into()],
-                track_bones: false,
-            }),
+            })
         ];
         let strn = serde_json::to_string_pretty(&default_config).unwrap();
         println!("{}", strn);
     }
 }
+

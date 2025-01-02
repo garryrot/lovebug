@@ -5,6 +5,8 @@ use crate::scene;
 
 pub fn nr_events() -> Vec<Trigger> {
     vec![
+        // TODO: NR_FM_MirelurkKing_Standing01_PT
+        
         scene(
             "Nuka Ride: Mule Anal Insertion",
             SceneId::Exact("NR_Mule_Clothed_PT".into()),
@@ -36,7 +38,7 @@ pub fn nr_actions() -> Vec<Action> {
             name: "nr.shockchair.penetration".into(),
             control: vec![
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
                     StrokeRange {
                         min_ms: 400,
                         max_ms: 400,

@@ -5,9 +5,7 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "vaginal"
-            ]
+            "Tag": "vaginal"
           },
           [
             "Vibrate",
@@ -23,9 +21,7 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis"
-            ]
+            "Tag": "penis"
           },
           [
             "Vibrate",
@@ -37,9 +33,7 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis"
-            ]
+            "Tag": "penis"
           },
           {
             "min_ms": 150,
@@ -57,9 +51,7 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis"
-            ]
+            "Tag": "penis"
           },
           [
             "Vibrate",
@@ -70,9 +62,7 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis"
-            ]
+            "Tag": "penis"
           },
           {
             "min_ms": 150,
@@ -90,9 +80,13 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis",
-              "vaginal"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "vaginal"
+              }
             ]
           },
           [
@@ -105,9 +99,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "vaginal"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "vaginal"
+              }
             ]
           },
           {
@@ -126,9 +124,13 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis",
-              "vaginal"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "vaginal"
+              }
             ]
           },
           [
@@ -141,9 +143,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "vaginal"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "vaginal"
+              }
             ]
           },
           {
@@ -162,9 +168,13 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           [
@@ -177,9 +187,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           {
@@ -198,9 +212,13 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           [
@@ -213,9 +231,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           {
@@ -234,9 +256,13 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           [
@@ -249,9 +275,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           {
@@ -270,9 +300,13 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           [
@@ -285,9 +319,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           {
@@ -306,9 +344,13 @@
       {
         "Scalar": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           [
@@ -321,9 +363,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "oral"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "oral"
+              }
             ]
           },
           {

@@ -5,9 +5,13 @@
       {
         "Stroke": [
           {
-            "BodyParts": [
-              "penis",
-              "vaginal"
+            "Or": [
+              {
+                "Tag": "penis"
+              },
+              {
+                "Tag": "vaginal"
+              }
             ]
           },
           {

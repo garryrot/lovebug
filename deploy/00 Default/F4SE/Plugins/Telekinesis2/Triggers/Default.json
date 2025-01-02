@@ -3,7 +3,7 @@
     "Scene": {
       "description": "Default Scene",
       "scene_id": "Any",
-      "tags": "Any",
+      "scene_tags": "Any",
       "actions": [
         {
           "action": "vibrate",
@@ -29,9 +29,9 @@
   },
   {
     "Scene": {
-      "description": "Masturbation Scene",
+      "description": "Default Masturbation Scene",
       "scene_id": "Any",
-      "tags": {
+      "scene_tags": {
         "Tag": "masturbation"
       },
       "actions": [

@@ -181,6 +181,7 @@ mod ffi {
 }
 
 pub fn lb_actor_value_changed(form_id: u32, value: f32) {
+    // debug!("actor value change {}: {}", form_id, value);
     Telekinesis::run_static_no_return(|lb| {
         let _ = lb.variables.update(form_id, value);
     });

@@ -111,7 +111,7 @@
         {
             "id": "bXInput:Connection",
             "text": "X-Input",
-            "help": "",
+            "help": "If enabled, connects to X-Input devices such as the XBox-Controllers.",
             "type": "switcher",
             "valueOptions": {
                 "sourceType": "ModSettingBool"
@@ -197,7 +197,7 @@
                     }
                 },
                 {
-                    "text": "Associated Body Parts",
+                    "text": "Body Parts",
                     "type": "section"
                 },
                 {
@@ -309,9 +309,13 @@
             "pageDisplayName": "Debugging",
             "content": [
                 {
+                    "text": "Notifications",
+                    "type": "section"
+                },
+                {
                     "id": "bActions:Debugging",
-                    "text": "Debug Device Actions",
-                    "help": "Show each device action as a notification",
+                    "text": "Device Actions",
+                    "help": "Show device actions (that match at least one enabled and connected device) as a notification. Actions are pre-defined groups of actuator types and tags that can be activated by actions. If the ",
                     "type": "switcher",
                     "valueOptions": {
                         "sourceType": "ModSettingBool"
@@ -319,8 +323,8 @@
                 },
                 {
                     "id": "bScenes:Debugging",
-                    "text": "Debug Scenes",
-                    "help": "Show each scene triggers as notification",
+                    "text": "Scenes",
+                    "help": "Show each scene trigger as notification. Scenes execute a set of actions on specific character animations.",
                     "type": "switcher",
                     "valueOptions": {
                         "sourceType": "ModSettingBool"
@@ -328,11 +332,127 @@
                 },
                 {
                     "id": "bEvents:Debugging",
-                    "text": "Debug Events",
-                    "help": "Show each event triggers as notification",
+                    "text": "Triggers",
+                    "help": "Show each event trigger as notification. Triggers execute a set of actions on custom event triggers, (like devious devices vibrate events)",
                     "type": "switcher",
                     "valueOptions": {
                         "sourceType": "ModSettingBool"
+                    }
+                },
+                {
+                    "text": "Test Devices",
+                    "type": "section"
+                },
+                {
+                    "text": "Vibrate All...",
+                    "type": "button",
+                    "help": "Run all enabled vibrators for 5 seconds at 100% strength...",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["vibrate", "{i}100"]
+                    }
+                },
+                {
+                    "text": "Constrict All...",
+                    "type": "button",
+                    "help": "Run all enabled constrictors for 5 seconds at 50% strength...",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["constrict", "{i}50"]
+                    }
+                },
+                {
+                    "text": "Inflate All...",
+                    "type": "button",
+                    "help": "Run all enabled inflators for 5 seconds at 50% strength...",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["constrict", "{i}50"]
+                    }
+                },
+                {
+                    "text": "Stroke All...",
+                    "type": "button",
+                    "help": "Run all enabled strokers for 5 seconds at 50% speed...",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["linear", "{i}50"]
+                    }
+                },
+                {
+                    "text": "Test Body Parts",
+                    "type": "section"
+                },
+                {
+                    "text": "Vibrate Anal...",
+                    "type": "button",
+                    "help": "",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["vibrate.anal", "{i}100"]
+                    }
+                },
+                {
+                    "text": "Vibrate Vaginal...",
+                    "type": "button",
+                    "help": "",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["vibrate.vaginal", "{i}100"]
+                    }
+                },
+                {
+                    "text": "Vibrate Nipple...",
+                    "type": "button",
+                    "help": "",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["vibrate.nipple", "{i}100"]
+                    }
+                },
+                {
+                    "text": "Vibrate Clitoral...",
+                    "type": "button",
+                    "help": "",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["vibrate.clitoral", "{i}100"]
+                    }
+                },
+                {
+                    "text": "Vibrate Penis...",
+                    "type": "button",
+                    "help": "",
+                    "action": {
+                        "type": "CallFunction",
+                        "form": "Telekinesis.esp|2665",
+                        "scriptName": "TK2:MCM_Devices",
+                        "function": "TestAction",
+                        "params": ["vibrate.penis", "{i}100"]
                     }
                 }
             ]

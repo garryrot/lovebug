@@ -14,6 +14,7 @@ DevicePageStruct DataToStruct(DevicePage data)
         pack.insert("Oral", data.oral );
         pack.insert("Penis", data.penis );
         pack.insert("Vaginal", data.vaginal );
+        // pack.insert("Slow", data.slow );
     }
     return pack;
 }
@@ -29,6 +30,7 @@ DevicePage StructToData(DevicePageStruct pack) {
     data.oral = pack.find<bool>("Oral", false).value();
     data.penis = pack.find<bool>("Penis", false).value();
     data.vaginal = pack.find<bool>("Vaginal", false).value();
+    // data.slow = pack.find<bool>("Slow", false).value();
     return data;
 }
 

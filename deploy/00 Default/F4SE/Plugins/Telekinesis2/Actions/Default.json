@@ -4,7 +4,7 @@
     "control": [
       {
         "Scalar": [
-          "All",
+          "Any",
           [
             "Vibrate"
           ]
@@ -17,7 +17,7 @@
     "control": [
       {
         "Scalar": [
-          "All",
+          "Any",
           [
             "Constrict"
           ]
@@ -30,7 +30,7 @@
     "control": [
       {
         "Scalar": [
-          "All",
+          "Any",
           [
             "Inflate"
           ]
@@ -43,7 +43,7 @@
     "control": [
       {
         "Scalar": [
-          "All",
+          "Any",
           [
             "Vibrate",
             "Constrict",
@@ -59,7 +59,7 @@
     "control": [
       {
         "Stroke": [
-          "All",
+          "Any",
           {
             "min_ms": 100,
             "max_ms": 1500,
@@ -75,7 +75,7 @@
     "control": [
       {
         "Scalar": [
-          "All",
+          "Any",
           [
             "Oscillate"
           ]

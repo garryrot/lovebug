@@ -21,6 +21,7 @@ mod ffi_mcm {
         pub penis: bool,
         pub oral: bool,
         pub vaginal: bool,
+        // pub slow: bool
     }
 
     extern "Rust" {
@@ -55,6 +56,7 @@ pub fn lb_actuator_get(index: u32) -> DevicePage {
                 penis: settings.body_parts.contains(&TAG_PENIS.to_owned()),
                 oral: settings.body_parts.contains(&TAG_ORAL.to_owned()),
                 vaginal: settings.body_parts.contains(&TAG_VAGINAL.to_owned()),
+                // slow: settings.body_parts.contains(&TAG_SLOW.to_owned()),
             }
         } else {
             DevicePage::default()
@@ -85,23 +87,26 @@ pub fn lb_actuator_set(data: DevicePage) -> bool {
                     setting.enabled = data.enabled;
                     let mut body_parts = vec![];
                     if data.anal {
-                        body_parts.push(TAG_ANAL.to_owned());
+                        body_parts.push(TAG_ANAL.into());
                     }
                     if data.clitoral {
-                        body_parts.push(TAG_CLIT.to_owned());
+                        body_parts.push(TAG_CLIT.into());
                     }
                     if data.nipple {
-                        body_parts.push(TAG_NIPPLE.to_owned());
+                        body_parts.push(TAG_NIPPLE.into());
                     }
                     if data.oral {
-                        body_parts.push(TAG_ORAL.to_owned());
+                        body_parts.push(TAG_ORAL.into());
                     }
                     if data.vaginal {
-                        body_parts.push(TAG_VAGINAL.to_owned());
+                        body_parts.push(TAG_VAGINAL.into());
                     }
                     if data.penis {
-                        body_parts.push(TAG_PENIS.to_owned());
+                        body_parts.push(TAG_PENIS.into());
                     }
+                    // if data.slow {
+                    //     body_parts.push(TAG_SLOW.into());
+                    // }
                     setting.body_parts = body_parts;
                     lb.client.device_settings.update_device(setting.clone());
                     lb.store_devices();
@@ -128,6 +133,7 @@ impl Default for DevicePage {
             penis: Default::default(),
             oral: Default::default(),
             vaginal: Default::default(),
+            // slow: false
         }
     }
 }

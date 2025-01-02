@@ -8,7 +8,7 @@ use tracing::{debug, error, info, info_span, trace, Instrument};
 
 use bp_scheduler::{
     actuator::Actuator,
-    config::actuators::ActuatorSettings,
+    config::{actions::Selector, actuators::ActuatorSettings},
     dynamic_tracking::*,
     filter::Filter,
 };
@@ -150,7 +150,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
     let player_body = match get_body_for_actor(player_actor, &lb.races) {
         Some(race) => race,
         None => {
-            error!(?lb.default_race_female, "player body not found using default");
+            error!(?lb.default_race_female, "player body not found, using default...");
             lb.default_race_female.clone().unwrap()
         }
     };
@@ -165,7 +165,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
         let npc_body = match get_body_for_actor(npc, &lb.races) {
             Some(race) => race,
             None => {
-                error!(?lb.default_race_male, "player body not found using default");
+                error!(?lb.default_race_male, "npc body not found, using default...");
                 lb.default_race_male.clone().unwrap()
             }
         };
@@ -205,7 +205,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
                     ),
                     npc.get_bone(&npc_body.oral_bone),
                     player_actor.get_bone(&player_body.penetrator_bone),
-                    vec![TAG_PENIS, TAG_ORAL],
+                    Selector::body_parts(vec![TAG_PENIS.into(),TAG_ORAL.into()]),
                     "oral active",
                 ));
             }
@@ -220,7 +220,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
                     ),
                     npc.get_bone(&npc_body.anal_bone),
                     player_actor.get_bone(&player_body.penetrator_bone),
-                    vec![TAG_PENIS, TAG_VAGINAL, TAG_ANAL],
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into(), TAG_ANAL.into()]),
                     "anal/vaginal active",
                 ));
             }
@@ -235,7 +235,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
                     ),
                     player_actor.get_bone(&player_body.oral_bone),
                     npc.get_bone(&npc_body.penetrator_bone),
-                    vec![TAG_PENIS, TAG_ORAL],
+                    Selector::body_parts(vec![TAG_PENIS.into(),TAG_ORAL.into()]),
                     "oral passive",
                 ));
             }
@@ -250,7 +250,7 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
                     ),
                     player_actor.get_bone(&player_body.anal_bone),
                     npc.get_bone(&npc_body.penetrator_bone),
-                    vec![TAG_PENIS, TAG_VAGINAL, TAG_ANAL],
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into(), TAG_ANAL.into()]),
                     "anal/vaginal passive",
                 ));
             }
@@ -311,21 +311,17 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
 fn start_control_thread(
     dynamic_settings: DynamicSettings,
     actuator_settings: ActuatorSettings,
-    body_parts: &[&str],
+    selector: &Selector,
     receiver: UnboundedReceiver<TrackingSignal>,
     actuators: Vec<Arc<Actuator>>,
     tracking_handle: DynamicTrackingHandle,
 ) {
-    let parts = body_parts
-        .iter()
-        .map(|s| s.to_string())
-        .collect::<Vec<String>>();
-
     let mut actuator_settings_clone = actuator_settings.clone();
+    let selector_clone = selector.clone();
     tokio::spawn(async move {
         let (_, actuators) = Filter::from_actuators(actuator_settings, actuators)
             .load_config(&mut actuator_settings_clone)
-            .with_body_parts(&parts)
+            .with_selector(&selector_clone)
             .result();
         let mut dynamic = DynamicTracking {
             settings: dynamic_settings,
@@ -333,7 +329,7 @@ fn start_control_thread(
             actuators,
             status: tracking_handle,
         };
-        info!(?dynamic.settings, ?parts, "control task started with settings");
+        info!(?dynamic.settings, ?selector_clone, "control task started with settings");
         let _ = dynamic.track_mirror().await;
     });
 }

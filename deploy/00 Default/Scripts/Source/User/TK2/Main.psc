@@ -54,7 +54,6 @@ Function Connect()
 	Bool bluetooth = MCM.GetModSettingInt("Telekinesis", "bBluetooth:Connection")
 	Bool xInput = MCM.GetModSettingInt("Telekinesis", "bXInput:Connection")
 	Bool serial = MCM.GetModSettingInt("Telekinesis", "bSerial:Connection")
-	; Debug.MessageBox(bluetooth + " xi " + xInput + " se " + serial)
 	bool connected = Telekinesis.Connect(connection, port, host, bluetooth, xInput, serial)
 EndFunction
 

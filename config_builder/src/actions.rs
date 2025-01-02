@@ -6,28 +6,28 @@ pub fn default_actions() -> Vec<Action> {
         Action::new(
             "vibrate",
             vec![Control::Scalar(
-                Selector::All,
+                Selector::Any,
                 vec![ScalarActuator::Vibrate],
             )],
         ),
         Action::new(
             "constrict",
             vec![Control::Scalar(
-                Selector::All,
+                Selector::Any,
                 vec![ScalarActuator::Constrict],
             )],
         ),
         Action::new(
             "inflate",
             vec![Control::Scalar(
-                Selector::All,
+                Selector::Any,
                 vec![ScalarActuator::Inflate],
             )],
         ),
         Action::new(
             "scalar",
             vec![Control::Scalar(
-                Selector::All,
+                Selector::Any,
                 vec![
                     ScalarActuator::Vibrate,
                     ScalarActuator::Constrict,
@@ -39,7 +39,7 @@ pub fn default_actions() -> Vec<Action> {
         Action::new(
             "linear",
             vec![Control::Stroke(
-                Selector::All,
+                Selector::Any,
                 StrokeRange {
                     min_ms: 100,
                     max_ms: 1500,
@@ -51,7 +51,7 @@ pub fn default_actions() -> Vec<Action> {
         Action::new(
             "oscillate",
             vec![Control::Scalar(
-                Selector::All,
+                Selector::Any,
                 vec![ScalarActuator::Oscillate],
             )],
         ),
@@ -63,63 +63,63 @@ pub fn body_part_actions() -> Vec<Action> {
         Action::new(
             "vibrate.nipple",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_NIPPLE.into()]),
+                Selector::body_parts(vec![TAG_NIPPLE.into()]),
                 vec![ScalarActuator::Vibrate],
             )],
         ),
         Action::new(
             "vibrate.vaginal",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_VAGINAL.into()]),
+                Selector::body_parts(vec![TAG_VAGINAL.into()]),
                 vec![ScalarActuator::Vibrate],
             )],
         ),
         Action::new(
             "vibrate.clitoral",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_CLIT.into()]),
+                Selector::body_parts(vec![TAG_CLIT.into()]),
                 vec![ScalarActuator::Vibrate],
             )],
         ),
         Action::new(
             "vibrate.anal",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_ANAL.into()]),
+                Selector::body_parts(vec![TAG_ANAL.into()]),
                 vec![ScalarActuator::Vibrate],
             )],
         ),
         Action::new(
             "constrict.penis",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_PENIS.into()]),
+                Selector::body_parts(vec![TAG_PENIS.into()]),
                 vec![ScalarActuator::Inflate],
             )],
         ),
         Action::new(
             "constrict.vaginal",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_VAGINAL.into()]),
+                Selector::body_parts(vec![TAG_VAGINAL.into()]),
                 vec![ScalarActuator::Inflate],
             )],
         ),
         Action::new(
             "constrict.anal",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_ANAL.into()]),
+                Selector::body_parts(vec![TAG_ANAL.into()]),
                 vec![ScalarActuator::Inflate],
             )],
         ),
         Action::new(
             "inflate.vaginal",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_VAGINAL.into()]),
+                Selector::body_parts(vec![TAG_VAGINAL.into()]),
                 vec![ScalarActuator::Inflate],
             )],
         ),
         Action::new(
             "inflate.anal",
             vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_ANAL.into()]),
+                Selector::body_parts(vec![TAG_ANAL.into()]),
                 vec![ScalarActuator::Inflate],
             )],
         ),
@@ -131,7 +131,7 @@ pub fn sex_acts() -> Vec<Action> {
         Action {
             name: "cunnilungus".into(),
             control: vec![Control::Scalar(
-                Selector::BodyParts(vec![TAG_VAGINAL.into()]),
+                Selector::body_parts(vec![TAG_VAGINAL.into()]),
                 vec![ScalarActuator::Vibrate, ScalarActuator::Constrict],
             )],
         },
@@ -139,7 +139,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "masturbation".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -147,7 +147,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -161,11 +161,11 @@ pub fn sex_acts() -> Vec<Action> {
             name: "footjob".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into()]),
                     vec![ScalarActuator::Vibrate, ScalarActuator::Oscillate],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -179,7 +179,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "penetration.vaginal".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -187,7 +187,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -201,7 +201,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "penetration.vaginal.deep".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -209,7 +209,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -223,7 +223,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "penetration.oral.shallow".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -231,7 +231,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -245,7 +245,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "penetration.oral".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -253,7 +253,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -267,7 +267,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "penetration.oral.deep".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -275,7 +275,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -289,7 +289,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "penetration.anal".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -297,7 +297,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,
@@ -311,7 +311,7 @@ pub fn sex_acts() -> Vec<Action> {
             name: "penetration.anal.deep".into(),
             control: vec![
                 Control::Scalar(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     vec![
                         ScalarActuator::Vibrate,
                         ScalarActuator::Constrict,
@@ -319,7 +319,7 @@ pub fn sex_acts() -> Vec<Action> {
                     ],
                 ),
                 Control::Stroke(
-                    Selector::BodyParts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()]),
                     StrokeRange {
                         min_ms: 150,
                         max_ms: 1500,

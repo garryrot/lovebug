@@ -85,9 +85,10 @@ impl Triggers {
         if self.scenes_exact_index.contains_key(&scene_id) {
             scene = Some(self.scenes_exact_index.get(&scene_id).unwrap().clone());
         } else {
+            let lowercased_tags = tags.iter().map(|x| x.to_lowercase()).clone().collect();
             for wildcard in &self.scenes {
                 if wildcard.scene_id.matches(&scene_id)
-                    && wildcard.tags.matches(&tags)
+                    && wildcard.scene_tags.matches(&lowercased_tags)
                 {
                     scene = Some(wildcard.clone());
                 }

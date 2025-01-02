@@ -13,6 +13,7 @@ Bool Property Nipple = True Auto
 Bool Property Oral = True Auto
 Bool Property Penis = True Auto
 Bool Property Vaginal = True Auto
+; Bool Property Slow = False Auto
 
 Bool Property AAF_Started = False Auto
 Bool Property AAF_Not_Started = True Auto
@@ -73,6 +74,10 @@ Function OnConnectionError(String strArg, Float numArg)
     ConnectionError = True
 EndFunction
 
+Function TestAction(String name, Int strength)
+    Telekinesis.Action(name, strength, 5.0)
+EndFunction
+
 Function Reconnect()
 	TK2:Main main = Game.GetFormFromFile(0x1732, "Telekinesis.esp") as TK2:Main
 	Telekinesis.Disconnect()
@@ -113,7 +118,7 @@ Function Update(int len)
         current = x
         If x.Index != -1
             Index = x.Index
-            Actuator = x.Actuator
+            Actuator = x.Actuator 
             Enabled = x.Enabled
             Anal = x.Anal
             Clitoral = x.Clitoral
@@ -121,6 +126,7 @@ Function Update(int len)
             Oral = x.Oral
             Penis = x.Penis
             Vaginal = x.Vaginal
+            ; Slow = x.Slow
         Else
             Index = -1
             Actuator = ""
@@ -131,6 +137,7 @@ Function Update(int len)
             Oral = False            
             Penis = False             
             Vaginal = False 
+            ; Slow = False
         EndIf
     EndIf
 
@@ -139,7 +146,7 @@ EndFunction
 
 Function OnChange(string modName, string id)
     If current != None
-        If (id == "enabled:Device" || id == "anal:Device" || id == "clit:Device" || id == "nipple:Device" || id == "oral:Device" ||  id == "vaginal:Device" || id == "penis:Device")
+        If (id == "enabled:Device" || id == "anal:Device" || id == "clit:Device" || id == "nipple:Device" || id == "oral:Device" ||  id == "vaginal:Device" || id == "penis:Device") ; || id == "slow:Device"
             current.Enabled = Enabled
             current.Anal = Anal
             current.Clitoral = Clitoral
@@ -147,6 +154,7 @@ Function OnChange(string modName, string id)
             current.Oral = Oral
             current.Penis = Penis
             current.Vaginal = Vaginal
+            ; current.Slow = Slow
             Telekinesis.MCM_Devices_Set(current)
         EndIf
     EndIf

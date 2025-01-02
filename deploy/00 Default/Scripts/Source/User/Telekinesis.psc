@@ -20,6 +20,7 @@ Struct DevicePage
     Bool Oral = False
     Bool Penis = False
     Bool Vaginal = False
+    ; Bool Slow = False
 EndStruct
 
 Int Function MCM_Devices_Len() Native Global
