@@ -1,30 +1,24 @@
 use bodies::Race;
 use bones::lb_dynamic_tracking;
-use config::events::StopCondition;
+use bridge::ffi_bridge::{GetFormID, GetPlayerActorValue, TESForm_GetFormByEditorID};
+use config::variables::{ConfigVariable, VariableStore};
 use cxx::{CxxString, CxxVector};
 use dd::start_dd_workaround;
 use input::{read_input_duration, read_input_string};
 use lazy_static::lazy_static;
 use tokio::task::JoinHandle;
-use variables::VariableStore;
 
 use std::{
-    sync::{atomic::AtomicI64, Arc, Mutex},
-    time::Duration,
+    clone, collections::HashMap, sync::{atomic::AtomicI64, Arc, Mutex}, time::Duration
 };
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 
 use crate::bones::ffi_bones::ActorVec;
 
 use bp_scheduler::{
     client::{BpClient, DispatchResult},
     config::{
-        actions::*,
-        actuators::ActuatorSettings,
-        client::{ClientSettings, InProcessFeatures},
-        connection::ConnectionType,
-        read::*,
-        write::try_write,
+        actions::*, actuators::*, client::*, util::{read::*, write::*},
     },
     dynamic_tracking::{DynamicSettings, DynamicTrackingHandle},
     speed::Speed,
@@ -69,6 +63,7 @@ pub struct Telekinesis {
     variables: VariableStore,
     variable_update_thread: Option<JoinHandle<()>>,
     consider_player_passive: bool,
+    event_handles: HashMap<String, i32>
 }
 
 impl Telekinesis {
@@ -222,7 +217,26 @@ pub fn lb_connect(
 
         let dynamic_task = DynamicTrackingHandle::default();
         let vars = read_variables();
-        let variables = VariableStore::new(vars, &dynamic_task);
+
+        // initialise actor values so that they are available for checks
+        let mut vars_with_init = vec![];
+        for var in vars {
+            if let ConfigVariable::PlayerActorValue(val) = &var {
+                let form_id = unsafe { 
+                    GetFormID(TESForm_GetFormByEditorID(&val.editor_id))
+                };
+                if form_id > 0 {
+                    info!("observing actor value {} {:#X} on player", val.editor_id, form_id);
+                    let init_val = unsafe { GetPlayerActorValue(&val.editor_id) };
+                    debug!(init_val, val.editor_id, "monitored actor value initialized");
+                    vars_with_init.push( (var.clone(), form_id as i64, init_val) );
+                } else {
+                    warn!("actor value {} not found on form", &val.editor_id);
+                }
+            }
+        }
+        let variables = VariableStore::new(vars_with_init, &dynamic_task);
+        
         let mut lb = Telekinesis {
             client: client.unwrap(),
             triggers: Triggers::default(),
@@ -235,9 +249,9 @@ pub fn lb_connect(
             variables,
             variable_update_thread: None,
             consider_player_passive: true,
+            event_handles: HashMap::new()
         };
 
-        lb.variables.init_actor_values();
         lb.client.read_actions(ACTIONS_DIR);
         lb.read_races();
 
@@ -282,6 +296,7 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
                 vec![],
                 Speed::new(speed.into()),
                 read_input_duration(time_secs),
+                -1
             );
             send_action_events(&results);
             results.handle
@@ -302,7 +317,7 @@ pub fn lb_scene(
     info!(scene_name, speed, time_secs, ?tags, "lb_scene 2");
     Telekinesis::run_static(
         |lb| {
-            let scene = lb.triggers.find_scene(scene_name, &tags);
+            let scene = lb.triggers.start_scene(scene_name, &tags);
             debug!(?scene, ?tags, "matched scene");
 
             if let Some(scene) = scene {
@@ -317,6 +332,7 @@ pub fn lb_scene(
                     vec![],
                     Speed::new(speed.into()),
                     read_input_duration(time_secs),
+                    -1
                 );
                 send_action_events(&results);
                 return results.handle;
@@ -331,20 +347,31 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     info!(event_name, str_arg, num_arg, "lb_process_event");
     Telekinesis::run_static(
         |lb| {
-            if let Some(start_event) = lb.triggers.find_started_events(event_name) {
-                send_mod_event(ModEvent::new("Tele_Event", &start_event.description, 0.0));
-                let converted = get_actions_from_refs(lb, start_event.actions);
+            let binding =  lb.triggers.start_events(&lb.variables, event_name);
+
+            let mut handle = -1;
+            for start_event in binding.into_iter() {
+
+                let actions = match start_event.clone() {
+                    triggers::Trigger::Scene(scene) => scene.actions,
+                    triggers::Trigger::Event(event) => event.actions,
+                    triggers::Trigger::TimedEvent(timed_event) => timed_event.actions,
+                };
+                let converted = get_actions_from_refs(lb, actions);
+
+                let duration = match start_event {
+                    triggers::Trigger::TimedEvent(timed_event) => timed_event.duration,
+                    _ => Duration::MAX,
+                };
                 let results = lb.client.dispatch_refs(
                     converted,
                     vec![],
                     Speed::max(),
-                    match start_event.event_stop {
-                        StopCondition::ElapsedMs(ms) => Duration::from_millis(ms.into()),
-                        _ => Duration::MAX,
-                    },
+                    duration,
+                    handle
                 );
                 send_action_events(&results);
-                return results.handle;
+                handle = results.handle;
             }
             -1
         },

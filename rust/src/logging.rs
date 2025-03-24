@@ -3,7 +3,7 @@ use std::{
     sync::Mutex,
 };
 
-use bp_scheduler::config::{client::LoggingSettings, read::read_or_default};
+use bp_scheduler::config::{client::LoggingSettings, util::read::*};
 use tracing::{debug, error, info, Level};
 
 use crate::{CONFIG_DIR, LOGGING_SETTINGS};

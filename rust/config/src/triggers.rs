@@ -1,24 +1,26 @@
 use std::collections::HashMap;
 
-use events::Event;
+use events::{Event, TimedEvent};
 use tracing::{debug, info};
+use variables::VariableStore;
 
 use crate::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Trigger {
     Scene(Scene),
-    Event(Event)
+    Event(Event),
+    TimedEvent(TimedEvent)
 }
 
 #[derive(Debug)]
 pub struct Triggers {
+    /// triggered by process_event
+    pub events: Vec<Trigger>,
     /// maps lowercased scene IDs to a specific trigger
     scenes_exact_index: HashMap<String, Scene>,
     /// all remaining scenes
     scenes: Vec<Scene>,
-    /// triggered by process_event
-    pub events: Vec<Event>
 }
 
 impl Triggers {
@@ -26,7 +28,7 @@ impl Triggers {
         Triggers {
             scenes_exact_index: HashMap::new(),
             scenes: vec![],
-            events: vec![],
+            events: vec![]
         }
     }
 
@@ -48,8 +50,11 @@ impl Triggers {
                     }
                 },
                 Trigger::Event(event) => {
-                    self.events.push(event);
+                    self.events.push(Trigger::Event(event));
                 }
+                Trigger::TimedEvent(timed_event) => {
+                    self.events.push(Trigger::TimedEvent(timed_event));
+                },
             }
         }
         self.scenes.append(&mut scenes_default);
@@ -65,20 +70,41 @@ impl Triggers {
         }
     }
 
-    pub fn find_started_events(&self, event_name: &str) -> Option<Event> {
-        self.events.iter().find(|x| x.event_start.event == event_name ).cloned()
-    }
-
-    pub fn find_stopped_events(&self, event_name: &str) -> Option<Event> {
-        self.events.iter().find(|x| {
-            match &x.event_stop {
-                events::StopCondition::Event(event_trigger) => event_trigger.event == event_name,
-                _ => false
+    pub fn start_events(&mut self, vars: &VariableStore, event_name: &str) -> Vec<Trigger> {
+        self.events.iter().filter(|x| {
+            match x {
+                Trigger::Scene(scene) => false,
+                Trigger::Event(event) => {
+                    event.event_start.matches(vars, event_name)
+                },
+                Trigger::TimedEvent(event) => {
+                    event.event_start.matches(vars, event_name)
+                },
             }
-        }).cloned()
+        })
+        .cloned()
+        .collect()
     }
 
-    pub fn find_scene(&self, scene_name: &str, tags: &Vec<String>) -> Option<Scene> {
+    pub fn stop_events(&mut self, vars: &VariableStore, event_name: &str) -> Vec<ActionRef> {
+        self.events.iter().filter(|x| {
+            match x {
+                Trigger::Scene(scene) => false,
+                Trigger::TimedEvent(event) => false,
+                Trigger::Event(event) => {
+                    event.event_stop.matches(vars, event_name)
+                },
+            }
+        })
+        .map(|x| match x {
+            Trigger::Event(event) => event.actions.clone(),
+            _ => panic!()
+        })
+        .flatten()
+        .collect()
+    }
+
+    pub fn start_scene(&self, scene_name: &str, tags: &Vec<String>) -> Option<Scene> {
         let scene_id: String = scene_name.to_lowercase();
 
         let mut scene : Option<Scene> = None;

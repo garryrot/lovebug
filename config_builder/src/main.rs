@@ -3,6 +3,7 @@ use std::{
     path::Path,
 };
 
+use av::av_variables;
 use bodies::Race;
 
 use actions::*;
@@ -17,6 +18,7 @@ use serde::Serialize;
 
 use bp_scheduler::{config::client::LoggingSettings, dynamic_tracking::DynamicSettings};
 
+mod av;
 mod actions;
 mod dd;
 mod nuka_ride;
@@ -90,6 +92,9 @@ fn pack_nr(config_dir: &str) {
 fn pack_dd(config_dir: &str) {
     write_file(format!("{}/Triggers/DD.json", config_dir), dd_events());
     write_file(format!("{}/Variables/DD.json", config_dir), dd_variables());
+    
+    write_file(format!("{}/Triggers/DD.json", config_dir), av_events());
+    write_file(format!("{}/Variables/AV.json", config_dir), av_variables());
 }
 
 fn pack_bp70(config_dir: &str) {

@@ -34,15 +34,6 @@ impl SceneId {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Framework {
-    All,
-    AAF,
-    Sexlab,
-    Ostim,
-    Love,
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -54,13 +45,11 @@ mod tests {
                 description: "Milk Mod: Feeding Stage".into(),
                 event_start: EventTrigger {
                     form: Form::All,
-                    event: "MilkQuest.FeedingStage".into(),
-                    conditions: vec![],
+                    event: "MilkQuest.FeedingStage".into()
                 },
                 event_stop: EventTrigger {
                     form: Form::All,
-                    event: "MilkQuest.MilkingStage".into(),
-                    conditions: vec![],
+                    event: "MilkQuest.MilkingStage".into()
                 },
                 action: vec!["milkmod.feedingstage".into()],
                 body_parts: BodyParts::Tags(vec!["Anal".into()]),
@@ -69,13 +58,11 @@ mod tests {
                 description: "Milk Mod: Milking Stage".into(),
                 event_start: EventTrigger {
                     form: Form::All,
-                    event: "MilkQuest.MilkingStage".into(),
-                    conditions: vec![],
+                    event: "MilkQuest.MilkingStage".into()
                 },
                 event_stop: EventTrigger {
                     form: Form::All,
-                    event: "MilkQuest.FuckMachineStage".into(),
-                    conditions: vec![],
+                    event: "MilkQuest.FuckMachineStage".into()
                 },
                 action: vec!["milkmod.milkingstage".into()],
                 body_parts: BodyParts::Tags(vec!["Anal".into(), "Nipple".into()]),
@@ -84,13 +71,11 @@ mod tests {
                 description: "Milk Mod: Fucking Machine Stage".into(),
                 event_start: EventTrigger {
                     form: Form::All,
-                    event: "MilkQuest.FuckMachineStage".into(),
-                    conditions: vec![],
+                    event: "MilkQuest.FuckMachineStage".into()
                 },
                 event_stop: EventTrigger {
                     form: Form::All,
-                    event: "MilkQuest.StartMilkingMachine".into(),
-                    conditions: vec![],
+                    event: "MilkQuest.StartMilkingMachine".into()
                 },
                 action: vec!["milkmod.fuckingmachinestage".into()],
                 body_parts: BodyParts::Tags(vec!["Anal".into(), "Vaginal".into()]),
@@ -99,8 +84,7 @@ mod tests {
                 description: "Milk Mod: Start Milking Machine".into(),
                 event_start: EventTrigger {
                     form: Form::All,
-                    event: "MilkQuest.StartMilkingMachine".into(),
-                    conditions: vec![],
+                    event: "MilkQuest.StartMilkingMachine".into()
                 },
                 duration_ms: 10_000,
                 action: vec![],
