@@ -1,0 +1,16 @@
+[
+  {
+    "PlayerActorValue": {
+      "editor_id": "AV_VibrationStrengthNipple",
+      "min": 0.0,
+      "max": 100.0
+    }
+  },
+  {
+    "PlayerActorValue": {
+      "editor_id": "AV_VibrationStrengthVaginal",
+      "min": 0.0,
+      "max": 100.0
+    }
+  }
+]

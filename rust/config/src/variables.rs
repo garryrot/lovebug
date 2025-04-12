@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use bp_scheduler::dynamic_tracking::DynamicTrackingHandle;
-use tracing::{debug, error, info};
+use tracing::debug;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ConfigVariable {

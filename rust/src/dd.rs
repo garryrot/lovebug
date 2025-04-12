@@ -12,8 +12,7 @@ use crate::{
 /// This monitors the vibration keyword and start/stops an event, because
 /// there is no other way to do this.
 ///
-/// - DD will update the actor values for vibration whenever a plug starts
-/// vibrating
+/// - DD will update the actor values for vibration whenever a plug starts vibrating
 /// - It will not reset it to 0 when the plug stop vibrating
 /// - This monitors if "DD_kw_Event_IsVibrating" keyword is on the player and
 ///   turns off all the plugs by resetting the variable to 0

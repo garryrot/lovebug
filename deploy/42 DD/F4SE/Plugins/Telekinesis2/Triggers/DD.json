@@ -1,37 +1,22 @@
 [
   {
     "Event": {
-      "description": "DD Vibrators (controlled by Actor Value)",
+      "description": "DD Vaginal Vibrator",
       "event_start": {
-        "event": "dd.vibrator.anal",
-        "form": "Any",
-        "conditions": []
-      },
-      "event_stop": {
-        "ElapsedMs": 80000
-      },
-      "actions": [
-        {
-          "action": "vibrate.anal",
-          "strength": {
-            "Variable": {
-              "PlayerActorValue": "DD_AV_VibrateStrengthAnal"
-            }
+        "ActorValue": {
+          "variable_id": "DD_AV_VibrateStrengthVaginal",
+          "condition": {
+            "GreaterThan": 0
           }
         }
-      ]
-    }
-  },
-  {
-    "Event": {
-      "description": "DD Vibrators (controlled by Actor Value)",
-      "event_start": {
-        "event": "dd.vibrator.vaginal",
-        "form": "Any",
-        "conditions": []
       },
       "event_stop": {
-        "ElapsedMs": 70000
+        "ActorValue": {
+          "variable_id": "DD_AV_VibrateStrengthVaginal",
+          "condition": {
+            "Equal": 0
+          }
+        }
       },
       "actions": [
         {
@@ -47,24 +32,24 @@
   },
   {
     "Event": {
-      "description": "DD Vibrators (controlled by Actor Value)",
+      "description": "DD Anal Vibrator",
       "event_start": {
-        "event": "dd.vibrator",
-        "form": "Any",
-        "conditions": []
+        "ActorValue": {
+          "variable_id": "DD_AV_VibrateStrengthVaginal",
+          "condition": {
+            "GreaterThan": 0
+          }
+        }
       },
       "event_stop": {
-        "ElapsedMs": 65000
+        "ActorValue": {
+          "variable_id": "DD_AV_VibrateStrengthVaginal",
+          "condition": {
+            "Equal": 0
+          }
+        }
       },
       "actions": [
-        {
-          "action": "vibrate",
-          "strength": {
-            "Variable": {
-              "PlayerActorValue": "DD_AV_VibrateStrengthAnal"
-            }
-          }
-        },
         {
           "action": "vibrate.vaginal",
           "strength": {
@@ -78,13 +63,45 @@
   },
   {
     "Event": {
+      "description": "Radiation Rate",
+      "event_start": {
+        "ActorValue": {
+          "variable_id": "Rads",
+          "condition": {
+            "GreaterThan": 0
+          }
+        }
+      },
+      "event_stop": {
+        "ActorValue": {
+          "variable_id": "Rads",
+          "condition": {
+            "Equal": 0
+          }
+        }
+      },
+      "actions": [
+        {
+          "action": "vibrate.vaginal",
+          "strength": {
+            "Variable": {
+              "PlayerActorValue": "DD_AV_VibrateStrengthVaginal"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "TimedEvent": {
       "description": "DD Inflators (controlled by Actor Value)",
       "event_start": {
-        "event": "dd.inflate",
-        "form": "Any",
-        "conditions": []
+        "LovebugEvent": "dd.inflate"
       },
-      "event_stop": "Never",
+      "duration": {
+        "secs": 9999999,
+        "nanos": 0
+      },
       "actions": [
         {
           "action": "inflate.vaginal",

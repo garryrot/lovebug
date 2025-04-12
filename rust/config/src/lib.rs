@@ -8,7 +8,7 @@ pub mod events;
 pub mod triggers;
 pub mod variables;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Scene {
     pub description: String,
     pub scene_id: SceneId,
@@ -17,7 +17,7 @@ pub struct Scene {
     pub track_bones: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SceneId {
     Any,
     Exact(String),

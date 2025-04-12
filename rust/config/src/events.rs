@@ -6,7 +6,7 @@ use serde_hex::{SerHex, StrictPfx};
 
 use crate::variables::VariableStore;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Event {
     pub description: String,
     pub event_start: Condition,
@@ -23,8 +23,8 @@ pub struct TimedEvent {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Comparison {
-    Eq(i64),
+pub enum Comparison { 
+    Equal(i64),
     SmallerThan(i64),
     SmallerEqualThan(i64),
     GreaterThan(i64),
@@ -53,21 +53,24 @@ pub enum Condition {
 }
 
 impl Condition {
-    pub fn matches(&self, vars: &VariableStore, triggered_event: &str) -> bool {
+    pub fn matches(&self, vars: &VariableStore, event: Option<&str>) -> bool {
         match self {
-            Condition::And(conds) => conds.iter().all(|x| x.matches(vars, triggered_event)),
-            Condition::Or(conds) => conds.iter().any(|x| x.matches(vars, triggered_event)),
-            Condition::LovebugEvent(name) => name == triggered_event,
+            Condition::And(conds) => conds.iter().all(|x| x.matches(vars, event)),
+            Condition::Or(conds) => conds.iter().any(|x| x.matches(vars, event)),
+            Condition::LovebugEvent(name) => match event {
+                Some(mope) => mope == name,
+                None => false,
+            },
             Condition::ActorValue(cond) => {
                 let var = vars.get(&cond.variable_id).map(|x| x.load(Ordering::Relaxed)).unwrap_or(-1);
                 match cond.condition {
-                    Comparison::Eq(val) => var == val,
+                    Comparison::Equal(val) => var == val,
                     Comparison::SmallerThan(val) => var < val,
                     Comparison::SmallerEqualThan(val) => var <= val,
                     Comparison::GreaterThan(val) => var > val,
                     Comparison::GreaterEqualThan(val) => var >= val,
                 }
-            } ,
+            },
         }
     }
 }

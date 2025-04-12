@@ -1,7 +1,10 @@
 use std::time::Duration;
 
 use bp_scheduler::config::actions::{ActionRef, Stren, Variable};
-use config::{events::{Condition, Event, Form}, triggers::Trigger, variables::{ConfigVariable, PlayerActorValue}};
+use config::{events::{ActorValueChange, Comparison, Condition, Event, TimedEvent}, triggers::Trigger, variables::{ConfigVariable, PlayerActorValue}};
+
+
+pub static VAR_RADS: &str = "Rads";
 
 pub static VAR_DD_AROUSAL: &str = "DD_AV_Arousal";
 pub static VAR_DD_INFLATE_STATUS_VAGINAL: &str = "DD_AV_InflateStatusVaginal";
@@ -36,51 +39,72 @@ pub fn dd_variables() -> Vec<ConfigVariable> {
             min: 0.0,
             max: 5.0,
         }),
+        ConfigVariable::PlayerActorValue(PlayerActorValue {
+            editor_id: "Rads".into(),
+            min: 0.0,
+            max: 100.0,
+        }),
     ]
 }
 
 pub fn dd_events() -> Vec<Trigger> {
     let vec = vec![
-        Trigger::TimedEvent(TimedEvent {
-            description: "DD Vibrators (controlled by Actor Value)".into(),
-            event_start: Condition::LovebugEvent("dd.vibrator.anal".into()),
-            duration: Duration::from_millis(80_000), // 65 is max, we do a bit extra
-            actions: vec![ActionRef {
-                action: "vibrate.anal".into(),
-                strength: Stren::Variable(Variable::PlayerActorValue(
-                    "DD_AV_VibrateStrengthAnal".into(),
-                )),
-            }],
-        }),
-        Trigger::TimedEvent(TimedEvent {
-            description: "DD Vibrators (controlled by Actor Value)".into(),
-            event_start: Condition::LovebugEvent("dd.vibrator.vaginal".into()),
-            duration: Duration::from_millis(80_000), // 65 is max, we do a bit extra
-            actions: vec![ActionRef {
-                action: "vibrate.vaginal".into(),
-                strength: Stren::Variable(Variable::PlayerActorValue(
-                    "DD_AV_VibrateStrengthVaginal".into(),
-                )),
-            }],
-        }),
-        Trigger::TimedEvent(TimedEvent {
-            description: "DD Vibrators (controlled by Actor Value)".into(),
-            event_start: Condition::LovebugEvent("dd.vibrator".into()),
-            duration: Duration::from_millis(65_000),
+        Trigger::Event(Event { 
+            description: "DD Vaginal Vibrator".into(), 
+            event_start: Condition::ActorValue(ActorValueChange { 
+                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
+                condition: Comparison::GreaterThan(0)
+            }), 
+            event_stop: Condition::ActorValue(ActorValueChange { 
+                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
+                condition: Comparison::Equal(0)
+            }),
             actions: vec![
-                ActionRef {
-                    action: "vibrate".into(),
+                ActionRef { 
+                    action: "vibrate.vaginal".into(), 
                     strength: Stren::Variable(Variable::PlayerActorValue(
-                        "DD_AV_VibrateStrengthAnal".into(),
-                    )),
-                },
-                ActionRef {
-                    action: "vibrate.vaginal".into(),
+                        VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+                    )) 
+                }
+            ]
+        }),
+        Trigger::Event(Event {
+            description: "DD Anal Vibrator".into(), 
+            event_start: Condition::ActorValue(ActorValueChange { 
+                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
+                condition: Comparison::GreaterThan(0)
+            }), 
+            event_stop: Condition::ActorValue(ActorValueChange { 
+                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
+                condition: Comparison::Equal(0)
+            }),
+            actions: vec![
+                ActionRef { 
+                    action: "vibrate.vaginal".into(), 
                     strength: Stren::Variable(Variable::PlayerActorValue(
-                        "DD_AV_VibrateStrengthVaginal".into(),
-                    )),
-                },
-            ],
+                        VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+                    )) 
+                }
+            ]
+        }),
+        Trigger::Event(Event {
+            description: "Radiation Rate".into(), 
+            event_start: Condition::ActorValue(ActorValueChange { 
+                variable_id: "Rads".into(), 
+                condition: Comparison::GreaterThan(0)
+            }), 
+            event_stop: Condition::ActorValue(ActorValueChange { 
+                variable_id: "Rads".into(), 
+                condition: Comparison::Equal(0)
+            }),
+            actions: vec![
+                ActionRef { 
+                    action: "vibrate.vaginal".into(), 
+                    strength: Stren::Variable(Variable::PlayerActorValue(
+                        VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+                    ))
+                }
+            ]
         }),
         Trigger::TimedEvent(TimedEvent {
             description: "DD Inflators (controlled by Actor Value)".into(),

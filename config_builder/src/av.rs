@@ -30,7 +30,7 @@ pub fn av_events() -> Vec<Trigger> {
         }),
         event_stop: Condition::ActorValue(ActorValueChange { 
             variable_id: VAR_AV_VIBRATION_STRENGTH_NIPPLE.to_owned(), 
-            condition: Comparison::Eq(0) 
+            condition: Comparison::Equal(0) 
         }),
         actions: vec![ActionRef {
             action: "vibrate.nipple".into(),

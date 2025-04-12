@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use events::{Event, TimedEvent};
 use tracing::{debug, info};
@@ -6,11 +6,28 @@ use variables::VariableStore;
 
 use crate::*;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Trigger {
     Scene(Scene),
     Event(Event),
     TimedEvent(TimedEvent)
+}
+
+impl Trigger {
+    pub fn actions(&self) -> Vec<ActionRef> {
+        match self {
+            Trigger::Scene(scene) => scene.actions.clone(),
+            Trigger::Event(event) => event.actions.clone(),
+            Trigger::TimedEvent(timed_event) => timed_event.actions.clone(),
+        }
+    }
+
+    pub fn duration(&self) -> Duration {
+        match self {
+            triggers::Trigger::TimedEvent(timed_event) => timed_event.duration,
+            _ => Duration::MAX,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -21,6 +38,7 @@ pub struct Triggers {
     scenes_exact_index: HashMap<String, Scene>,
     /// all remaining scenes
     scenes: Vec<Scene>,
+    running: Vec<Trigger>,
 }
 
 impl Triggers {
@@ -28,7 +46,8 @@ impl Triggers {
         Triggers {
             scenes_exact_index: HashMap::new(),
             scenes: vec![],
-            events: vec![]
+            events: vec![],
+            running: vec![],
         }
     }
 
@@ -70,10 +89,11 @@ impl Triggers {
         }
     }
 
-    pub fn start_events(&mut self, vars: &VariableStore, event_name: &str) -> Vec<Trigger> {
-        self.events.iter().filter(|x| {
+    pub fn start_events(&mut self, vars: &VariableStore, event_name: Option<&str>) -> Vec<Trigger> {
+        info!(?event_name, "start_events");
+        let matched_events: Vec<Trigger> = self.events.iter().filter(|x| {
             match x {
-                Trigger::Scene(scene) => false,
+                Trigger::Scene(_) => false,
                 Trigger::Event(event) => {
                     event.event_start.matches(vars, event_name)
                 },
@@ -83,25 +103,38 @@ impl Triggers {
             }
         })
         .cloned()
-        .collect()
+        .collect();
+
+        let mut started_events = vec![];
+        for matched_event in matched_events {
+            if !self.running.contains(&matched_event) {
+                self.running.push(matched_event.clone());
+                debug!(?matched_event, "starting"); 
+                started_events.push(matched_event);
+            } else {
+                debug!(?matched_event, "already running");
+            }
+        }
+
+        started_events
     }
 
-    pub fn stop_events(&mut self, vars: &VariableStore, event_name: &str) -> Vec<ActionRef> {
-        self.events.iter().filter(|x| {
-            match x {
-                Trigger::Scene(scene) => false,
-                Trigger::TimedEvent(event) => false,
-                Trigger::Event(event) => {
-                    event.event_stop.matches(vars, event_name)
-                },
-            }
-        })
-        .map(|x| match x {
-            Trigger::Event(event) => event.actions.clone(),
-            _ => panic!()
-        })
-        .flatten()
-        .collect()
+    pub fn stop_events(&mut self, vars: &VariableStore, event_name: Option<&str>) -> Vec<Trigger> {
+        let mut stopped = vec![];
+        self.running.retain(|x| match x {
+            Trigger::Scene(_) => true,
+            Trigger::TimedEvent(_) => true,
+            Trigger::Event(event) => {
+                if event.event_stop.matches(vars, event_name) {
+                    debug!(?event, "stopping");
+                    stopped.push(Trigger::Event(event.clone()));
+                    false
+                } else {
+                    true
+                }
+            },
+        });
+        stopped
     }
 
     pub fn start_scene(&self, scene_name: &str, tags: &Vec<String>) -> Option<Scene> {

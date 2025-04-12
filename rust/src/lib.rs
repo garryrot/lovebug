@@ -1,7 +1,7 @@
 use bodies::Race;
 use bones::lb_dynamic_tracking;
 use bridge::ffi_bridge::{GetFormID, GetPlayerActorValue, TESForm_GetFormByEditorID};
-use config::variables::{ConfigVariable, VariableStore};
+use config::{triggers::Trigger, variables::{ConfigVariable, VariableStore}};
 use cxx::{CxxString, CxxVector};
 use dd::start_dd_workaround;
 use input::{read_input_duration, read_input_string};
@@ -9,9 +9,9 @@ use lazy_static::lazy_static;
 use tokio::task::JoinHandle;
 
 use std::{
-    clone, collections::HashMap, sync::{atomic::AtomicI64, Arc, Mutex}, time::Duration
+    collections::HashMap, hash::Hash, sync::{atomic::AtomicI64, Arc, Mutex}, time::Duration
 };
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info, trace, warn};
 
 use crate::bones::ffi_bones::ActorVec;
 
@@ -48,7 +48,6 @@ mod events;
 mod input;
 mod logging;
 mod mcm;
-mod variables;
 
 #[derive(Debug)]
 pub struct Telekinesis {
@@ -63,7 +62,7 @@ pub struct Telekinesis {
     variables: VariableStore,
     variable_update_thread: Option<JoinHandle<()>>,
     consider_player_passive: bool,
-    event_handles: HashMap<String, i32>
+    triggers_running: HashMap<Trigger, i32>,
 }
 
 impl Telekinesis {
@@ -175,12 +174,6 @@ mod ffi {
     }
 }
 
-pub fn lb_actor_value_changed(form_id: u32, value: f32) {
-    // debug!("actor value change {}: {}", form_id, value);
-    Telekinesis::run_static_no_return(|lb| {
-        let _ = lb.variables.update(form_id, value);
-    });
-}
 
 pub fn lb_connect(
     connection: i32,
@@ -218,25 +211,7 @@ pub fn lb_connect(
         let dynamic_task = DynamicTrackingHandle::default();
         let vars = read_variables();
 
-        // initialise actor values so that they are available for checks
-        let mut vars_with_init = vec![];
-        for var in vars {
-            if let ConfigVariable::PlayerActorValue(val) = &var {
-                let form_id = unsafe { 
-                    GetFormID(TESForm_GetFormByEditorID(&val.editor_id))
-                };
-                if form_id > 0 {
-                    info!("observing actor value {} {:#X} on player", val.editor_id, form_id);
-                    let init_val = unsafe { GetPlayerActorValue(&val.editor_id) };
-                    debug!(init_val, val.editor_id, "monitored actor value initialized");
-                    vars_with_init.push( (var.clone(), form_id as i64, init_val) );
-                } else {
-                    warn!("actor value {} not found on form", &val.editor_id);
-                }
-            }
-        }
-        let variables = VariableStore::new(vars_with_init, &dynamic_task);
-        
+        let variables = init_variables(&dynamic_task, vars);
         let mut lb = Telekinesis {
             client: client.unwrap(),
             triggers: Triggers::default(),
@@ -249,7 +224,7 @@ pub fn lb_connect(
             variables,
             variable_update_thread: None,
             consider_player_passive: true,
-            event_handles: HashMap::new()
+            triggers_running: HashMap::new(),
         };
 
         lb.client.read_actions(ACTIONS_DIR);
@@ -271,6 +246,36 @@ pub fn lb_connect(
         error!("init failed");
     }
     true
+}
+
+fn init_variables(dynamic_task: &DynamicTrackingHandle, vars: Vec<ConfigVariable>) -> VariableStore {
+    // initialise actor values so that they are available for checks
+    let mut vars_with_init = vec![];
+    for var in vars {
+        if let ConfigVariable::PlayerActorValue(val) = &var {
+            let form_id = unsafe { 
+                GetFormID(TESForm_GetFormByEditorID(&val.editor_id))
+            };
+            if form_id > 0 {
+                info!("observing actor value {} {:#X} on player", val.editor_id, form_id);
+                let init_val = unsafe { GetPlayerActorValue(&val.editor_id) };
+                debug!(init_val, val.editor_id, "monitored actor value initialized");
+                vars_with_init.push( (var.clone(), form_id as i64, init_val) );
+            } else {
+                error!("actor value {} not found on form", &val.editor_id);
+            }
+        }
+    }
+    VariableStore::new(vars_with_init, dynamic_task)
+}
+
+fn read_variables() -> Vec<config::variables::ConfigVariable> {
+    let vars = read_config_dir(VARIABLES_DIR.into());
+    for var in &vars {
+        debug!(?var, "read variable");
+    }
+    info!("read {} variables...", vars.len());
+    vars
 }
 
 pub fn lb_disconnect() {
@@ -319,10 +324,8 @@ pub fn lb_scene(
         |lb| {
             let scene = lb.triggers.start_scene(scene_name, &tags);
             debug!(?scene, ?tags, "matched scene");
-
             if let Some(scene) = scene {
                 send_mod_event(ModEvent::new("Tele_Scene", &scene.description, 0.0));
-
                 let actions = get_actions_from_refs(lb, scene.actions);
                 if scene.track_bones {
                     lb_dynamic_tracking(lb, actor_vec);
@@ -347,24 +350,15 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     info!(event_name, str_arg, num_arg, "lb_process_event");
     Telekinesis::run_static(
         |lb| {
-            let binding =  lb.triggers.start_events(&lb.variables, event_name);
+            let binding =  lb.triggers.start_events(&lb.variables, Some(event_name));
 
             let mut handle = -1;
             for start_event in binding.into_iter() {
 
-                let actions = match start_event.clone() {
-                    triggers::Trigger::Scene(scene) => scene.actions,
-                    triggers::Trigger::Event(event) => event.actions,
-                    triggers::Trigger::TimedEvent(timed_event) => timed_event.actions,
-                };
-                let converted = get_actions_from_refs(lb, actions);
-
-                let duration = match start_event {
-                    triggers::Trigger::TimedEvent(timed_event) => timed_event.duration,
-                    _ => Duration::MAX,
-                };
+                let actions = get_actions_from_refs(lb, start_event.actions());
+                let duration = start_event.duration();
                 let results = lb.client.dispatch_refs(
-                    converted,
+                    actions,
                     vec![],
                     Speed::max(),
                     duration,
@@ -379,6 +373,41 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     )
 }
 
+pub fn lb_actor_value_changed(form_id: u32, value: f32) {
+    Telekinesis::run_static_no_return(|lb| {
+        if let Some(var_editor_id) = lb.variables.update(form_id, value) {
+            trace!(var_editor_id, value, "actor value changed");
+
+            let start_iter =  lb.triggers.start_events(&lb.variables, None);
+            for trigger in start_iter.into_iter() {
+                let actions = get_actions_from_refs(lb, trigger.actions());
+                let duration = trigger.duration();
+                let results = lb.client.dispatch_refs(
+                    actions,
+                    vec![],
+                    Speed::max(),
+                    duration,
+                    -1
+                );
+                send_action_events(&results);
+                let handle = results.handle;
+                debug!(handle, ?trigger, "started trigger");
+                lb.triggers_running.insert(trigger, handle);
+            }
+
+            let stop_iter = lb.triggers.stop_events(&lb.variables, None);
+            for trigger in stop_iter.into_iter() {
+                if let Some(handle) = lb.triggers_running.get(&trigger) {
+                    lb.client.stop(*handle);
+                    debug!(handle, ?trigger, "stopped trigger");
+                } else {
+                    error!(?trigger, "no handle found")
+                }
+            }
+        }
+    });
+}
+
 pub fn lb_update(handle: i32, speed: i32) -> bool {
     info!(handle, speed, "lb_update");
     Telekinesis::run_static(
@@ -390,15 +419,6 @@ pub fn lb_update(handle: i32, speed: i32) -> bool {
 pub fn lb_stop(handle: i32) -> bool {
     info!(handle, "lb_stop");
     Telekinesis::run_static(|lb| lb.client.stop(handle), false)
-}
-
-fn read_variables() -> Vec<config::variables::ConfigVariable> {
-    let vars = read_config_dir(VARIABLES_DIR.into());
-    for var in &vars {
-        debug!(?var, "read variable");
-    }
-    info!("read {} variables...", vars.len());
-    vars
 }
 
 fn send_action_events(results: &DispatchResult) {
