@@ -33,12 +33,5 @@
       "min": 0.0,
       "max": 5.0
     }
-  },
-  {
-    "PlayerActorValue": {
-      "editor_id": "Rads",
-      "min": 0.0,
-      "max": 100.0
-    }
   }
 ]

@@ -31,3 +31,6 @@ std::uint32_t GetSavedFormType(const RE::TESForm* form);
 const RE::NiAVObject* GetBone(const RE::Actor *actor, rust::Str bone);
 bool ContainsKeyword(const RE::Actor *actor, rust::Str editorId);
 float GetPlayerActorValue(rust::Str actorValueEditorId);
+
+const RE::TESForm* GetFormByID(int formId);
+rust::String Form_GetEditorID(const RE::TESForm* form);

@@ -89,7 +89,7 @@ impl Triggers {
         }
     }
 
-    pub fn start_events(&mut self, vars: &VariableStore, event_name: Option<&str>) -> Vec<Trigger> {
+    pub fn start_events(&mut self, vars: &VariableStore, event_name: Option<&str>, scene_name: Option<&str>, scene_tags: &Vec<String>) -> Vec<Trigger> {
         info!(?event_name, "start_events");
         let matched_events: Vec<Trigger> = self.events.iter().filter(|x| {
             match x {
@@ -106,6 +106,12 @@ impl Triggers {
         .collect();
 
         let mut started_events = vec![];
+        if let Some(scene) = scene_name {
+            if let Some(scene_result) = self.start_scene(scene, scene_tags) {
+                started_events.push(Trigger::Scene(scene_result));
+            }
+        }
+
         for matched_event in matched_events {
             if !self.running.contains(&matched_event) {
                 self.running.push(matched_event.clone());
@@ -117,6 +123,25 @@ impl Triggers {
         }
 
         started_events
+    }
+
+    pub fn start_scene(&self, scene_name: &str, tags: &Vec<String>) -> Option<Scene> {
+        let scene_id: String = scene_name.to_lowercase();
+
+        let mut scene = None;
+        if self.scenes_exact_index.contains_key(&scene_id) {
+            scene = Some(self.scenes_exact_index.get(&scene_id).unwrap().clone());
+        } else {
+            let lowercased_tags = tags.iter().map(|x| x.to_lowercase()).clone().collect();
+            for wildcard in &self.scenes {
+                if wildcard.scene_id.matches(&scene_id)
+                    && wildcard.scene_tags.matches(&lowercased_tags)
+                {
+                    scene = Some(wildcard.clone());
+                }
+            }
+        }
+        scene
     }
 
     pub fn stop_events(&mut self, vars: &VariableStore, event_name: Option<&str>) -> Vec<Trigger> {
@@ -135,24 +160,5 @@ impl Triggers {
             },
         });
         stopped
-    }
-
-    pub fn start_scene(&self, scene_name: &str, tags: &Vec<String>) -> Option<Scene> {
-        let scene_id: String = scene_name.to_lowercase();
-
-        let mut scene : Option<Scene> = None;
-        if self.scenes_exact_index.contains_key(&scene_id) {
-            scene = Some(self.scenes_exact_index.get(&scene_id).unwrap().clone());
-        } else {
-            let lowercased_tags = tags.iter().map(|x| x.to_lowercase()).clone().collect();
-            for wildcard in &self.scenes {
-                if wildcard.scene_id.matches(&scene_id)
-                    && wildcard.scene_tags.matches(&lowercased_tags)
-                {
-                    scene = Some(wildcard.clone());
-                }
-            }
-        }
-        scene
     }
 }

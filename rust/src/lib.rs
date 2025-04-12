@@ -1,6 +1,6 @@
 use bodies::Race;
 use bones::lb_dynamic_tracking;
-use bridge::ffi_bridge::{GetFormID, GetPlayerActorValue, TESForm_GetFormByEditorID};
+use bridge::ffi_bridge::{GetFormID, Form_GetEditorID, GetPlayerActorValue, TESForm_GetFormByEditorID, GetFormByID};
 use config::{triggers::Trigger, variables::{ConfigVariable, VariableStore}};
 use cxx::{CxxString, CxxVector};
 use dd::start_dd_workaround;
@@ -9,9 +9,9 @@ use lazy_static::lazy_static;
 use tokio::task::JoinHandle;
 
 use std::{
-    collections::HashMap, hash::Hash, sync::{atomic::AtomicI64, Arc, Mutex}, time::Duration
+    collections::HashMap, sync::{atomic::AtomicI64, Arc, Mutex}
 };
-use tracing::{debug, error, info, trace, warn};
+use tracing::{debug, error, info, trace};
 
 use crate::bones::ffi_bones::ActorVec;
 
@@ -169,7 +169,7 @@ mod ffi {
         ) -> i32;
         fn lb_update(id: i32, speed: i32) -> bool;
         fn lb_stop(id: i32) -> bool;
-        fn lb_actor_value_changed(form_id: u32, value: f32);
+        fn lb_process_actor_value(form_id: u32, value: f32);
         fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32;
     }
 }
@@ -285,7 +285,7 @@ pub fn lb_disconnect() {
     });
 }
 
-pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
+fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     info!(action_name, speed, time_secs, "lb_action");
     Telekinesis::run_static(
         |lb| {
@@ -311,7 +311,7 @@ pub fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
     -1
 }
 
-pub fn lb_scene(
+fn lb_scene(
     scene_name: &str,
     scene_tags: &CxxVector<CxxString>,
     speed: i32,
@@ -319,28 +319,19 @@ pub fn lb_scene(
     actor_vec: &ActorVec,
 ) -> i32 {
     let tags = read_input_string(scene_tags);
-    info!(scene_name, speed, time_secs, ?tags, "lb_scene 2");
+    info!(scene_name, speed, time_secs, ?tags, "lb_scene");
     Telekinesis::run_static(
         |lb| {
-            let scene = lb.triggers.start_scene(scene_name, &tags);
-            debug!(?scene, ?tags, "matched scene");
-            if let Some(scene) = scene {
-                send_mod_event(ModEvent::new("Tele_Scene", &scene.description, 0.0));
-                let actions = get_actions_from_refs(lb, scene.actions);
-                if scene.track_bones {
-                    lb_dynamic_tracking(lb, actor_vec);
+            let (handle, triggers) = process_triggers(lb, None, Some(scene_name), &tags);
+            for trigger in triggers {
+                if let Trigger::Scene(scene) = trigger {
+                    send_mod_event(ModEvent::new("Tele_Scene", &scene.description, 0.0));
+                    if scene.track_bones {
+                        lb_dynamic_tracking(lb, actor_vec);
+                    }
                 }
-                let results = lb.client.dispatch_refs(
-                    actions,
-                    vec![],
-                    Speed::new(speed.into()),
-                    read_input_duration(time_secs),
-                    -1
-                );
-                send_action_events(&results);
-                return results.handle;
             }
-            -1
+            handle
         },
         -1,
     )
@@ -350,62 +341,60 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
     info!(event_name, str_arg, num_arg, "lb_process_event");
     Telekinesis::run_static(
         |lb| {
-            let binding =  lb.triggers.start_events(&lb.variables, Some(event_name));
-
-            let mut handle = -1;
-            for start_event in binding.into_iter() {
-
-                let actions = get_actions_from_refs(lb, start_event.actions());
-                let duration = start_event.duration();
-                let results = lb.client.dispatch_refs(
-                    actions,
-                    vec![],
-                    Speed::max(),
-                    duration,
-                    handle
-                );
-                send_action_events(&results);
-                handle = results.handle;
-            }
-            -1
+            let (handle, _) = process_triggers(lb, Some(event_name), None,  &vec![]);
+            handle
         },
         -1,
     )
 }
 
-pub fn lb_actor_value_changed(form_id: u32, value: f32) {
+fn lb_process_actor_value(form_id: u32, value: f32) {
+    let form_id_i32 = form_id as i32;
+     unsafe { 
+        let form = GetFormByID(form_id_i32);
+        let editor_id = Form_GetEditorID( form );
+        debug!(editor_id, form_id, value, "actor value updated");
+    };
+
     Telekinesis::run_static_no_return(|lb| {
         if let Some(var_editor_id) = lb.variables.update(form_id, value) {
             trace!(var_editor_id, value, "actor value changed");
-
-            let start_iter =  lb.triggers.start_events(&lb.variables, None);
-            for trigger in start_iter.into_iter() {
-                let actions = get_actions_from_refs(lb, trigger.actions());
-                let duration = trigger.duration();
-                let results = lb.client.dispatch_refs(
-                    actions,
-                    vec![],
-                    Speed::max(),
-                    duration,
-                    -1
-                );
-                send_action_events(&results);
-                let handle = results.handle;
-                debug!(handle, ?trigger, "started trigger");
-                lb.triggers_running.insert(trigger, handle);
-            }
-
-            let stop_iter = lb.triggers.stop_events(&lb.variables, None);
-            for trigger in stop_iter.into_iter() {
-                if let Some(handle) = lb.triggers_running.get(&trigger) {
-                    lb.client.stop(*handle);
-                    debug!(handle, ?trigger, "stopped trigger");
-                } else {
-                    error!(?trigger, "no handle found")
-                }
-            }
+            process_triggers(lb, None, None, &vec![]);
         }
     });
+}
+
+fn process_triggers(lb: &mut Telekinesis, event_name: Option<&str>, scene_name: Option<&str>, scene_tags: &Vec<String>) -> (i32, Vec<Trigger>) {
+    let started =  lb.triggers.start_events(&lb.variables, event_name, scene_name, scene_tags);
+
+    let mut handle = -1;
+    for trigger in started.iter() {
+        let actions = get_actions_from_refs(lb, trigger.actions());
+        let duration = trigger.duration();
+        let results = lb.client.dispatch_refs(
+            actions,
+            vec![],
+            Speed::max(),
+            duration,
+            handle
+        );
+        send_action_events(&results);
+        handle = results.handle;
+        debug!(handle, ?trigger, "started trigger");
+        lb.triggers_running.insert(trigger.clone(), handle);
+    }
+
+    let stop_iter = lb.triggers.stop_events(&lb.variables, event_name);
+    for trigger in stop_iter.into_iter() {
+        if let Some(handle) = lb.triggers_running.get(&trigger) {
+            lb.client.stop(*handle);
+            debug!(handle, ?trigger, "stopped trigger");
+        } else {
+            error!(?trigger, "no handle found")
+        }
+    }
+
+    (handle, started)
 }
 
 pub fn lb_update(handle: i32, speed: i32) -> bool {

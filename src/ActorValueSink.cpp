@@ -14,7 +14,7 @@ public:
 	{
         auto formId = event.actorValue.GetFormID();
         auto value = RE::PlayerCharacter::GetSingleton()->GetActorValue(event.actorValue);
-        lb_actor_value_changed(formId, value);
+        lb_process_actor_value(formId, value);
         
         return RE::BSEventNotifyControl::kContinue;
 	}

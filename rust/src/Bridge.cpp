@@ -67,6 +67,14 @@ float GetPlayerActorValue(rust::Str editorId) {
     return 0;
 }
 
+const RE::TESForm* GetFormByID(int a_formID) {
+    return RE::TESForm::GetFormByID( a_formID );
+}
+
+rust::String Form_GetEditorID(const RE::TESForm* form) {
+    return form->GetFormEditorID();
+}
+
 // ActorVec
 ActorVec::ActorVec(std::vector<RE::Actor*> actors) {
     this->actors = actors;

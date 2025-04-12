@@ -62,37 +62,6 @@
     }
   },
   {
-    "Event": {
-      "description": "Radiation Rate",
-      "event_start": {
-        "ActorValue": {
-          "variable_id": "Rads",
-          "condition": {
-            "GreaterThan": 0
-          }
-        }
-      },
-      "event_stop": {
-        "ActorValue": {
-          "variable_id": "Rads",
-          "condition": {
-            "Equal": 0
-          }
-        }
-      },
-      "actions": [
-        {
-          "action": "vibrate.vaginal",
-          "strength": {
-            "Variable": {
-              "PlayerActorValue": "DD_AV_VibrateStrengthVaginal"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
     "TimedEvent": {
       "description": "DD Inflators (controlled by Actor Value)",
       "event_start": {
