@@ -52,7 +52,7 @@ float GetPlayerActorValue(rust::Str editorId) {
         {
             auto a_info = (RE::ActorValueInfo*) form;
             float actorValue = player->GetActorValue( (*a_info) );
-            lb_log_info(std::format("Read actor value {} from formId={:x}: {}", actorValueEditorId, form->formID, actorValue));
+            // lb_log_info(std::format("Read actor value {} from formId={:x}: {}", actorValueEditorId, form->formID, actorValue));
             return actorValue;
         }
         else 

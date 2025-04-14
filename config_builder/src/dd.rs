@@ -1,12 +1,13 @@
-use std::time::Duration;
 
 use bp_scheduler::config::actions::{ActionRef, Stren, Variable};
-use config::{events::{ActorValueChange, Comparison, Condition, Event, TimedEvent}, triggers::Trigger, variables::{ConfigVariable, PlayerActorValue}};
-
-
-pub static VAR_RADS: &str = "RadsRate";
+use config::{
+    events::{ActorValueChange, Comparison, Condition, Event},
+    triggers::Trigger,
+    variables::{ConfigVariable, PlayerActorValue},
+};
 
 pub static VAR_DD_AROUSAL: &str = "DD_AV_Arousal";
+pub static VAR_DD_KW_IS_VIBRATING: &str = "DD_kw_Event_IsVibrating";
 pub static VAR_DD_INFLATE_STATUS_VAGINAL: &str = "DD_AV_InflateStatusVaginal";
 pub static VAR_DD_INFLATE_STATUS_ANAL: &str = "DD_AV_InflateStatusAnal";
 pub static VAR_DD_VIBRATE_STRENGTH_VAGINAL: &str = "DD_AV_VibrateStrengthVaginal";
@@ -39,68 +40,108 @@ pub fn dd_variables() -> Vec<ConfigVariable> {
             min: 0.0,
             max: 5.0,
         }),
+        ConfigVariable::PlayerKeyword(VAR_DD_KW_IS_VIBRATING.into()),
     ]
 }
 
 pub fn dd_events() -> Vec<Trigger> {
-    let vec = vec![
-        Trigger::Event(Event { 
-            description: "DD Vaginal Vibrator".into(), 
-            event_start: Condition::ActorValue(ActorValueChange { 
-                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
-                condition: Comparison::GreaterThan(0)
-            }), 
-            event_stop: Condition::ActorValue(ActorValueChange { 
-                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
-                condition: Comparison::Equal(0)
-            }),
-            actions: vec![
-                ActionRef { 
-                    action: "vibrate.vaginal".into(), 
-                    strength: Stren::Variable(Variable::PlayerActorValue(
-                        VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
-                    )) 
-                }
-            ]
-        }),
-        Trigger::Event(Event {
-            description: "DD Anal Vibrator".into(), 
-            event_start: Condition::ActorValue(ActorValueChange { 
-                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
-                condition: Comparison::GreaterThan(0)
-            }), 
-            event_stop: Condition::ActorValue(ActorValueChange { 
-                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(), 
-                condition: Comparison::Equal(0)
-            }),
-            actions: vec![
-                ActionRef { 
-                    action: "vibrate.vaginal".into(), 
-                    strength: Stren::Variable(Variable::PlayerActorValue(
-                        VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
-                    )) 
-                }
-            ]
-        }),
-        Trigger::TimedEvent(TimedEvent {
-            description: "DD Inflators (controlled by Actor Value)".into(),
-            event_start: Condition::LovebugEvent("dd.inflate".into()),
-            duration: Duration::from_secs(9_999_999),
-            actions: vec![
-                ActionRef {
-                    action: "inflate.vaginal".into(),
-                    strength: Stren::Variable(Variable::PlayerActorValue(
-                        "DD_AV_InflateStatusVaginal".into(),
-                    )),
-                },
-                ActionRef {
-                    action: "inflate.anal".into(),
-                    strength: Stren::Variable(Variable::PlayerActorValue(
-                        "DD_AV_InflateStatusAnal".into(),
-                    )),
-                },
-            ],
-        })
+    let all_funscripts = vec![
+        "Tease".into(),
+        "Cruel-Tease".into(),
+        "On-Off".into(),
+        "On-Off-Fast".into(),
+        "Sawtooth".into(),
+        "Sawtooth-Fast".into(),
+        "Square".into(),
+        "Wub-Wub-Wub".into(),
     ];
+
+    let mut vec = vec![];
+
+    for i in 1..6 {
+        vec.push(Trigger::Event(Event {
+            description: format!("DD: Vibrator Vaginal {}", i),
+            start: vec![
+                Condition::HasKeyword(VAR_DD_KW_IS_VIBRATING.into()),
+                Condition::ActorValue(ActorValueChange {
+                    variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+                    condition: Comparison::Equal(i),
+                }),
+            ],
+            stop: vec![ Condition::HasNotKeyword(VAR_DD_KW_IS_VIBRATING.into()) ],
+            actions: vec![ActionRef {
+                action: "vibrate.vaginal".into(),
+                strength: Stren::RandomFunscript((i * 20) as i32, all_funscripts.clone()),
+            }],
+        }));
+
+        vec.push(Trigger::Event(Event {
+            description: format!("DD: Vibrator Anal {}", i),
+            start: vec![
+                Condition::HasKeyword(VAR_DD_KW_IS_VIBRATING.into()),
+                Condition::ActorValue(ActorValueChange {
+                    variable_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
+                    condition: Comparison::Equal(i),
+                }),
+            ],
+            stop:  vec![ Condition::HasNotKeyword(VAR_DD_KW_IS_VIBRATING.into()) ],
+            actions: vec![ActionRef {
+                action: "vibrate.anal".into(),
+                strength: Stren::RandomFunscript((i * 20) as i32, all_funscripts.clone()),
+            }],
+        }));
+    }
+
+    vec.push(Trigger::Event(Event {
+        description: "DD Vibrator Vaginal (Default)".into(),
+        start: vec![
+            Condition::HasKeyword(VAR_DD_KW_IS_VIBRATING.into()),
+            Condition::ActorValue(ActorValueChange {
+                variable_id: VAR_DD_VIBRATE_STRENGTH_VAGINAL.into(),
+                condition: Comparison::Equal(0),
+            }),
+        ],
+        stop: vec![ Condition::HasNotKeyword(VAR_DD_KW_IS_VIBRATING.into()) ],
+        actions: vec![ActionRef {
+            action: "vibrate.vaginal".into(),
+            strength: Stren::Constant(10),
+        }],
+    }));
+
+    vec.push(Trigger::Event(Event {
+        description: "DD Vibrator Anal (Default)".into(),
+        start: vec![
+            Condition::HasKeyword(VAR_DD_KW_IS_VIBRATING.into()),
+            Condition::ActorValue(ActorValueChange {
+                variable_id: VAR_DD_VIBRATE_STRENGTH_ANAL.into(),
+                condition: Comparison::Equal(0),
+            }),
+        ],
+        stop: vec![ Condition::HasNotKeyword(VAR_DD_KW_IS_VIBRATING.into()) ],
+        actions: vec![ActionRef {
+            action: "vibrate.anal".into(),
+            strength: Stren::Constant(10),
+        }],
+    }));
+
+    vec.push(Trigger::Event(Event {
+        description: "DD Inflator".into(),
+        start: vec![ Condition::LovebugEvent("dd.inflate".into()) ],
+        stop: vec![ Condition::LovebugEvent("dd.inflate.stop".into()) ],
+        actions: vec![
+            ActionRef {
+                action: "inflate.vaginal".into(),
+                strength: Stren::Variable(Variable::PlayerActorValue(
+                    "DD_AV_InflateStatusVaginal".into(),
+                )),
+            },
+            ActionRef {
+                action: "inflate.anal".into(),
+                strength: Stren::Variable(Variable::PlayerActorValue(
+                    "DD_AV_InflateStatusAnal".into(),
+                )),
+            },
+        ],
+    }));
     vec
 }

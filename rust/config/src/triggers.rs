@@ -2,9 +2,8 @@ use std::{collections::HashMap, time::Duration};
 
 use events::{Event, TimedEvent};
 use tracing::{debug, info};
-use variables::VariableStore;
 
-use crate::*;
+use crate::{keyword_store::KeywordStore, variable_store::VariableStore, *};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Trigger {
@@ -78,8 +77,8 @@ impl Triggers {
         }
         self.scenes.append(&mut scenes_default);
 
-        info!("read {} scenes...", self.scenes.len());
-        info!("read {} events...", self.events.len());
+        info!("read {} scene triggers...", self.scenes.len());
+        info!("read {} event triggers...", self.events.len());
         info!("indexed {} exact scenes...", self.scenes_exact_index.len());
         self.scenes_exact_index.iter().for_each(|(_, scene)| {
             debug!("{:?}", scene);
@@ -87,18 +86,25 @@ impl Triggers {
         for scene in &self.scenes {
             debug!("{:?}", scene);
         }
+        for trigger in &self.events {
+            debug!("{:?}", trigger);
+        }
     }
 
-    pub fn start_events(&mut self, vars: &VariableStore, event_name: Option<&str>, scene_name: Option<&str>, scene_tags: &Vec<String>) -> Vec<Trigger> {
+    pub fn start_events(&mut self, vars: &VariableStore, kws: &KeywordStore, event_name: Option<&str>, scene_name: Option<&str>, scene_tags: &Vec<String>) -> Vec<Trigger> {
         info!(?event_name, "start_events");
         let matched_events: Vec<Trigger> = self.events.iter().filter(|x| {
             match x {
                 Trigger::Scene(_) => false,
                 Trigger::Event(event) => {
-                    event.event_start.matches(vars, event_name)
+                    let result = event.start.iter().all(|x| x.matches(vars, kws, event_name));
+                    debug!(?event, result, "matched?");
+                    result
                 },
                 Trigger::TimedEvent(event) => {
-                    event.event_start.matches(vars, event_name)
+                    let result = event.start.iter().all(|x| x.matches(vars, kws, event_name));
+                    debug!(?event, result, "matched?");
+                    result
                 },
             }
         })
@@ -144,13 +150,13 @@ impl Triggers {
         scene
     }
 
-    pub fn stop_events(&mut self, vars: &VariableStore, event_name: Option<&str>) -> Vec<Trigger> {
+    pub fn stop_events(&mut self, vars: &VariableStore,  kws: &KeywordStore, event_name: Option<&str>) -> Vec<Trigger> {
         let mut stopped = vec![];
         self.running.retain(|x| match x {
             Trigger::Scene(_) => true,
             Trigger::TimedEvent(_) => true,
             Trigger::Event(event) => {
-                if event.event_stop.matches(vars, event_name) {
+                if event.stop.iter().all(|x| x.matches(vars, kws, event_name)) {
                     debug!(?event, "stopping");
                     stopped.push(Trigger::Event(event.clone()));
                     false

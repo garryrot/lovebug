@@ -2,22 +2,26 @@
   {
     "Event": {
       "description": "Actual Vibrators: Bullet Vibrator Nipple",
-      "event_start": {
-        "ActorValue": {
-          "variable_id": "AV_VibrationStrengthNipple",
-          "condition": {
-            "GreaterThan": 0
+      "start": [
+        {
+          "ActorValue": {
+            "variable_id": "AV_VibrationStrengthNipple",
+            "condition": {
+              "GreaterThan": 0
+            }
           }
         }
-      },
-      "event_stop": {
-        "ActorValue": {
-          "variable_id": "AV_VibrationStrengthNipple",
-          "condition": {
-            "Equal": 0
+      ],
+      "stop": [
+        {
+          "ActorValue": {
+            "variable_id": "AV_VibrationStrengthNipple",
+            "condition": {
+              "Equal": 0
+            }
           }
         }
-      },
+      ],
       "actions": [
         {
           "action": "vibrate.nipple",

@@ -7,6 +7,8 @@ pub mod body_parts;
 pub mod events;
 pub mod triggers;
 pub mod variables;
+pub mod variable_store;
+pub mod keyword_store;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Scene {
@@ -36,63 +38,44 @@ impl SceneId {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::{events::{ActorValueChange, Comparison, Condition, Event}, keyword_store::{KeywordSource, KeywordStore}, triggers::Trigger, variable_store::{VariableSource, VariableStore}, variables::PlayerActorValue};
+
+    struct KwFTest {}
+    impl KeywordSource for KwFTest {
+        fn player_has_keyword(&self, _editor_id: &str) -> bool {
+            true
+        }
+    }
+
+    struct FakeVSForTest {}
+    impl VariableSource for FakeVSForTest {
+        fn get_player_actor_value(&self, _editor_id: &str) -> f32 {
+            5.0
+        }
+        fn get_form_id(&self, _editor_id: &str) -> u32 {
+            1
+        }
+    }
 
     #[test]
-    fn create_milkmod_config() {
-        let default_config = vec![
-            Trigger::Event(Event {
-                description: "Milk Mod: Feeding Stage".into(),
-                event_start: EventTrigger {
-                    form: Form::All,
-                    event: "MilkQuest.FeedingStage".into()
-                },
-                event_stop: EventTrigger {
-                    form: Form::All,
-                    event: "MilkQuest.MilkingStage".into()
-                },
-                action: vec!["milkmod.feedingstage".into()],
-                body_parts: BodyParts::Tags(vec!["Anal".into()]),
-            }),
-            Trigger::Event(Event {
-                description: "Milk Mod: Milking Stage".into(),
-                event_start: EventTrigger {
-                    form: Form::All,
-                    event: "MilkQuest.MilkingStage".into()
-                },
-                event_stop: EventTrigger {
-                    form: Form::All,
-                    event: "MilkQuest.FuckMachineStage".into()
-                },
-                action: vec!["milkmod.milkingstage".into()],
-                body_parts: BodyParts::Tags(vec!["Anal".into(), "Nipple".into()]),
-            }),
-            Trigger::Event(Event {
-                description: "Milk Mod: Fucking Machine Stage".into(),
-                event_start: EventTrigger {
-                    form: Form::All,
-                    event: "MilkQuest.FuckMachineStage".into()
-                },
-                event_stop: EventTrigger {
-                    form: Form::All,
-                    event: "MilkQuest.StartMilkingMachine".into()
-                },
-                action: vec!["milkmod.fuckingmachinestage".into()],
-                body_parts: BodyParts::Tags(vec!["Anal".into(), "Vaginal".into()]),
-            }),
-            Trigger::Timed(TimedEvent {
-                description: "Milk Mod: Start Milking Machine".into(),
-                event_start: EventTrigger {
-                    form: Form::All,
-                    event: "MilkQuest.StartMilkingMachine".into()
-                },
-                duration_ms: 10_000,
-                action: vec![],
-                body_parts: BodyParts::Tags(vec!["Anal".into(), "Vaginal".into(), "Nipple".into()]),
-            })
-        ];
-        let strn = serde_json::to_string_pretty(&default_config).unwrap();
-        println!("{}", strn);
+    fn test_start_condition() {
+        let vs = VariableStore::init(Box::new(FakeVSForTest {}), vec![PlayerActorValue { editor_id: "VAR_X".into(), min: 0.0, max: 5.0 }], vec![]);
+        let kws = KeywordStore::init(Box::new(KwFTest {}), vec![ "KW_Y".into() ]);
+        let x = Event {
+            description: format!("DD: Vibrator Vaginal {}", 5),
+            start: vec![
+                Condition::HasKeyword("KW_Y".into()),
+                Condition::ActorValue(ActorValueChange {
+                    variable_id: "VAR_X".into(),
+                    condition: Comparison::Equal(5),
+                }),
+            ],
+            stop: vec![ Condition::HasNotKeyword("KW_Y".into()) ],
+            actions: vec![],
+        };
+
+        let matches_condition = x.start.iter().all(|x| x.matches(&vs, &kws, None));
+        assert!(matches_condition, "condition matches with actual value");
     }
 }
 

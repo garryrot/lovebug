@@ -1,30 +1,42 @@
 [
   {
     "Event": {
-      "description": "DD Vaginal Vibrator",
-      "event_start": {
-        "ActorValue": {
-          "variable_id": "DD_AV_VibrateStrengthVaginal",
-          "condition": {
-            "GreaterThan": 0
+      "description": "DD: Vibrator Vaginal 1",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthVaginal",
+            "condition": {
+              "Equal": 1
+            }
           }
         }
-      },
-      "event_stop": {
-        "ActorValue": {
-          "variable_id": "DD_AV_VibrateStrengthVaginal",
-          "condition": {
-            "Equal": 0
-          }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
         }
-      },
+      ],
       "actions": [
         {
           "action": "vibrate.vaginal",
           "strength": {
-            "Variable": {
-              "PlayerActorValue": "DD_AV_VibrateStrengthVaginal"
-            }
+            "RandomFunscript": [
+              20,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
           }
         }
       ]
@@ -32,45 +44,466 @@
   },
   {
     "Event": {
-      "description": "DD Anal Vibrator",
-      "event_start": {
-        "ActorValue": {
-          "variable_id": "DD_AV_VibrateStrengthVaginal",
-          "condition": {
-            "GreaterThan": 0
+      "description": "DD: Vibrator Anal 1",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthAnal",
+            "condition": {
+              "Equal": 1
+            }
           }
         }
-      },
-      "event_stop": {
-        "ActorValue": {
-          "variable_id": "DD_AV_VibrateStrengthVaginal",
-          "condition": {
-            "Equal": 0
-          }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
         }
-      },
+      ],
       "actions": [
         {
-          "action": "vibrate.vaginal",
+          "action": "vibrate.anal",
           "strength": {
-            "Variable": {
-              "PlayerActorValue": "DD_AV_VibrateStrengthVaginal"
-            }
+            "RandomFunscript": [
+              20,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
           }
         }
       ]
     }
   },
   {
-    "TimedEvent": {
-      "description": "DD Inflators (controlled by Actor Value)",
-      "event_start": {
-        "LovebugEvent": "dd.inflate"
-      },
-      "duration": {
-        "secs": 9999999,
-        "nanos": 0
-      },
+    "Event": {
+      "description": "DD: Vibrator Vaginal 2",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthVaginal",
+            "condition": {
+              "Equal": 2
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.vaginal",
+          "strength": {
+            "RandomFunscript": [
+              40,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD: Vibrator Anal 2",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthAnal",
+            "condition": {
+              "Equal": 2
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.anal",
+          "strength": {
+            "RandomFunscript": [
+              40,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD: Vibrator Vaginal 3",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthVaginal",
+            "condition": {
+              "Equal": 3
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.vaginal",
+          "strength": {
+            "RandomFunscript": [
+              60,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD: Vibrator Anal 3",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthAnal",
+            "condition": {
+              "Equal": 3
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.anal",
+          "strength": {
+            "RandomFunscript": [
+              60,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD: Vibrator Vaginal 4",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthVaginal",
+            "condition": {
+              "Equal": 4
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.vaginal",
+          "strength": {
+            "RandomFunscript": [
+              80,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD: Vibrator Anal 4",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthAnal",
+            "condition": {
+              "Equal": 4
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.anal",
+          "strength": {
+            "RandomFunscript": [
+              80,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD: Vibrator Vaginal 5",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthVaginal",
+            "condition": {
+              "Equal": 5
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.vaginal",
+          "strength": {
+            "RandomFunscript": [
+              100,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD: Vibrator Anal 5",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthAnal",
+            "condition": {
+              "Equal": 5
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.anal",
+          "strength": {
+            "RandomFunscript": [
+              100,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD Vibrator Vaginal (Default)",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthVaginal",
+            "condition": {
+              "Equal": 0
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.vaginal",
+          "strength": {
+            "Constant": 10
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD Vibrator Anal (Default)",
+      "start": [
+        {
+          "HasKeyword": "DD_kw_Event_IsVibrating"
+        },
+        {
+          "ActorValue": {
+            "variable_id": "DD_AV_VibrateStrengthAnal",
+            "condition": {
+              "Equal": 0
+            }
+          }
+        }
+      ],
+      "stop": [
+        {
+          "HasNotKeyword": "DD_kw_Event_IsVibrating"
+        }
+      ],
+      "actions": [
+        {
+          "action": "vibrate.anal",
+          "strength": {
+            "Constant": 10
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Event": {
+      "description": "DD Inflator",
+      "start": [
+        {
+          "LovebugEvent": "dd.inflate"
+        }
+      ],
+      "stop": [
+        {
+          "LovebugEvent": "dd.inflate.stop"
+        }
+      ],
       "actions": [
         {
           "action": "inflate.vaginal",
