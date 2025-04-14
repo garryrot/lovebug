@@ -1,6 +1,6 @@
 use bp_scheduler::config::actions::{ActionRef, Stren, Variable};
 use config::{
-    events::{ActorValueChange, Comparison, Condition, Event},
+    events::{ActorValue, ValueRange, Condition, Event},
     triggers::Trigger,
     variables::{ConfigVariable, PlayerActorValue},
 };
@@ -26,13 +26,13 @@ pub fn av_variables() -> Vec<ConfigVariable> {
 pub fn av_events() -> Vec<Trigger> {
     vec![Trigger::Event(Event {
         description: "Actual Vibrators: Bullet Vibrator Nipple".into(),
-        start: vec![Condition::ActorValue(ActorValueChange {
-            variable_id: VAR_AV_VIBRATION_STRENGTH_NIPPLE.to_owned(),
-            condition: Comparison::GreaterThan(0),
+        start: vec![Condition::ActorValue(ActorValue {
+            editor_id: VAR_AV_VIBRATION_STRENGTH_NIPPLE.to_owned(),
+            value: ValueRange::GreaterThan(0),
         })],
-        stop: vec![Condition::ActorValue(ActorValueChange {
-            variable_id: VAR_AV_VIBRATION_STRENGTH_NIPPLE.to_owned(),
-            condition: Comparison::Equal(0),
+        stop: vec![Condition::ActorValue(ActorValue {
+            editor_id: VAR_AV_VIBRATION_STRENGTH_NIPPLE.to_owned(),
+            value: ValueRange::Equals(0),
         })],
         actions: vec![ActionRef {
             action: "vibrate.nipple".into(),

@@ -23,8 +23,8 @@ pub struct TimedEvent {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Comparison { 
-    Equal(i64),
+pub enum ValueRange { 
+    Equals(i64),
     SmallerThan(i64),
     SmallerEqualThan(i64),
     GreaterThan(i64),
@@ -39,19 +39,19 @@ pub enum Form {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ActorValueChange {
-    pub variable_id: String,
-    pub condition: Comparison
+pub struct ActorValue {
+    pub editor_id: String,
+    pub value: ValueRange
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Condition {
     And(Vec<Condition>),
     Or(Vec<Condition>),
-    LovebugEvent(String),
-    ActorValue(ActorValueChange),
-    HasKeyword(String),
-    HasNotKeyword(String)
+    ControlEvent(String),
+    ActorValue(ActorValue),
+    PlayerHasKeyword(String),
+    PlayerWithoutKeyword(String)
 }
 
 impl Condition {
@@ -59,20 +59,20 @@ impl Condition {
         match self {
             Condition::And(conds) => conds.iter().all(|x| x.matches(vars, kws, event)),
             Condition::Or(conds) => conds.iter().any(|x| x.matches(vars, kws, event)),
-            Condition::LovebugEvent(name) => match event {
+            Condition::ControlEvent(name) => match event {
                         Some(mope) => mope == name,
                         None => false,
-                    },
-            Condition::HasKeyword(editor_id) => { kws.has_keyword(editor_id) }
-            Condition::HasNotKeyword(editor_id) => { ! kws.has_keyword(editor_id) },
+            },
+            Condition::PlayerHasKeyword(editor_id) => { kws.has_keyword(editor_id) }
+            Condition::PlayerWithoutKeyword(editor_id) => { ! kws.has_keyword(editor_id) },
             Condition::ActorValue(cond) => {
-                        let var = vars.get_value(&cond.variable_id).unwrap_or(-1);
-                        match cond.condition {
-                            Comparison::Equal(val) => var == val,
-                            Comparison::SmallerThan(val) => var < val,
-                            Comparison::SmallerEqualThan(val) => var <= val,
-                            Comparison::GreaterThan(val) => var > val,
-                            Comparison::GreaterEqualThan(val) => var >= val,
+                        let var = vars.get_value(&cond.editor_id).unwrap_or(-1);
+                        match cond.value {
+                            ValueRange::Equals(val) => var == val,
+                            ValueRange::SmallerThan(val) => var < val,
+                            ValueRange::SmallerEqualThan(val) => var <= val,
+                            ValueRange::GreaterThan(val) => var > val,
+                            ValueRange::GreaterEqualThan(val) => var >= val,
                         }
                     },
         }

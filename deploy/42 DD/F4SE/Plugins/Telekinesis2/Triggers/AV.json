@@ -5,8 +5,8 @@
       "start": [
         {
           "ActorValue": {
-            "variable_id": "AV_VibrationStrengthNipple",
-            "condition": {
+            "editor_id": "AV_VibrationStrengthNipple",
+            "value": {
               "GreaterThan": 0
             }
           }
@@ -15,9 +15,9 @@
       "stop": [
         {
           "ActorValue": {
-            "variable_id": "AV_VibrationStrengthNipple",
-            "condition": {
-              "Equal": 0
+            "editor_id": "AV_VibrationStrengthNipple",
+            "value": {
+              "Equals": 0
             }
           }
         }

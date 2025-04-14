@@ -38,7 +38,7 @@ impl SceneId {
 
 #[cfg(test)]
 mod tests {
-    use crate::{events::{ActorValueChange, Comparison, Condition, Event}, keyword_store::{KeywordSource, KeywordStore}, triggers::Trigger, variable_store::{VariableSource, VariableStore}, variables::PlayerActorValue};
+    use crate::{events::{ActorValue, ValueRange, Condition, Event}, keyword_store::{KeywordSource, KeywordStore}, triggers::Trigger, variable_store::{VariableSource, VariableStore}, variables::PlayerActorValue};
 
     struct KwFTest {}
     impl KeywordSource for KwFTest {
@@ -64,13 +64,13 @@ mod tests {
         let x = Event {
             description: format!("DD: Vibrator Vaginal {}", 5),
             start: vec![
-                Condition::HasKeyword("KW_Y".into()),
-                Condition::ActorValue(ActorValueChange {
-                    variable_id: "VAR_X".into(),
-                    condition: Comparison::Equal(5),
+                Condition::PlayerHasKeyword("KW_Y".into()),
+                Condition::ActorValue(ActorValue {
+                    editor_id: "VAR_X".into(),
+                    value: ValueRange::Equals(5),
                 }),
             ],
-            stop: vec![ Condition::HasNotKeyword("KW_Y".into()) ],
+            stop: vec![ Condition::PlayerWithoutKeyword("KW_Y".into()) ],
             actions: vec![],
         };
 

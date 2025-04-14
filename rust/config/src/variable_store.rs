@@ -82,7 +82,7 @@ impl VariableStore {
             let normalized = &state.actor_value.normalize(value);
             debug!(
                 value,
-                normalized, "player AV updated {} ", 
+                normalized, "observed player AV updated {} ", 
                 state.actor_value.editor_id
             );
             state.normalized.store(*normalized, Ordering::Relaxed);

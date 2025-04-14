@@ -379,13 +379,6 @@ fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
 }
 
 fn lb_process_actor_value(form_id: u32, value: f32) {
-    let form_id_i32 = form_id as i32;
-    unsafe {
-        let form = GetFormByID(form_id_i32);
-        let editor_id = Form_GetEditorID(form);
-        debug!(editor_id, form_id, value, "actor value updated");
-    };
-
     Telekinesis::run_static_no_return(|lb| {
         if lb.variable_store.update(form_id, value) {
             process_triggers(lb, None, None, &vec![]);
