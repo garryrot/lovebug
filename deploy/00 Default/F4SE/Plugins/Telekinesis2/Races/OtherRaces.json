@@ -1,22 +1,43 @@
 [
   {
-    "form_id": 106505,
     "name": "Super Mutant",
+    "form_id": 106505,
     "sex": "Male",
     "penetrator_bone": "Penis1",
-    "strapon_extra_length": 0.0,
+    "penis_extra_len": 0.0,
     "oral_bone": "HEAD",
     "anal_bone": "Pelvis",
     "anal_collision": {
-      "outer_distance": 14.5,
+      "radius": 14.5,
       "depth": 10.0,
-      "min_stroke": 0.25,
+      "min_penetration": 0.25,
       "error_tolerance": 0.35
     },
     "oral_collision": {
-      "outer_distance": 14.5,
+      "radius": 14.5,
       "depth": 10.0,
-      "min_stroke": 0.25,
+      "min_penetration": 0.25,
+      "error_tolerance": 0.35
+    }
+  },
+  {
+    "name": "Molerat/FEVHound",
+    "form_id": 592947,
+    "sex": "Male",
+    "penetrator_bone": "RaiderDog_Penis",
+    "penis_extra_len": 27.0,
+    "oral_bone": "HEAD",
+    "anal_bone": "Pelvis",
+    "anal_collision": {
+      "radius": 14.5,
+      "depth": 10.0,
+      "min_penetration": 0.25,
+      "error_tolerance": 0.35
+    },
+    "oral_collision": {
+      "radius": 14.5,
+      "depth": 10.0,
+      "min_penetration": 0.25,
       "error_tolerance": 0.35
     }
   }

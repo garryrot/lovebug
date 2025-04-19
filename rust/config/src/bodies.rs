@@ -10,11 +10,11 @@ pub enum Sex {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Race {
-    pub form_id: u32,
     pub name: String,
+    pub form_id: u32,
     pub sex: Sex,
     pub penetrator_bone: String,
-    pub strapon_extra_length: f32, // hacky but whatever
+    pub penis_extra_len: f32, // hacky but whatever
     pub oral_bone: String,
     pub anal_bone: String,
     pub anal_collision: Option<Collision>,
@@ -24,9 +24,9 @@ pub struct Race {
 impl Default for Race {
     fn default() -> Self {
         let collision = Collision {
-            outer_distance: 14.5,
+            radius: 14.5,
             depth: 10.0,
-            min_stroke: 0.25,
+            min_penetration: 0.25,
             error_tolerance: 0.35,
         };
         Race {
@@ -38,7 +38,7 @@ impl Default for Race {
             anal_bone: "Pelvis".into(),
             anal_collision: Some(collision),
             oral_collision: Some(collision),
-            strapon_extra_length: 8.0,
+            penis_extra_len: 8.0,
         }
     }
 }
@@ -46,9 +46,9 @@ impl Default for Race {
 impl Race {
     pub fn female_default() -> Race {
         let collision = Collision {
-            outer_distance: 14.5,
+            radius: 14.5,
             depth: 10.0,
-            min_stroke: 0.25,
+            min_penetration: 0.25,
             error_tolerance: 0.35,
         };
         Race {
@@ -60,15 +60,15 @@ impl Race {
             anal_bone: "Pelvis".into(),
             anal_collision: Some(collision),
             oral_collision: Some(collision),
-            strapon_extra_length: 8.0,
+            penis_extra_len: 8.0,
         }
     }
 
     pub fn male_default() -> Race {
         let collision = Collision {
-            outer_distance: 14.5,
+            radius: 14.5,
             depth: 10.0,
-            min_stroke: 0.25,
+            min_penetration: 0.25,
             error_tolerance: 0.35,
         };
         Race {
@@ -80,7 +80,7 @@ impl Race {
             anal_bone: "Pelvis".into(),
             anal_collision: Some(collision),
             oral_collision: Some(collision),
-            strapon_extra_length: 8.0,
+            penis_extra_len: 8.0,
         }
     }
 }

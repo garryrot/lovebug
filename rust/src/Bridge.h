@@ -22,7 +22,8 @@ class ActorVec {
 };
 
 // Form
-const RE::TESForm* AsForm(const RE::TESRace* form);
+const RE::TESForm* RaceAsForm(const RE::TESRace* form);
+const RE::TESForm* ActorAsForm(const RE::Actor* form);
 const RE::TESForm* TESForm_GetFormByEditorID(rust::Str editorId);
 std::uint32_t GetFormID(const RE::TESForm* form);
 std::uint32_t GetSavedFormType(const RE::TESForm* form);

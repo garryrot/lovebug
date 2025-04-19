@@ -12,7 +12,7 @@ pub fn start_kw_thread(tk: &mut Telekinesis, kws: Vec<(String, Arc<AtomicBool>)>
         existing.abort();
     }
     tk.keyword_update_thread = Some(tk.client.runtime.spawn(async move {
-        info!("keyword update thread");
+        debug!("keyword update thread");
         loop {
             sleep(Duration::from_millis(250)).await;
             let mut changed = false;

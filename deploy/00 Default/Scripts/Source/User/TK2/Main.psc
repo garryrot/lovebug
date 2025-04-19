@@ -13,13 +13,13 @@ EndEvent
 Function Startup()
 	ScriptObject aafBridge = CastAs("TK2:AAF_EventBridge")
 	If aafBridge
-		Debug("Starting AAF Event Bridge")
+		Trace("Starting AAF Event Bridge")
 		aafBridge.CallFunction("Startup", new Var[0])
 	EndIf
 	
 	ScriptObject ddBridge = CastAs("TK2:DD_EventBridge")
 	If ddBridge
-		Debug("Starting DD Event Bridge")
+		Trace("Starting DD Event Bridge")
 		ddBridge.CallFunction("Startup", new Var[0])
 	EndIf
 

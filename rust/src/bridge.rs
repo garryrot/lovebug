@@ -38,7 +38,8 @@ pub mod ffi_bridge {
         pub unsafe fn TESForm_GetFormByEditorID(editorId: &str) -> *const TESForm;
         pub unsafe fn GetFormID(form: *const TESForm) -> u32;
         pub unsafe fn GetSavedFormType(form: *const TESForm) -> u32; // enum_form_id
-        pub unsafe fn AsForm(form: *const TESRace) -> *const TESForm;
+        pub unsafe fn RaceAsForm(form: *const TESRace) -> *const TESForm;
+        pub unsafe fn ActorAsForm(form: *const Actor) -> *const TESForm;
         pub unsafe fn IsPlayer(actor: *const Actor) -> bool;
         pub unsafe fn GetSex(actor: *const Actor) -> Sex;
         pub unsafe fn GetRace(actor: *const Actor) -> *const TESRace;
@@ -58,7 +59,27 @@ impl UnsafeTESFormPtr {
     pub fn get_form_id(&self) -> u32 {
         unsafe { GetFormID(self.ptr) }
     }
+    pub fn get_editor_id(&self) -> String {
+        unsafe {
+            Form_GetEditorID(self.ptr)
+        }
+    }
 }
+impl From<UnsafeActorPtr> for UnsafeTESFormPtr {
+    fn from(value: UnsafeActorPtr) -> Self {
+        UnsafeTESFormPtr { 
+            ptr: unsafe { ActorAsForm(value.ptr) } 
+        }
+    }
+}
+impl From<UnsafeTESRacePtr> for UnsafeTESFormPtr {
+    fn from(value: UnsafeTESRacePtr) -> Self {
+        UnsafeTESFormPtr { 
+            ptr: unsafe { RaceAsForm(value.ptr) } 
+        }
+    }
+}
+
 
 #[derive(Clone)]
 pub struct UnsafeActorPtr {
@@ -73,7 +94,7 @@ impl UnsafeActorPtr {
     }
     pub fn get_race(&self) -> UnsafeTESRacePtr {
         UnsafeTESRacePtr { ptr: unsafe { GetRace(self.ptr) } }
-    }    
+    }
     pub fn get_bone(&self, bone_name: &str) -> UnsafeAvObjectPtr {
         let ptr = unsafe { GetBone(self.ptr, bone_name) };
         UnsafeAvObjectPtr {
@@ -82,7 +103,6 @@ impl UnsafeActorPtr {
         }
     }
 }
-unsafe impl Send for UnsafeActorPtr {}
 
 #[derive(Clone)]
 pub struct UnsafeAvObjectPtr {
@@ -95,10 +115,9 @@ unsafe impl Send for UnsafeAvObjectPtr {}
 pub struct UnsafeTESRacePtr {
     pub ptr: *const TESRace
 }
-impl From<UnsafeTESRacePtr> for UnsafeTESFormPtr {
-    fn from(value: UnsafeTESRacePtr) -> Self {
-        UnsafeTESFormPtr { 
-            ptr: unsafe { AsForm(value.ptr) } 
-        }
+impl UnsafeTESRacePtr {
+    pub fn get_form_id(&self) -> u32 {
+        let race_form: UnsafeTESFormPtr = self.clone().into();
+        race_form.get_form_id()
     }
 }

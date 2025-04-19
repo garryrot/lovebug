@@ -97,14 +97,10 @@ impl Triggers {
             match x {
                 Trigger::Scene(_) => false,
                 Trigger::Event(event) => {
-                    let result = event.start.iter().all(|x| x.matches(vars, kws, event_name));
-                    debug!(?event, result, "matched?");
-                    result
+                    event.start.iter().all(|x| x.matches(vars, kws, event_name))
                 },
                 Trigger::TimedEvent(event) => {
-                    let result = event.start.iter().all(|x| x.matches(vars, kws, event_name));
-                    debug!(?event, result, "matched?");
-                    result
+                    event.start.iter().all(|x| x.matches(vars, kws, event_name))
                 },
             }
         })

@@ -35,7 +35,6 @@ bool ContainsKeyword(const RE::Actor *actor, rust::Str editorId) {
     auto isVibratingKeyword = RE::TESForm::GetFormByEditorID( (std::string) editorId);
     if (isVibratingKeyword && isVibratingKeyword->GetSavedFormType() == RE::ENUM_FORM_ID::kKYWD)
     {
-        
         return actor->HasKeyword( (const RE::BGSKeyword *) isVibratingKeyword, nullptr);
     }
     return false;
@@ -72,7 +71,12 @@ const RE::TESForm* GetFormByID(int a_formID) {
 }
 
 rust::String Form_GetEditorID(const RE::TESForm* form) {
-    return form->GetFormEditorID();
+    auto result = form->GetFormEditorID();
+    if (result == NULL)
+    {
+        return "";
+    }
+    return result;
 }
 
 // ActorVec
@@ -87,7 +91,10 @@ int ActorVec::Size() const {
 }
 
 // Form
-const RE::TESForm* AsForm(const RE::TESRace* form) {
+const RE::TESForm* RaceAsForm(const RE::TESRace* form) {
+    return form;
+}
+const RE::TESForm* ActorAsForm(const RE::Actor* form) {
     return form;
 }
 const RE::TESForm* TESForm_GetFormByEditorID(rust::Str editorId) {

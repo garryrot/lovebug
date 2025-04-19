@@ -1,7 +1,7 @@
-use bodies::Race;
-use bones::lb_dynamic_tracking;
+use bone_tracking::config::{read_bone_tracking_settings, BoneTrackingSettings};
+use bones::start_bone_tracking;
 use bridge::ffi_bridge::{
-    ContainsKeyword, Form_GetEditorID, GetFormByID, GetFormID, GetPlayerActorValue,
+    ContainsKeyword, GetFormID, GetPlayerActorValue,
     PlayerCharacter_GetSingleton, TESForm_GetFormByEditorID,
 };
 use config::{
@@ -31,7 +31,7 @@ use bp_scheduler::{
         client::*,
         util::{read::*, write::*},
     },
-    dynamic_tracking::{DynamicSettings, DynamicTrackingHandle},
+    dynamic_tracking::DynamicTrackingHandle,
     speed::Speed,
 };
 
@@ -43,37 +43,33 @@ pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2";
 pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Patterns";
 pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Actions";
 pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Triggers";
-pub static RACES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Races";
 pub static VARIABLES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Variables";
 
-pub static DEFAULT_RACE_MALE: &str = "DefaultRaceMale.json";
-pub static DEFAULT_RACE_FEMALE: &str = "DefaultRaceFemale.json";
-pub static BONE_TRACKING: &str = "BoneTracking.json";
 pub static LOGGING_SETTINGS: &str = "Logging.json";
 pub static DEVICE_SETTINGS: &str = "Devices.json";
 
-mod bones;
 pub mod bridge;
 mod dd;
 mod events;
 mod input;
 mod logging;
 mod mcm;
+mod bones;
+mod bone_tracking;
 
 #[derive(Debug)]
 pub struct Telekinesis {
     client: BpClient,
     triggers: Triggers,
-    dynamic_settings: DynamicSettings,
-    races: Vec<Race>,
-    default_race_male: Option<Race>,
-    default_race_female: Option<Race>,
-    consider_player_passive: bool,
-    tracking_counter: i32,
+
+    bone_tracking_config: BoneTrackingSettings,
     dynamic_task: DynamicTrackingHandle,
-    triggers_running: HashMap<Trigger, i32>,
+
+    // runtime state
+    tracking_counter: i32,
     variable_store: VariableStore,
     keyword_store: KeywordStore,
+    triggers_running: HashMap<Trigger, i32>,
     keyword_update_thread: Option<JoinHandle<()>>,
 }
 
@@ -134,12 +130,6 @@ impl Telekinesis {
         try_write(&self.client.device_settings, CONFIG_DIR, DEVICE_SETTINGS);
     }
 
-    pub fn read_races(&mut self) {
-        self.races = read_config_dir(RACES_DIR.into());
-        self.default_race_male = Some(read_or_default(CONFIG_DIR, DEFAULT_RACE_MALE));
-        self.default_race_female = Some(read_or_default(CONFIG_DIR, DEFAULT_RACE_FEMALE));
-        self.dynamic_settings = read_or_default(CONFIG_DIR, BONE_TRACKING);
-    }
 }
 
 #[derive(Debug)]
@@ -259,30 +249,24 @@ pub fn lb_connect(
                 ("BoneTrackingDepth".into(), bone_track.cur_avg_depth.clone()),
             ],
         );
+        let mut triggers = Triggers::default();
+        triggers.load_triggers(read_config_dir(TRIGGERS_DIR.into()));
 
         let mut lb = Telekinesis {
             client: client.unwrap(),
-            triggers: Triggers::default(),
+            triggers,
             dynamic_task: bone_track,
+            bone_tracking_config: read_bone_tracking_settings(),
             tracking_counter: 0,
-            races: vec![],
-            default_race_male: None,
-            default_race_female: None,
-            dynamic_settings: DynamicSettings::default(),
             variable_store,
-            consider_player_passive: true,
             triggers_running: HashMap::new(),
             keyword_store: KeywordStore::init(Box::new(Fo4KeywordSource {}), keywords),
-            keyword_update_thread: None,
+            keyword_update_thread: None
         };
 
         lb.client.read_actions(ACTIONS_DIR);
-        lb.read_races();
 
         start_outgoing_event_thread(&lb.client);
-
-        lb.triggers
-            .load_triggers(read_config_dir(TRIGGERS_DIR.into()));
 
         if lb.client.scan_for_devices() {
             send_mod_event(ModEvent::new("Tele_ConnectionSuccess", "", 0.0));
@@ -357,7 +341,7 @@ fn lb_scene(
                 if let Trigger::Scene(scene) = trigger {
                     send_mod_event(ModEvent::new("Tele_Scene", &scene.description, 0.0));
                     if scene.track_bones {
-                        lb_dynamic_tracking(lb, actor_vec);
+                        start_bone_tracking(lb, actor_vec);
                     }
                 }
             }

@@ -1,10 +1,15 @@
-use std::{sync::Arc, time::Duration};
+use std::{sync::{atomic::Ordering, Arc}, time::Duration};
+
 use tokio::{
-    sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
-    time::{sleep, Instant},
+    sync::mpsc::{unbounded_channel, UnboundedReceiver},
+    time::sleep,
 };
+
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, error, info, info_span, trace, Instrument};
+
+use tracing::{debug, error, info, trace, warn};
+
+use buttplug::core::message::ActuatorType;
 
 use bp_scheduler::{
     actuator::Actuator,
@@ -12,18 +17,10 @@ use bp_scheduler::{
     dynamic_tracking::*,
     filter::Filter,
 };
-use buttplug::core::message::ActuatorType;
-
-use config::{bodies::Race, body_parts::*};
-
-use crate::{
-    bridge::{ffi_bridge::*, *},
-    Telekinesis,
-};
-use collision::Collision;
+use config::{bodies::Race, body_parts::*, bodies::Sex as RaceSex};
 use ffi_bones::*;
 
-use config::bodies::Sex as RaceSex;
+use crate::{bone_tracking::{observer::{BoneObserver, ObserverSettings}, config::BoneTrackingSettings}, bridge::{ffi_bridge::Sex, UnsafeActorPtr, UnsafeAvObjectPtr, UnsafeTESFormPtr}, Telekinesis};
 
 #[cxx::bridge]
 pub mod ffi_bones {
@@ -47,7 +44,7 @@ pub mod ffi_bones {
 }
 
 impl UnsafeAvObjectPtr {
-    fn get_distance(&self, other: &UnsafeAvObjectPtr) -> f32 {
+    pub fn get_distance(&self, other: &UnsafeAvObjectPtr) -> f32 {
         if self.ptr.is_null() {
             error!("bone is null {}", self.name);
             f32::MAX
@@ -60,27 +57,14 @@ impl UnsafeAvObjectPtr {
     }
 }
 
-#[derive(Clone, Debug)]
-pub enum TrackingState {
-    Init,
-    MovingOut,
-    OuterTurn,
-    MovingIn,
-    InnerTurn,
-}
-
 fn get_body_for_actor(actor: &UnsafeActorPtr, races: &Vec<Race>) -> Option<Race> {
     let race_form: UnsafeTESFormPtr = actor.get_race().into();
     let race_id = race_form.get_form_id();
     let sex = actor.get_sex();
-    debug!(
-        "fetching body for sex={:?} player={} race_id={:X}",
-        sex,
-        actor.is_player(),
-        race_id
-    );
-
-    let actor_sex = match actor.get_sex() {
+    let is_player = actor.is_player();
+    trace!(?sex, ?race_id, is_player, "fetching race for body");
+    trace!(?races);
+    let actor_sex = match sex {
         Sex::Female => RaceSex::Female,
         Sex::Male => RaceSex::Male,
         _ => RaceSex::None,
@@ -90,16 +74,21 @@ fn get_body_for_actor(actor: &UnsafeActorPtr, races: &Vec<Race>) -> Option<Race>
     for race in races {
         if race.form_id == race_id && race.sex == actor_sex {
             chosen_race = Some(race.clone());
-            debug!("found race {:?}", chosen_race);
         }
     }
-    debug!("body: {:?}", chosen_race);
+    if chosen_race.is_none() {
+        warn!("body for race {:#X} not found", race_id);
+    }
+    trace!(?chosen_race);
     chosen_race
 }
 
-pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
-    info!("lb_dynamic_tracking Actors={}", actor_vec.Size());
+pub fn start_bone_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
     let actors_in = from_actor_vec(actor_vec);
+    info!("start_bone_tracking");
+    for (i, actor) in actors_in.iter().enumerate() {
+        info!(sex=?actor.get_sex(), is_player=actor.is_player(), "Actor[{}] Race={:#X}", i, actor.get_race().get_form_id());
+    }
 
     if let Some(token) = lb.dynamic_task.cancel.take() {
         token.cancel();
@@ -109,18 +98,15 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
     lb.dynamic_task.cancel = Some(global_cancel.clone());
 
     let (sender, receiver) = unbounded_channel::<TrackingSignal>();
-
-    for actor in &actors_in {
-        info!("actor {:?} Player:{}", actor.get_sex(), actor.is_player());
-    }
-
     let player_actor_opt = actors_in.iter().find(|x| x.is_player());
     if player_actor_opt.is_none() {
         error!("no player animation, stopping bone tracking");
         return;
     };
 
-    if lb.default_race_female.is_none() || lb.default_race_male.is_none() {
+    if lb.bone_tracking_config.default_race_female.is_none()
+        || lb.bone_tracking_config.default_race_male.is_none()
+    {
         error!("default race is not defined");
         return;
     }
@@ -145,13 +131,12 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
 
     let mut starting_ramps = vec![];
     let player_actor = player_actor_opt.unwrap();
-    let mut t_id = 0;
 
-    let player_body = match get_body_for_actor(player_actor, &lb.races) {
+    let player_body = match get_body_for_actor(player_actor, &lb.bone_tracking_config.races) {
         Some(race) => race,
         None => {
-            error!(?lb.default_race_female, "player body not found, using default...");
-            lb.default_race_female.clone().unwrap()
+            error!("using default female race {:?} for player", lb.bone_tracking_config.default_race_female);
+            lb.bone_tracking_config.default_race_female.clone().unwrap()
         }
     };
 
@@ -160,310 +145,184 @@ pub fn lb_dynamic_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
     // at some point in the feature but I doubt it)
 
     for npc in npc_actors {
-        t_id += 1;
 
-        let npc_body = match get_body_for_actor(npc, &lb.races) {
+        let npc_body = match get_body_for_actor(npc, &lb.bone_tracking_config.races) {
             Some(race) => race,
             None => {
-                error!(?lb.default_race_male, "npc body not found, using default...");
-                lb.default_race_male.clone().unwrap()
+                error!("using default male race {:?} for npc race {:#}", lb.bone_tracking_config.default_race_male, npc.get_race().get_form_id());
+                lb.bone_tracking_config.default_race_male.clone().unwrap()
             }
         };
 
-        let mut monitor_threads = vec![];
-
-        if lb.consider_player_passive {
+        debug!(?player_body, ?npc_body, "Starting bone monitoring threads for Player + NPC({})", npc_body.name);
+        if lb.bone_tracking_config.consider_player_passive {
             // TODO: right now we always assume there is a strap-on, should we check that?
-
-            let pen_bone = player_actor.get_bone(&player_body.penetrator_bone);
-            info!("pen_bone is_null={}", pen_bone.ptr.is_null());
-
             let uses_strapon =
                 player_actor.get_sex() == Sex::Female && npc.get_sex() == Sex::Female;
-
-            fn get_actual_collision(
-                use_strapon: bool,
-                collision: Collision,
-                penetrator_body: &Race,
-            ) -> Collision {
-                if use_strapon {
-                    let mut c2 = collision;
-                    c2.outer_distance += penetrator_body.strapon_extra_length;
-                    c2
-                } else {
-                    collision
-                }
-            }
-
+                
             // player on npc oral
             if npc_body.oral_collision.is_some() {
-                monitor_threads.push((
-                    get_actual_collision(
-                        uses_strapon,
-                        npc_body.oral_collision.unwrap(),
-                        &player_body,
-                    ),
-                    npc.get_bone(&npc_body.oral_bone),
-                    player_actor.get_bone(&player_body.penetrator_bone),
-                    Selector::body_parts(vec![TAG_PENIS.into(),TAG_ORAL.into()]),
-                    "oral active",
-                ));
+                let settings = ObserverSettings::new(
+                    uses_strapon,
+                    npc_body.oral_collision.unwrap(),
+                    &player_body,
+                    &npc_body.oral_bone,
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()])
+                );
+                let mut observer = BoneObserver::new(
+                    "oral (player penetrates)".into(),
+                    sender.clone(), 
+                    global_cancel.clone(),
+                    settings
+                );
+                observer.observe(lb, player_actor,  npc);
+                starting_ramps.push(observer);
             }
 
             // player on npc anal
             if npc_body.anal_collision.is_some() {
-                monitor_threads.push((
-                    get_actual_collision(
-                        uses_strapon,
-                        npc_body.anal_collision.unwrap(),
-                        &player_body,
-                    ),
-                    npc.get_bone(&npc_body.anal_bone),
-                    player_actor.get_bone(&player_body.penetrator_bone),
-                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into(), TAG_ANAL.into()]),
-                    "anal/vaginal active",
-                ));
+                let settings = ObserverSettings::new(
+                    uses_strapon,
+                    npc_body.anal_collision.unwrap(),
+                    &player_body,
+                    &npc_body.anal_bone,
+                    Selector::body_parts(vec![
+                        TAG_PENIS.into(),
+                        TAG_VAGINAL.into(),
+                        TAG_ANAL.into(),
+                    ])
+                );
+                let mut observer = BoneObserver::new(
+                    "anal (player penetrates)".into(), 
+                    sender.clone(), 
+                    global_cancel.clone(),
+                    settings
+                );
+                observer.observe(lb, player_actor, npc );
+                starting_ramps.push(observer);
             }
 
             // npc on player oral
             if player_body.oral_collision.is_some() {
-                monitor_threads.push((
-                    get_actual_collision(
-                        uses_strapon,
-                        player_body.oral_collision.unwrap(),
-                        &npc_body,
-                    ),
-                    player_actor.get_bone(&player_body.oral_bone),
-                    npc.get_bone(&npc_body.penetrator_bone),
-                    Selector::body_parts(vec![TAG_PENIS.into(),TAG_ORAL.into()]),
-                    "oral passive",
-                ));
+                let settings = ObserverSettings::new(
+                    uses_strapon,
+                    player_body.oral_collision.unwrap(),
+                    &npc_body,
+                    &player_body.oral_bone,
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()])
+                );
+
+                let mut observer = BoneObserver::new(
+                    "oral (player penetrated)".into(),
+                    sender.clone(), 
+                    global_cancel.clone(),
+                    settings
+                );
+                observer.observe(lb, npc, player_actor);
+                starting_ramps.push(observer);
             }
 
             // npc on player anal
             if player_body.anal_collision.is_some() {
-                monitor_threads.push((
-                    get_actual_collision(
-                        uses_strapon,
-                        player_body.anal_collision.unwrap(),
-                        &npc_body,
-                    ),
-                    player_actor.get_bone(&player_body.anal_bone),
-                    npc.get_bone(&npc_body.penetrator_bone),
-                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_VAGINAL.into(), TAG_ANAL.into()]),
-                    "anal/vaginal passive",
-                ));
+                let settings = ObserverSettings::new(
+                    uses_strapon,
+                    player_body.anal_collision.unwrap(),
+                    &npc_body,
+                    &player_body.anal_bone,
+                    Selector::body_parts(vec![TAG_PENIS.into(), TAG_ORAL.into()])
+                );
+                let mut observer = BoneObserver::new(
+                    "anal (player penetrated)".into(),
+                    sender.clone(), 
+                    global_cancel.clone(),
+                    settings
+                );
+                observer.observe(lb, npc, player_actor);
+                starting_ramps.push(observer);
             }
         }
-        if monitor_threads.is_empty() {
+        if starting_ramps.is_empty() {
             error!("no viable monitoring combination for scene actors")
-        }
-        for monitor_target in monitor_threads {
-            let pen_signal = CancellationToken::new();
-            let cancel_observation = observe_bones(
-                lb,
-                &monitor_target.1,
-                &monitor_target.2,
-                monitor_target.0,
-                sender.clone(),
-                pen_signal.clone(),
-                global_cancel.clone(),
-                monitor_target.4.into(),
-            );
-            starting_ramps.push((pen_signal, cancel_observation, monitor_target.3, t_id));
         }
     }
 
-    let tracking_handle = lb.dynamic_task.clone();
+    let tracking_handle = lb.dynamic_task.clone();    
     if !starting_ramps.is_empty() {
-        let dynamic_settings_clone = lb.dynamic_settings.clone();
+        let dynamic_settings_clone = lb.bone_tracking_config.clone();
         let actuator_settings_clone = lb.client.device_settings.clone();
         lb.client.runtime.spawn(async move {
-            let mut winner = None;
-            while winner.is_none() {
+            let mut winner: Option<&BoneObserver> = None;
+            while !global_cancel.is_cancelled() && winner.is_none() {
                 sleep(Duration::from_millis(200)).await;
-                for (i, ramp) in starting_ramps.iter().enumerate() {
-                    if ramp.0.is_cancelled() {
-                        debug!("id={} penetrated, closing all remaining thredas", ramp.3);
+                for (i, observer) in starting_ramps.iter().enumerate() {
+                    if observer.penetration_happened.is_cancelled() {
+                        info!("success! t_id={} penetrated, closing other threads", observer.global_id);
                         for (j, loser_thread) in starting_ramps.iter().enumerate() {
                             if j != i {
-                                debug!("cancelling other tracking thread {}", j);
-                                loser_thread.1.cancel();
+                                loser_thread.local_cancel.cancel();
                             }
                         }
-                        winner = Some(ramp);
+                        winner = Some(observer);
                         break;
                     }
                 }
             }
-            start_control_thread(
-                dynamic_settings_clone,
-                actuator_settings_clone,
-                &winner.unwrap().2,
-                receiver,
-                enabled_position_actuators,
-                tracking_handle,
-            );
+
+            if !global_cancel.is_cancelled() {
+                start_control_thread(
+                    dynamic_settings_clone,
+                    actuator_settings_clone,
+                    receiver,
+                    enabled_position_actuators,
+                    tracking_handle,
+                    winner.unwrap().clone()
+                );
+                info!("Collision successful");
+            } else {
+                info!("No collision detected in any of the threads");
+                for observer in starting_ramps {
+                    let stop_time = observer.stats.stat_run_ms.load(Ordering::Relaxed);
+                    debug!(?observer, "'{}' ran for {}ms...", observer.name, stop_time); 
+                    // TODO: Only log stats id and settigns, not cancellation tokens
+                }
+            }
         });
     }
 }
 
 fn start_control_thread(
-    dynamic_settings: DynamicSettings,
+    dynamic_settings: BoneTrackingSettings,
     actuator_settings: ActuatorSettings,
-    selector: &Selector,
     receiver: UnboundedReceiver<TrackingSignal>,
     actuators: Vec<Arc<Actuator>>,
     tracking_handle: DynamicTrackingHandle,
+    observer: BoneObserver
 ) {
-    let mut actuator_settings_clone = actuator_settings.clone();
-    let selector_clone = selector.clone();
+    let mut actuator_setting = actuator_settings.clone();
+    let selector_clone = observer.settings.selector.clone();
+
     tokio::spawn(async move {
         let (_, actuators) = Filter::from_actuators(actuator_settings, actuators)
-            .load_config(&mut actuator_settings_clone)
+            .load_config(&mut actuator_setting)
             .with_selector(&selector_clone)
             .result();
+        
         let mut dynamic = DynamicTracking {
-            settings: dynamic_settings,
+            settings: dynamic_settings.stroker_settings,
             signals: receiver,
             actuators,
             status: tracking_handle,
         };
-        info!(?dynamic.settings, ?selector_clone, "control task started with settings");
+        info!(?dynamic.settings, ?selector_clone, ?actuator_setting, "success! moving stroker");
         let _ = dynamic.track_mirror().await;
+
+        info!("bone tracking finished");
     });
-}
-
-fn observe_bones(
-    lb: &mut Telekinesis,
-    a1_bone: &UnsafeAvObjectPtr,
-    a2_bone: &UnsafeAvObjectPtr,
-    collision_sphere: Collision,
-    sender: UnboundedSender<TrackingSignal>,
-    first_pen: CancellationToken,
-    global_cancel: CancellationToken,
-    thread_name: String,
-) -> CancellationToken {
-    let cancel_me = CancellationToken::new();
-    let bone1 = a1_bone.clone();
-    let bone2 = a2_bone.clone();
-    let cancellation_token = cancel_me.clone();
-    if bone1.ptr.is_null() {
-        error!(bone1.name, "bone null, stopping");
-        return cancellation_token;
-    }
-    if bone2.ptr.is_null() {
-        error!(bone2.name, "bone null, stopping");
-        return cancellation_token;
-    }
-
-    let initial_timeout_ms = lb.dynamic_settings.initial_timeout_ms;
-    let sampling_rate_ms = lb.dynamic_settings.sampling_rate_ms;
-
-    let t_id = lb.tracking_counter;
-    lb.tracking_counter += 1;
-    lb.client.runtime.spawn(async move {
-        let span = info_span!("observe_bones", id = t_id);
-        async move {
-            info!(
-                "observation task {} '{}' started. bone1={} - bone2={}. collision_sphere={:?}",
-                t_id, thread_name, bone1.name, bone2.name, collision_sphere
-            );
-            sleep(Duration::from_millis(initial_timeout_ms)).await;
-            let mut last_dist = f32::MAX;
-            let mut most_outward = f32::MAX;
-            let mut most_inward = f32::MAX;
-            let mut penetrated = false;
-            let mut state = TrackingState::Init;
-            while !cancellation_token.is_cancelled() && !global_cancel.is_cancelled() {
-                let dist = bone1.get_distance(&bone2);
-                let diff = last_dist - dist;
-                trace!("dist = {}", dist);
-                match state {
-                    TrackingState::Init => {
-                        if dist < collision_sphere.outer_distance {
-                            state = TrackingState::MovingIn;
-                            info!(?state, dist);
-                            first_pen.cancel();
-                            let _ = sender.send(TrackingSignal::Penetration(Instant::now()));
-                            penetrated = true;
-                        }
-                    }
-                    TrackingState::MovingIn => {
-                        if diff < 0.0 {
-                            state = TrackingState::InnerTurn;
-                            most_inward = dist;
-                            debug!(?state, dist, most_inward);
-                        }
-                        if !penetrated && dist < collision_sphere.outer_distance {
-                            penetrated = true;
-                            let _ = sender.send(TrackingSignal::Penetration(Instant::now()));
-                        }
-                    }
-                    TrackingState::InnerTurn => {
-                        if dist - most_inward > collision_sphere.error_tolerance {
-                            let (most_in, most_out) =
-                                collision_sphere.get_stroke_range(most_outward, most_inward);
-                            let _ = sender.send(TrackingSignal::InnerTurn(
-                                Instant::now(),
-                                Margins::new(most_in, most_out),
-                            ));
-                            info!("sending inner turn!");
-                            state = TrackingState::MovingOut;
-                            debug!(?state, dist, most_inward);
-                        } else if dist - most_inward < -collision_sphere.error_tolerance {
-                            state = TrackingState::MovingIn;
-                            error!(
-                                ?state,
-                                dist, most_inward, "dist - most_inward < -ERROR_TOLERANCE"
-                            );
-                        }
-                    }
-                    TrackingState::MovingOut => {
-                        if diff > 0.0 {
-                            state = TrackingState::OuterTurn;
-                            most_outward = dist;
-                            debug!(?state, dist, most_outward);
-                        }
-                    }
-                    TrackingState::OuterTurn => {
-                        if most_outward - dist > collision_sphere.error_tolerance {
-                            let (from, to) =
-                                collision_sphere.get_stroke_range(most_outward, most_inward);
-                            let _ = sender.send(TrackingSignal::OuterTurn(
-                                Instant::now(),
-                                Margins::new(from, to),
-                            ));
-                            info!("sending outer turn!");
-                            penetrated = false;
-                            state = TrackingState::MovingIn;
-                            debug!(?state, dist, most_outward);
-                        } else if most_outward - dist < -collision_sphere.error_tolerance {
-                            state = TrackingState::MovingOut;
-                            error!(
-                                ?state,
-                                dist, most_inward, "most_outward - dist < -ERROR_TOLERANCE"
-                            );
-                        }
-                    }
-                };
-
-                last_dist = dist;
-                sleep(Duration::from_millis(sampling_rate_ms)).await;
-            }
-            if global_cancel.is_cancelled() {
-                let _ = sender.send(TrackingSignal::Stop);
-            }
-            info!("observation task stopped");
-        }
-        .instrument(span)
-        .await
-    });
-    cancel_me
 }
 
 fn from_actor_vec(actors: &ActorVec) -> Vec<UnsafeActorPtr> {
     let mut vec_clone = vec![];
+
     for i in 0..actors.Size() {
         vec_clone.push(UnsafeActorPtr {
             ptr: actors.GetActor(i),

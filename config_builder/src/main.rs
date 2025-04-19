@@ -16,7 +16,7 @@ use scenes_default::*;
 
 use serde::Serialize;
 
-use bp_scheduler::{config::client::LoggingSettings, dynamic_tracking::DynamicSettings};
+use bp_scheduler::{config::client::LoggingSettings, dynamic_tracking::StrokerSettings};
 
 mod av;
 mod actions;
@@ -70,7 +70,7 @@ fn pack_default(config_dir: &str) {
     );
     write_file(
         format!("{}/BoneTracking.json", config_dir),
-        DynamicSettings::default(),
+        StrokerSettings::default(),
     );
     write_file(
         format!("{}/Logging.json", config_dir),
