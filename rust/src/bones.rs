@@ -111,6 +111,9 @@ pub fn start_bone_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
         return;
     }
 
+    // start bone tracking with lowest until penetrations happen
+    lb.dynamic_task.cur_pos.store( 5, Ordering::Relaxed);
+
     let npc_actors = actors_in
         .iter()
         .filter(|x| !x.is_player())
@@ -156,7 +159,6 @@ pub fn start_bone_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
 
         debug!(?player_body, ?npc_body, "Starting bone monitoring threads for Player + NPC({})", npc_body.name);
         if lb.bone_tracking_config.consider_player_passive {
-            // TODO: right now we always assume there is a strap-on, should we check that?
             let uses_strapon =
                 player_actor.get_sex() == Sex::Female && npc.get_sex() == Sex::Female;
                 
@@ -277,13 +279,18 @@ pub fn start_bone_tracking(lb: &mut Telekinesis, actor_vec: &ActorVec) {
                     tracking_handle,
                     winner.unwrap().clone()
                 );
+                let winner_unwrap = winner.unwrap();
+                let stop_time = winner_unwrap.stats.stat_run_ms.load(Ordering::Relaxed);
                 info!("Collision successful");
+                debug!("'{}' ran for {:.1}s with {} collisions...", winner_unwrap.name, stop_time as f64 / 1000.0, winner_unwrap.stats.stat_pens.load(Ordering::Relaxed));
+                debug!(stats=?winner_unwrap.stats, "stat dump");
             } else {
-                info!("No collision detected in any of the threads");
+                warn!("No collision detected in any of the threads");
                 for observer in starting_ramps {
                     let stop_time = observer.stats.stat_run_ms.load(Ordering::Relaxed);
-                    debug!(?observer, "'{}' ran for {}ms...", observer.name, stop_time); 
-                    // TODO: Only log stats id and settigns, not cancellation tokens
+                    info!(observer.global_id, "'{}' ran for {:.1}s without collision...", observer.name, stop_time as f64 / 1000.0);
+                    info!(stats=?observer.stats, "stat dump");
+                    info!(settings=?observer.settings, "settings dump");
                 }
             }
         });

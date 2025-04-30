@@ -13,7 +13,7 @@ pub struct BoneTrackingSettings {
     pub races: Vec<Race>,
     pub default_race_male: Option<Race>,
     pub default_race_female: Option<Race>,
-    pub consider_player_passive: bool,
+    pub consider_player_passive: bool
 }
 
 pub fn read_bone_tracking_settings() -> BoneTrackingSettings {

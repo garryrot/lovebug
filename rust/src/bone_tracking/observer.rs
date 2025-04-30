@@ -56,12 +56,13 @@ impl BoneObserver {
         collision: Collision,
         penetrator_body: &Race,
     ) -> Collision {
+        let mut c2: Collision = collision;
         if use_strapon {
-            let mut c2: Collision = collision;
-            c2.radius += penetrator_body.penis_extra_len;
+            c2.radius += penetrator_body.strapon_len;
             c2
         } else {
-            collision
+            c2.radius += penetrator_body.penetrator_extra_len;
+            c2
         }
     }
 
@@ -76,6 +77,7 @@ impl BoneObserver {
         }
         if passive_bone.ptr.is_null() {
             error!(passive_bone.name, "bone null, stopping");
+            return;
         }
     
         let initial_timeout_ms = lb.bone_tracking_config.stroker_settings.initial_timeout_ms;
@@ -89,8 +91,8 @@ impl BoneObserver {
         lb.client.runtime.spawn(async move {
             let span = info_span!("observe", t=_self.global_id);
             async move {
-                let collision = BoneObserver::get_actual_collision(_self.settings.uses_strapon, _self.settings.collision, &_self.settings.penetrator_body);
-                debug!(settings=?_self.settings, "observing...");
+                let collision = BoneObserver::get_actual_collision(_self.settings.uses_strapon, _self.settings.collision, &_self.settings.penetrator_race);
+                debug!(name=&_self.name, settings=?_self.settings, "observing...");
                 sleep(Duration::from_millis(initial_timeout_ms)).await;
                 let mut last_dist = f32::MAX;
                 let mut most_outward = f32::MAX;
@@ -194,17 +196,17 @@ impl BoneObserver {
 pub struct ObserverSettings {
     uses_strapon: bool,
     collision: Collision,
-    penetrator_body: Race,
-    pub selector: Selector, // TODO: should this be here?
     penetrator_bone: String,
     passive_bone: String,
+    penetrator_race: Race,
+    pub selector: Selector, // TODO: should this be here?
 }
 
 impl ObserverSettings {
     pub fn new( uses_strapon: bool, collision: Collision, penetrator_body: &Race, passive_bone_name: &str, selector: Selector) -> ObserverSettings {
         ObserverSettings { 
             uses_strapon, 
-            penetrator_body: penetrator_body.clone(), 
+            penetrator_race: penetrator_body.clone(), 
             selector, 
             penetrator_bone: penetrator_body.penetrator_bone.clone(), 
             passive_bone: passive_bone_name.into(), 

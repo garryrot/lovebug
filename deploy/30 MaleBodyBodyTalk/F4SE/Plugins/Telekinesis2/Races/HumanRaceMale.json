@@ -4,7 +4,8 @@
     "form_id": 79686,
     "sex": "Male",
     "penetrator_bone": "Penis_01",
-    "penis_extra_len": 7.0,
+    "strapon_len": 7.0,
+    "penetrator_extra_len": 0.0,
     "oral_bone": "HEAD",
     "anal_bone": "Anus_01",
     "anal_collision": {

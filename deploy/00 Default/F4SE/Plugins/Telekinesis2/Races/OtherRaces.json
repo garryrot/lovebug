@@ -4,7 +4,8 @@
     "form_id": 106505,
     "sex": "Male",
     "penetrator_bone": "Penis1",
-    "penis_extra_len": 0.0,
+    "strapon_len": 0.0,
+    "penetrator_extra_len": 5.0,
     "oral_bone": "HEAD",
     "anal_bone": "Pelvis",
     "anal_collision": {
@@ -21,11 +22,122 @@
     }
   },
   {
-    "name": "Molerat/FEVHound",
+    "name": "Glowing One",
+    "form_id": 693951,
+    "sex": "Male",
+    "penetrator_bone": "Pelvis",
+    "strapon_len": 0.0,
+    "penetrator_extra_len": 12.0,
+    "oral_bone": "HEAD",
+    "anal_bone": "Pelvis",
+    "anal_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    },
+    "oral_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    }
+  },
+  {
+    "name": "Feral Ghoul Stalker",
+    "form_id": 439532,
+    "sex": "Male",
+    "penetrator_bone": "Pelvis",
+    "strapon_len": 0.0,
+    "penetrator_extra_len": 12.0,
+    "oral_bone": "HEAD",
+    "anal_bone": "Pelvis",
+    "anal_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    },
+    "oral_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    }
+  },
+  {
+    "name": "Attack Dog",
+    "form_id": 1604345,
+    "sex": "Male",
+    "penetrator_bone": "RaiderDog_Penis_Sheath",
+    "strapon_len": 0.0,
+    "penetrator_extra_len": 30.0,
+    "oral_bone": "Dogmeat_Head",
+    "anal_bone": "Dogmeat_Pelvis",
+    "anal_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    },
+    "oral_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    }
+  },
+  {
+    "name": "Attack Dog (Mutated)",
+    "form_id": 219018,
+    "sex": "Male",
+    "penetrator_bone": "RaiderDog_Penis_Sheath",
+    "strapon_len": 0.0,
+    "penetrator_extra_len": 30.0,
+    "oral_bone": "Dogmeat_Head",
+    "anal_bone": "Dogmeat_Pelvis",
+    "anal_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    },
+    "oral_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    }
+  },
+  {
+    "name": "FEVHound (Mutant Hound)",
     "form_id": 592947,
     "sex": "Male",
     "penetrator_bone": "RaiderDog_Penis",
-    "penis_extra_len": 27.0,
+    "strapon_len": 0.0,
+    "penetrator_extra_len": 25.0,
+    "oral_bone": "HEAD",
+    "anal_bone": "Pelvis",
+    "anal_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    },
+    "oral_collision": {
+      "radius": 1.0,
+      "depth": 1.0,
+      "min_penetration": 10.0,
+      "error_tolerance": 0.35
+    }
+  },
+  {
+    "name": "Gen 2 Synth (Nick Valentine)",
+    "form_id": 2253220,
+    "sex": "Male",
+    "penetrator_bone": "Pelvis",
+    "strapon_len": 0.0,
+    "penetrator_extra_len": 7.0,
     "oral_bone": "HEAD",
     "anal_bone": "Pelvis",
     "anal_collision": {

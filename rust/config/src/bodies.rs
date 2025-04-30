@@ -14,7 +14,8 @@ pub struct Race {
     pub form_id: u32,
     pub sex: Sex,
     pub penetrator_bone: String,
-    pub penis_extra_len: f32, // hacky but whatever
+    pub strapon_len: f32, // hacky but whatever
+    pub penetrator_extra_len: f32,
     pub oral_bone: String,
     pub anal_bone: String,
     pub anal_collision: Option<Collision>,
@@ -38,7 +39,8 @@ impl Default for Race {
             anal_bone: "Pelvis".into(),
             anal_collision: Some(collision),
             oral_collision: Some(collision),
-            penis_extra_len: 8.0,
+            strapon_len: 8.0,
+            penetrator_extra_len: 0.0
         }
     }
 }
@@ -60,7 +62,8 @@ impl Race {
             anal_bone: "Pelvis".into(),
             anal_collision: Some(collision),
             oral_collision: Some(collision),
-            penis_extra_len: 8.0,
+            strapon_len: 8.0,
+            penetrator_extra_len: 0.0,
         }
     }
 
@@ -80,7 +83,8 @@ impl Race {
             anal_bone: "Pelvis".into(),
             anal_collision: Some(collision),
             oral_collision: Some(collision),
-            penis_extra_len: 8.0,
+            strapon_len: 8.0,
+            penetrator_extra_len: 0.0,
         }
     }
 }
