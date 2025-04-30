@@ -319,14 +319,15 @@ pub fn lb_disconnect() {
     });
 }
 
-fn lb_action(action_name: &str, speed: i32, time_secs: f32) -> i32 {
-    info!(action_name, speed, time_secs, "lb_action");
+fn lb_action(action_name_unsanitized: &str, speed: i32, time_secs: f32) -> i32 {
+    let action_name = action_name_unsanitized.to_ascii_lowercase();
+    info!(action_name, action_name_unsanitized, speed, time_secs, "lb_action");
     Telekinesis::run_static(
         |lb| {
             let actions = get_actions_from_refs(
                 lb,
                 vec![ActionRef {
-                    action: action_name.into(),
+                    action: action_name,
                     strength: Stren::Constant(100),
                 }],
             );

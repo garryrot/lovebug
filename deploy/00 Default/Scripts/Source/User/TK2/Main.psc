@@ -13,13 +13,11 @@ EndEvent
 Function Startup()
 	ScriptObject aafBridge = CastAs("TK2:AAF_EventBridge")
 	If aafBridge
-		Trace("Starting AAF Event Bridge")
 		aafBridge.CallFunction("Startup", new Var[0])
 	EndIf
 	
 	ScriptObject ddBridge = CastAs("TK2:DD_EventBridge")
 	If ddBridge
-		Trace("Starting DD Event Bridge")
 		ddBridge.CallFunction("Startup", new Var[0])
 	EndIf
 
@@ -30,20 +28,20 @@ Function Startup()
 EndFunction
 
 Function OnAction(String description, Float handle)
-	If MCM.GetModSettingInt("Telekinesis", "bDebug:Actions")
-		Debug("Action: " + description + " " + handle)
+	If MCM.GetModSettingBool("Telekinesis", "bActions:Debugging")
+		Debug("Action: " + description + " " + (handle as Int))
 	EndIf
 EndFunction
 
 Function OnEvent(String description, Float handle)
-	If MCM.GetModSettingInt("Telekinesis", "bDebug:Scenes")
-		Debug("Triggered Scene: " + description + " " + handle)
+	If MCM.GetModSettingBool("Telekinesis", "bScenes:Debugging")
+		Debug("Triggered Scene: " + description + " " + (handle as Int))
 	EndIf
 EndFunction
 
 Function OnScene(String description, Float handle)
-	If MCM.GetModSettingInt("Telekinesis", "bDebug:Events")
-		Debug("Triggered Event: " + description + " " + handle)
+	If MCM.GetModSettingBool("Telekinesis", "bEvents:Debugging")
+		Debug("Triggered Event: " + description + " " + (handle as Int))
 	EndIf
 EndFunction
 

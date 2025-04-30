@@ -43,13 +43,21 @@ This mod is free software and can be used under the terms of the [Apache License
 
 ## Changelog
 
-### 2.0.0.rc1
+### 2.0.0.rc3
 
-- Initial preview version
+#### Triggers
 
-### 2.0.0.rc2
+- Support trigger through Actor Values
 
-- Fix DLL not loading on NG update
-- Fix direction of sync in the physical strokar
-- Add nuka ride config
+#### Bone Tracking
 
+- Activate lowest-possible default vibration during bone-tracked scenes, until first penetration has happened
+
+- Add more custom race presets for races that don't work out of the box
+    - Ghouls
+    - Synths
+    - Mutant Hounds (FEVHound)
+
+- Body Type Support
+    - Adapt fomod installer: FusionGirl also works for CBBE
+    - Include race preset for "Male Super Hero Body" (the NFSW version, untested)

@@ -92,7 +92,6 @@ impl Triggers {
     }
 
     pub fn start_events(&mut self, vars: &VariableStore, kws: &KeywordStore, event_name: Option<&str>, scene_name: Option<&str>, scene_tags: &Vec<String>) -> Vec<Trigger> {
-        info!(?event_name, "start_events");
         let matched_events: Vec<Trigger> = self.events.iter().filter(|x| {
             match x {
                 Trigger::Scene(_) => false,

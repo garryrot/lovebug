@@ -71,7 +71,7 @@ pub fn dd_events() -> Vec<Trigger> {
             stop: vec![ Condition::PlayerWithoutKeyword(VAR_DD_KW_IS_VIBRATING.into()) ],
             actions: vec![ActionRef {
                 action: "vibrate.vaginal".into(),
-                strength: Stren::RandomFunscript((i * 20) as i32, all_funscripts.clone()),
+                strength: Stren::RandomFunscript((20 + (i * 15)) as i32, all_funscripts.clone()),
             }],
         }));
 
@@ -87,7 +87,7 @@ pub fn dd_events() -> Vec<Trigger> {
             stop:  vec![ Condition::PlayerWithoutKeyword(VAR_DD_KW_IS_VIBRATING.into()) ],
             actions: vec![ActionRef {
                 action: "vibrate.anal".into(),
-                strength: Stren::RandomFunscript((i * 20) as i32, all_funscripts.clone()),
+                strength: Stren::RandomFunscript((20 + (i * 15)) as i32, all_funscripts.clone()),
             }],
         }));
     }

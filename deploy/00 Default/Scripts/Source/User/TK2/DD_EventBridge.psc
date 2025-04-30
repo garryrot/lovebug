@@ -49,7 +49,6 @@ EndFunction
 
 Event Actor.OnItemEquipped(Actor sender, Form object, ObjectReference reference)
     Armor item = object as Armor
-    Debug.Trace("Item.GetKeywords: : " + item.GetKeywords())
     If item && item.HasKeyword( libs.DD_kw_RenderedItem )
         StartEvents()
     EndIf
@@ -57,8 +56,6 @@ EndEvent
 
 Function StartEvents()
     Actor player = Game.GetPlayer()
-    Debug("Initializing Events")
-    Debug.Trace("Player Keywords: " + player.GetKeywords())
     If plugInflateHandle == -1
         If player.WornHasKeyword(libs.DD_kw_ItemEffect_PlugInflate)
             plugInflateHandle = Telekinesis.Process_Event("dd.inflate", "", 0.0)
