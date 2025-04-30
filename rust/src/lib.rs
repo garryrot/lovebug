@@ -74,41 +74,56 @@ pub struct Telekinesis {
 }
 
 impl Telekinesis {
+    pub fn is_loaded() -> bool
+    {
+        match LB.state.try_lock() {
+            Ok(guard) => guard.is_some(),
+            Err(_) => {
+                error!("failed locking mutex");
+                false
+            }
+        }
+    }
+
     pub fn run_static<F, R>(func: F, default: R) -> R
     where
         F: FnOnce(&mut Telekinesis) -> R,
         R: std::fmt::Debug,
     {
-        if let Ok(mut guard) = LB.state.try_lock() {
-            match guard.take() {
-                Some(mut tk) => {
-                    let result = func(&mut tk);
-                    guard.replace(tk);
-                    debug!("result: {:?}", result);
-                    return result;
+        match LB.state.try_lock() {
+            Ok(mut guard) => {
+                if let Some(tk) = guard.as_mut() {
+                    let result = func(tk);
+                    debug!(?result);
+                    result
+                } else {
+                    error!("State empty");
+                    default
                 }
-                None => error!("State empty"),
             }
-        } else {
-            error!("failed locking mutex");
+            Err(_) => {
+                error!("failed locking mutex");
+                default
+            }
         }
-        default
     }
 
     pub fn run_static_no_return<F>(func: F)
     where
         F: FnOnce(&mut Telekinesis),
     {
-        if let Ok(mut guard) = LB.state.try_lock() {
-            match guard.take() {
-                Some(mut tk) => {
-                    func(&mut tk);
-                    guard.replace(tk);
+        match LB.state.try_lock() {
+            Ok(mut guard) => {
+                if let Some(tk) = guard.as_mut() 
+                {
+                    func(tk);
+                } else {
+                    error!("State empty");
                 }
-                None => error!("State empty"),
+            },
+            Err(_) => {
+                error!("failed locking mutex");
             }
-        } else {
-            error!("failed locking mutex");
         }
     }
 
@@ -160,6 +175,7 @@ mod ffi {
             xinput: bool,
             serial: bool,
         ) -> bool;
+        fn lb_is_loaded() -> bool;
         fn lb_disconnect();
         fn lb_action(action: &str, speed: i32, time_sec: f32) -> i32;
         fn lb_scene(
@@ -281,6 +297,10 @@ pub fn lb_connect(
         error!("init failed");
     }
     true
+}
+
+pub fn lb_is_loaded() -> bool {
+    Telekinesis::is_loaded()
 }
 
 fn read_variables() -> Vec<config::variables::ConfigVariable> {

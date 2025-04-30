@@ -12,9 +12,12 @@ public:
         const ActorValueEvents::ActorValueChangedEvent& event, 
         RE::BSTEventSource<ActorValueEvents::ActorValueChangedEvent>*) override
 	{
-        auto formId = event.actorValue.GetFormID();
-        auto value = RE::PlayerCharacter::GetSingleton()->GetActorValue(event.actorValue);
-        lb_process_actor_value(formId, value);
+        if (lb_is_loaded())
+        {
+            auto formId = event.actorValue.GetFormID();
+            auto value = RE::PlayerCharacter::GetSingleton()->GetActorValue(event.actorValue);
+            lb_process_actor_value(formId, value);
+        }
         
         return RE::BSEventNotifyControl::kContinue;
 	}
