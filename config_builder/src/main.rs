@@ -32,12 +32,31 @@ fn main() {
     }
 
     pack_default(&get_dir("00 Default"));
+    pack_bone_tracking(&get_dir("10 BoneTracking"));
+    pack_no_bone_tracking(&get_dir("11 NoBoneTracking"));
+
     pack_nr(&get_dir("41 NukaRide"));
     pack_dd(&get_dir("42 DD"));
     pack_bp70(&get_dir("51 AAF BP70"));
 
     pack_fusion_girl(&get_dir("20 FemaleBodyFusionGirls"));
     pack_body_talk(&get_dir("30 MaleBodyBodyTalk"));
+}
+
+fn pack_bone_tracking(config_dir: &str) {
+    let triggers = vec![("Default.json", default_scene_bone_tracking())];
+    for trigger in triggers {
+        let path = format!("{}/Triggers/{}", config_dir, trigger.0);
+        write_file(path, trigger.1);
+    }
+}
+
+fn pack_no_bone_tracking(config_dir: &str) {
+    let triggers = vec![("Default.json", default_scene_no_bone_tracking())];
+    for trigger in triggers {
+        let path = format!("{}/Triggers/{}", config_dir, trigger.0);
+        write_file(path, trigger.1);
+    }
 }
 
 fn pack_default(config_dir: &str) {
@@ -52,12 +71,6 @@ fn pack_default(config_dir: &str) {
 
     for body in [("OtherRaces.json", ultimate_aaf_patch_races())] {
         write_file(format!("{}/Races/{}", config_dir, body.0), body.1);
-    }
-
-    let triggers = vec![("Default.json", default_scene_bone_tracking())];
-    for trigger in triggers {
-        let path = format!("{}/Triggers/{}", config_dir, trigger.0);
-        write_file(path, trigger.1);
     }
 
     write_file(

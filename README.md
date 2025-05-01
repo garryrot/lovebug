@@ -29,9 +29,33 @@ Telekinesis connects to your devices using the operating systems bluetooth contr
 
 # FAQ
 
+## Nothing happens (In General)
+
+Check the following:
+
+- Did you enable your device in MCM settings page (Devices)?
+- Try to vibrate the device through Intiface Central, if that doesn't work consult Buttplug.io/Intiface Documentation.
+- Try to vibrate the device through MCM Debug page to check that the fallout4 plugin is working.
+
+## Things work anywhere expect in AAF animations
+
+By default, things only happen if the bone monitoring detects an oral or anal/vaginal penetration.
+
+If it doesn't, you can do one of the following steps:
+
+- Try different animations, if it never works, you probably don't use a supported body type, read Telekinesis.log `%USERPROFILE%/My Games/Fallout4/F4S4/Telekinesis.log`
+
+- If specific animations don't work:
+     - Define your own trigger.json
+
+- It is possible to define custom behavior for each scene, that will disable bone tracking and use a custom device movement.
+   
+    - See NukaRide and BP70 triggers in the mod files for examples on how to do this
+- If no collision happens, you can find out why by reading , it will dump stats ont he collision data and whether bones are found on your body type.
+
 ## Where Are all the Settings
 
-Most settings are json files `Fallout4\Data\F4SE\Telekineis\*`, you can find the documentation [here](./docs/3-Config.md)
+Most settings are json files `Fallout4\Data\F4SE\Telekineis2\*`, you can find the documentation [here](./docs/3-Config.md)
 
 ## Bug Reports
 
@@ -45,13 +69,18 @@ This mod is free software and can be used under the terms of the [Apache License
 
 ### 2.0.0.rc3
 
+Did a lot of things under the hood, mainly added the ability to trigger actions based on actor value changes and some internal improvements.
+
+Note: Calling these "rc (release candidate)" is kind of a stretch, but I commited to it. Once its stable I will switch to regular versioning.
+
 #### Triggers
 
-- Support trigger through Actor Values
+- Support triggers through Actor Values
+    - Support logical conditions on actor values i.e. START if "x > 5 and y == 5" STOP if "x < 5" etc...
 
 #### Bone Tracking
 
-- Activate lowest-possible default vibration during bone-tracked scenes, until first penetration has happened
+- Activate lowest-possible default vibration during bone-tracked scenes, until first penetration has happened so that people aren't confused
 
 - Add more custom race presets for races that don't work out of the box
     - Ghouls
@@ -61,3 +90,8 @@ This mod is free software and can be used under the terms of the [Apache License
 - Body Type Support
     - Adapt fomod installer: FusionGirl also works for CBBE
     - Include race preset for "Male Super Hero Body" (the NFSW version, untested)
+
+#### Bugfixes
+
+- Fixed some issue that caused debug actions to not work due to string capitalization
+- Many more I've forgot about probably

@@ -1,0 +1,48 @@
+[
+  {
+    "Scene": {
+      "description": "Default Scene (Bone Tracked)",
+      "scene_id": "Any",
+      "scene_tags": "Any",
+      "actions": [
+        {
+          "action": "vibrate",
+          "strength": {
+            "Variable": "BoneTrackingPos"
+          }
+        },
+        {
+          "action": "oscillate",
+          "strength": {
+            "Variable": "BoneTrackingRate"
+          }
+        },
+        {
+          "action": "constrict",
+          "strength": {
+            "Variable": "BoneTrackingDepth"
+          }
+        }
+      ],
+      "track_bones": true
+    }
+  },
+  {
+    "Scene": {
+      "description": "Default Masturbation Scene",
+      "scene_id": "Any",
+      "scene_tags": {
+        "Tag": "masturbation"
+      },
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ],
+      "track_bones": true
+    }
+  }
+]

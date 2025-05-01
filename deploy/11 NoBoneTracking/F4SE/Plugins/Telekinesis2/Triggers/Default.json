@@ -1,0 +1,90 @@
+[
+  {
+    "Scene": {
+      "description": "Default Scene (No Bone Tracking)",
+      "scene_id": "Any",
+      "scene_tags": "Any",
+      "actions": [
+        {
+          "action": "vibrate",
+          "strength": {
+            "RandomFunscript": [
+              100,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        },
+        {
+          "action": "oscillate",
+          "strength": {
+            "RandomFunscript": [
+              100,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        },
+        {
+          "action": "constrict",
+          "strength": {
+            "RandomFunscript": [
+              100,
+              [
+                "Tease",
+                "Cruel-Tease",
+                "On-Off",
+                "On-Off-Fast",
+                "Sawtooth",
+                "Sawtooth-Fast",
+                "Square",
+                "Wub-Wub-Wub"
+              ]
+            ]
+          }
+        },
+        {
+          "action": "linear",
+          "strength": {
+            "Constant": 50
+          }
+        }
+      ],
+      "track_bones": false
+    }
+  },
+  {
+    "Scene": {
+      "description": "Default Masturbation Scene",
+      "scene_id": "Any",
+      "scene_tags": {
+        "Tag": "masturbation"
+      },
+      "actions": [
+        {
+          "action": "masturbation",
+          "strength": {
+            "Constant": 40
+          }
+        }
+      ],
+      "track_bones": false
+    }
+  }
+]
