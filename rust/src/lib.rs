@@ -238,19 +238,27 @@ pub fn lb_recv_signal(sig: PenSignal) {
                 let devices = lb.client.buttplug.devices();
                 let setting_clone = lb.stroker_settings.clone();
                 let dynamic_task_clone = lb.dynamic_task.clone();
+                let mut tags = vec![];
+                fn has_flag(sig: &PenSignal, with: BodyPartFlag) -> bool {
+                    sig.body_part_flags | (with as u64) > 0
+                }
+                if has_flag(&sig, BodyPartFlag::Anal) {
+                    tags.push(Box::new(Selector::Tag("anal".to_owned())));
+                }
+                if has_flag(&sig, BodyPartFlag::Oral) {
+                    tags.push(Box::new(Selector::Tag("oral".to_owned())));
+                }
+                if has_flag(&sig, BodyPartFlag::Vaginal) {
+                    tags.push(Box::new(Selector::Tag("vaginal".to_owned())));
+                }
+                if has_flag(&sig, BodyPartFlag::Penis) {
+                    tags.push(Box::new(Selector::Tag("penis".to_owned())));
+                }
                 let (_, actuators) =
                     Filter::new(lb.client.device_settings.clone(), devices.as_slice())
                         .load_config(&mut lb.client.device_settings)
-                        .with_selector(&Selector::Any)
+                        .with_selector(&Selector::Or(tags))
                         .result();
-
-                // fn has_flag(sig: &PenSignal, with: BodyPartFlag) -> bool {
-                //     sig.body_part_flags | (with as u64) > 0
-                // }
-                // let anal = has_flag(&sig, BodyPartFlag::Anal);
-                // let vag = has_flag(&sig, BodyPartFlag::Vaginal);
-                // let oral = has_flag(&sig, BodyPartFlag::Oral);
-                // let penis = has_flag(&sig, BodyPartFlag::Penis);
 
                 lb.client.runtime.spawn(async move {
                     info!("starting bone tracking");

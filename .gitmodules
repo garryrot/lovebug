@@ -15,3 +15,6 @@
 [submodule "extern/CommonLibF4-984"]
 	path = extern/CommonLibF4-984
 	url = https://github.com/shad0wshayd3-FO4/CommonLibF4
+[submodule "rust/clibf4"]
+	path = rust/clibf4
+	url = https://github.com/garryrot/clibf4

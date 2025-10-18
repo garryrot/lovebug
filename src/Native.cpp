@@ -10,15 +10,8 @@ void RegisterLovebugListener()
             if (message->type == LB_SIGNAL_MAGIC)
             {
                 auto payloaded = (PenSignal*) message->data;
-                lb_recv_signal(PenSignal {
-                    payloaded->signal_type,
-                    payloaded->ts_ms,
-                    payloaded->most_in,
-                    payloaded->most_out,
-                    payloaded->body_part_flags
-                });
+                lb_recv_signal(*payloaded);
             }
-            
         }, "Lovebug")) {
         lb_log_error("Failed to get messaging interface");
         return;
