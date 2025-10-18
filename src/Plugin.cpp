@@ -5,10 +5,10 @@
 
 #include "Bridge.h"
 
-#include "tk2/src/logging.rs.h"
-#include "tk2/src/bones.rs.h"
 #include "tk2/src/lib.rs.h"
 #include "tk2/src/mcm.rs.h"
+#include "tk2/src/logging.rs.h"
+// #include "lb/src/lib.rs.h"
 
 #include "Version.h"
 
@@ -27,10 +27,6 @@ void InitializeMessaging()
     if (!messaging || !messaging->RegisterListener([](F4SE::MessagingInterface::Message *message)
         {
             switch (message->type) {
-                case F4SE::MessagingInterface::kInputLoaded: {
-                    lb_log_info("input loaded");
-                    break;
-                }
                 case F4SE::MessagingInterface::kGameDataReady: {
                     lb_log_info("game data ready");
                     GameVM* gameVm = RE::GameVM::GetSingleton();
@@ -39,12 +35,13 @@ void InitializeMessaging()
                     }
                     break;
                 }
-                case F4SE::MessagingInterface::kGameLoaded:
+                case F4SE::MessagingInterface::kGameLoaded: {
                     lb_log_info("game loaded");
                     auto playerValueSink = ActorValueSink::GetSingleton();
                     RE::TESObjectREFR *player = RE::PlayerCharacter::GetSingleton();
                     player->RegisterSink(playerValueSink);
                     break;
+                }
             }
         })) {
         lb_log_error("Failed to get messaging interface");

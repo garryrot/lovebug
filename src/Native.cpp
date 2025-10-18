@@ -1,5 +1,33 @@
+
+const int LB_SIGNAL_MAGIC = 0xB00BA1510;
+
+void RegisterLovebugListener() 
+{
+    lb_log_error("listening for lovebug signals");
+    const auto messaging = F4SE::GetMessagingInterface();
+    if (!messaging || !messaging->RegisterListener([](F4SE::MessagingInterface::Message *message)
+        {
+            if (message->type == LB_SIGNAL_MAGIC)
+            {
+                auto payloaded = (PenSignal*) message->data;
+                lb_recv_signal(PenSignal {
+                    payloaded->signal_type,
+                    payloaded->ts_ms,
+                    payloaded->most_in,
+                    payloaded->most_out,
+                    payloaded->body_part_flags
+                });
+            }
+            
+        }, "Lovebug")) {
+        lb_log_error("Failed to get messaging interface");
+        return;
+    }
+}
+
 bool Connect(std::monostate, int connection, std::string port, std::string host, bool bluetooth, bool xinupt, bool serial)
 {
+    RegisterLovebugListener();
     return lb_connect(connection, port, host, bluetooth, xinupt, serial);
 }
 
@@ -18,9 +46,8 @@ bool Update(std::monostate, int handle, int speed)
     return lb_update(handle, speed);
 }
 
-bool Stop(std::monostate, int handle) 
+bool Stop(std::monostate, int handle)
 {
-    lb_dynamic_stop();
     return lb_stop(handle);
 }
 
@@ -31,8 +58,8 @@ void Disconnect(std::monostate)
 
 int Scene(std::monostate, std::string sceneName, std::vector<RE::Actor*> actors, std::vector<std::string> tags, int speed, float secs) 
 {
-    auto actorVec = ActorVec::ActorVec(actors);
-    int x = lb_scene(sceneName, tags, speed, secs, actorVec);
+    int x = lb_scene_start(sceneName, tags, speed, secs);
+    // TODO: Listen to Signals and control 
     return x;
 }
 

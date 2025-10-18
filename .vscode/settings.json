@@ -107,5 +107,8 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "*.rs": "cpp"
-    }
+    },
+    "github.copilot.enable": false,
+    "github.copilot.inlineSuggest.enable": false,
+    "github.copilot.experimental.inlineSuggest": false
 }

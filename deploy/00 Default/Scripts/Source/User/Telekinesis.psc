@@ -26,3 +26,8 @@ EndStruct
 Int Function MCM_Devices_Len() Native Global
 DevicePage Function MCM_Devices_Get(Int index) Native Global
 Bool Function MCM_Devices_Set(DevicePage actuator) Native Global
+
+; Lovebug
+
+Function Monitor(Actor[] actors, String[] tags) Native Global
+Function StopMonitor() Native Global

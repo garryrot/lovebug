@@ -1,0 +1,14 @@
+[package]
+name = "clibf4"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+cxx = "1.0"
+config = { path = "../config" }
+
+[build-dependencies]
+cxx-build = "1.0"

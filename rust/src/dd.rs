@@ -1,10 +1,12 @@
 use std::{sync::{atomic::{AtomicBool, Ordering}, Arc}, time::Duration};
 
+use clibf4::bridge::ffi_bridge::{ContainsKeyword, PlayerCharacter_GetSingleton};
 use tokio::time::sleep;
 use tracing::*;
 
 use crate::{
-    bridge::ffi_bridge::{ContainsKeyword, PlayerCharacter_GetSingleton}, process_triggers, Telekinesis
+    process_triggers, 
+    Telekinesis
 };
 
 pub fn start_kw_thread(tk: &mut Telekinesis, kws: Vec<(String, Arc<AtomicBool>)>) {

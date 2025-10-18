@@ -10,6 +10,8 @@ crate-type = ["staticlib", "rlib"]
 [dependencies]
 config = { path = "./config" }
 bp_scheduler = { path = "./bp_scheduler" }
+clibf4 = { path = "./clibf4" }
+
 buttplug = "7.1.13"
 anyhow = "1.0.68"
 cxx = "1.0.95"

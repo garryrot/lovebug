@@ -1,8 +1,7 @@
 #pragma once
 
 #include "rust/cxx.h"
-#include "tk2/src/bridge.rs.h"
-#include "tk2/src/logging.rs.h"
+#include "clibf4/src/bridge.rs.h"
 #include "PCH.h"
 
 // Actor
@@ -35,3 +34,8 @@ float GetPlayerActorValue(rust::Str actorValueEditorId);
 
 const RE::TESForm* GetFormByID(int formId);
 rust::String Form_GetEditorID(const RE::TESForm* form);
+
+// Utility
+float GetDistance(
+    const RE::NiAVObject* boneA,
+    const RE::NiAVObject* boneB);

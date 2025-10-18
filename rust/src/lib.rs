@@ -1,27 +1,28 @@
-use bone_tracking::config::{read_bone_tracking_settings, BoneTrackingSettings};
-use bones::start_bone_tracking;
-use bridge::ffi_bridge::{
-    ContainsKeyword, GetFormID, GetPlayerActorValue,
-    PlayerCharacter_GetSingleton, TESForm_GetFormByEditorID,
+use clibf4::bridge::ffi_bridge::{
+    ContainsKeyword, GetFormID, GetPlayerActorValue, PlayerCharacter_GetSingleton,
+    TESForm_GetFormByEditorID,
 };
 use config::{
-    keyword_store::KeywordSource, triggers::Trigger, variable_store::VariableSource, variables::ConfigVariable
+    keyword_store::KeywordSource, triggers::Trigger, variable_store::VariableSource,
+    variables::ConfigVariable,
 };
 use cxx::{CxxString, CxxVector};
 use dd::start_kw_thread;
 use input::{read_input_duration, read_input_string};
 use keyword_store::KeywordStore;
 use lazy_static::lazy_static;
-use tokio::task::JoinHandle;
+use tokio::{
+    sync::mpsc::{unbounded_channel, UnboundedSender},
+    task::JoinHandle,
+    time::Instant,
+};
 use variable_store::VariableStore;
 
 use std::{
     collections::HashMap,
-    sync::{atomic::AtomicI64, Arc, Mutex},
+    sync::{atomic::AtomicI64, Arc, Mutex}
 };
 use tracing::{debug, error, info};
-
-use crate::bones::ffi_bones::ActorVec;
 
 use bp_scheduler::{
     client::{BpClient, ExecutionResult},
@@ -31,13 +32,18 @@ use bp_scheduler::{
         client::*,
         util::{read::*, write::*},
     },
-    dynamic_tracking::DynamicTrackingHandle,
+    dynamic_tracking::{
+        BoneTrackingStats, DynamicTracking, Margins, StrokerSettings, TrackingSignal,
+    },
+    filter::Filter,
     speed::Speed,
 };
 
 use ::config::*;
 use events::{ffi_event::ModEvent, send_mod_event, start_outgoing_event_thread};
 use triggers::Triggers;
+
+use crate::ffi::{PenSignal, PenSignalType};
 
 pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2";
 pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Patterns";
@@ -47,35 +53,30 @@ pub static VARIABLES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Variables";
 
 pub static LOGGING_SETTINGS: &str = "Logging.json";
 pub static DEVICE_SETTINGS: &str = "Devices.json";
+pub static BONE_TRACKING: &str = "BoneTracking.json";
 
-pub mod bridge;
 mod dd;
 mod events;
 mod input;
 mod logging;
 mod mcm;
-mod bones;
-mod bone_tracking;
 
 #[derive(Debug)]
 pub struct Telekinesis {
     client: BpClient,
     triggers: Triggers,
-
-    bone_tracking_config: BoneTrackingSettings,
-    dynamic_task: DynamicTrackingHandle,
-
-    // runtime state
-    tracking_counter: i32,
+    dynamic_task: BoneTrackingStats,
     variable_store: VariableStore,
     keyword_store: KeywordStore,
     triggers_running: HashMap<Trigger, i32>,
     keyword_update_thread: Option<JoinHandle<()>>,
+
+    stroker_settings: StrokerSettings,
+    sender: Option<UnboundedSender<TrackingSignal>>,
 }
 
 impl Telekinesis {
-    pub fn is_loaded() -> bool
-    {
+    pub fn is_loaded() -> bool {
         match LB.state.try_lock() {
             Ok(guard) => guard.is_some(),
             Err(_) => {
@@ -114,13 +115,12 @@ impl Telekinesis {
     {
         match LB.state.try_lock() {
             Ok(mut guard) => {
-                if let Some(tk) = guard.as_mut() 
-                {
+                if let Some(tk) = guard.as_mut() {
                     func(tk);
                 } else {
                     error!("State empty");
                 }
-            },
+            }
             Err(_) => {
                 error!("failed locking mutex");
             }
@@ -144,7 +144,6 @@ impl Telekinesis {
     pub fn store_devices(&mut self) {
         try_write(&self.client.device_settings, CONFIG_DIR, DEVICE_SETTINGS);
     }
-
 }
 
 #[derive(Debug)]
@@ -160,13 +159,50 @@ lazy_static! {
     };
 }
 
+// shared & must not be changed >>>>>>
+#[derive(Clone, Debug)]
+pub enum BodyPartFlag {
+    Oral = 1,
+    Anal = 2,
+    Vaginal = 4,
+    Penis = 8,
+}
 #[cxx::bridge]
 mod ffi {
-    unsafe extern "C++" {
-        type ActorVec = crate::bones::ffi_bones::ActorVec;
+    enum PenSignalType {
+        Start,
+        Stop,
+        Penetration,
+        InnerTurn,
+        OuterTurn,
     }
+    struct PenSignal {
+        signal_type: PenSignalType,
+        ts_ms: u64,
+        most_in: f64,
+        most_out: f64,
+        body_part_flags: u64,
+    }
+    // <<<<<<<<
 
     extern "Rust" {
+        // legacy
+        fn lb_process_actor_value(form_id: u32, value: f32);
+        fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32;
+        fn lb_action(action: &str, speed: i32, time_sec: f32) -> i32;
+
+        // signal sinks
+        fn lb_scene_start(
+            scene: &str,
+            scene_tags: &CxxVector<CxxString>,
+            speed: i32,
+            time_sec: f32,
+        ) -> i32;
+
+        fn lb_recv_signal(sig: PenSignal);
+
+        // direct commands
+        fn lb_is_loaded() -> bool;
         fn lb_connect(
             connection: i32,
             port: &str,
@@ -175,21 +211,112 @@ mod ffi {
             xinput: bool,
             serial: bool,
         ) -> bool;
-        fn lb_is_loaded() -> bool;
         fn lb_disconnect();
-        fn lb_action(action: &str, speed: i32, time_sec: f32) -> i32;
-        fn lb_scene(
-            scene: &str,
-            scene_tags: &CxxVector<CxxString>,
-            speed: i32,
-            time_sec: f32,
-            actors: &ActorVec,
-        ) -> i32;
         fn lb_update(id: i32, speed: i32) -> bool;
         fn lb_stop(id: i32) -> bool;
-        fn lb_process_actor_value(form_id: u32, value: f32);
-        fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32;
+
+        // fn lb_control(
+        //     qry: &str,
+        //     arg0: i32,
+        //     arg1: f32,
+        //     arg2: &str,
+        //     arg3: &CxxVector<CxxString>,
+        // ) -> i32;
     }
+}
+
+pub fn lb_recv_signal(sig: PenSignal) {
+    debug!("lb_recv_signal");
+
+    Telekinesis::run_static_no_return(|lb| {
+        match sig.signal_type {
+            PenSignalType::Start => {
+                info!("PenSignalType::Start");
+                let (sender, receiver) = unbounded_channel();
+                lb.sender = Some(sender);
+
+                let devices = lb.client.buttplug.devices();
+                let setting_clone = lb.stroker_settings.clone();
+                let dynamic_task_clone = lb.dynamic_task.clone();
+                let (_, actuators) =
+                    Filter::new(lb.client.device_settings.clone(), devices.as_slice())
+                        .load_config(&mut lb.client.device_settings)
+                        .with_selector(&Selector::Any)
+                        .result();
+
+                // fn has_flag(sig: &PenSignal, with: BodyPartFlag) -> bool {
+                //     sig.body_part_flags | (with as u64) > 0
+                // }
+                // let anal = has_flag(&sig, BodyPartFlag::Anal);
+                // let vag = has_flag(&sig, BodyPartFlag::Vaginal);
+                // let oral = has_flag(&sig, BodyPartFlag::Oral);
+                // let penis = has_flag(&sig, BodyPartFlag::Penis);
+
+                lb.client.runtime.spawn(async move {
+                    info!("starting bone tracking");
+                    let mut dynamic = DynamicTracking {
+                        settings: setting_clone,
+                        signals: receiver,
+                        actuators,
+                        status: dynamic_task_clone,
+                    };
+                    info!(?dynamic.settings, "success! moving stroker");
+                    let _ = dynamic.track_mirror().await;
+                    info!("bone tracking finished");
+                });
+            }
+            PenSignalType::Stop => {
+                debug!("PenSignalType::Stop");
+                lb.sender
+                    .as_ref()
+                    .inspect(|x| { 
+                        if x.send(TrackingSignal::Stop).is_err() {
+                            error!("queue gone");
+                        }
+                    } );
+            }
+            PenSignalType::InnerTurn => {
+                debug!("PenSignalType::InnerTurn");
+                let signal = TrackingSignal::InnerTurn(
+                    Instant::now(),
+                    Margins {
+                        most_in: sig.most_in,
+                        most_out: sig.most_out,
+                    },
+                );
+                lb.sender.as_ref().inspect(|x| { 
+                    if x.send(signal).is_err() {
+                        error!("queue gone");
+                    }
+                });
+            }
+            PenSignalType::OuterTurn => {
+                debug!("PenSignalType::OuterTurn");
+                let signal = TrackingSignal::OuterTurn(
+                    Instant::now(),
+                    Margins {
+                        most_in: sig.most_in,
+                        most_out: sig.most_out,
+                    },
+                );
+                lb.sender.as_ref().inspect(|x| { 
+                    if x.send(signal).is_err() {
+                        error!("queue gone");
+                    }
+                });
+            }
+            PenSignalType::Penetration => {
+                debug!("PenSignalType::Penetration");
+                let signal = TrackingSignal::Penetration(Instant::now());
+                lb.sender.as_ref().inspect(|x| { 
+                    if x.send(signal).is_err() {
+                        error!("queue gone");
+                    } 
+                });
+            }
+            _ => {}
+        }
+    });
 }
 
 pub struct Fo4KeywordSource {}
@@ -244,7 +371,7 @@ pub fn lb_connect(
             return false;
         }
 
-        let bone_track = DynamicTrackingHandle::default();
+        let bone_track = BoneTrackingStats::default();
 
         let mut actor_values = vec![];
         let mut keywords = vec![];
@@ -272,12 +399,14 @@ pub fn lb_connect(
             client: client.unwrap(),
             triggers,
             dynamic_task: bone_track,
-            bone_tracking_config: read_bone_tracking_settings(),
-            tracking_counter: 0,
+            // bone_tracking_config: read_bone_tracking_settings(),
+            // tracking_counter: 0,
             variable_store,
             triggers_running: HashMap::new(),
             keyword_store: KeywordStore::init(Box::new(Fo4KeywordSource {}), keywords),
-            keyword_update_thread: None
+            keyword_update_thread: None,
+            stroker_settings: read_or_default(CONFIG_DIR, BONE_TRACKING),
+            sender: None,
         };
 
         lb.client.read_actions(ACTIONS_DIR);
@@ -321,7 +450,10 @@ pub fn lb_disconnect() {
 
 fn lb_action(action_name_unsanitized: &str, speed: i32, time_secs: f32) -> i32 {
     let action_name = action_name_unsanitized.to_ascii_lowercase();
-    info!(action_name, action_name_unsanitized, speed, time_secs, "lb_action");
+    info!(
+        action_name,
+        action_name_unsanitized, speed, time_secs, "lb_action"
+    );
     Telekinesis::run_static(
         |lb| {
             let actions = get_actions_from_refs(
@@ -346,24 +478,20 @@ fn lb_action(action_name_unsanitized: &str, speed: i32, time_secs: f32) -> i32 {
     -1
 }
 
-fn lb_scene(
+fn lb_scene_start(
     scene_name: &str,
     scene_tags: &CxxVector<CxxString>,
     speed: i32,
     time_secs: f32,
-    actor_vec: &ActorVec,
 ) -> i32 {
     let tags = read_input_string(scene_tags);
-    info!(scene_name, speed, time_secs, ?tags, "lb_scene");
+    info!(scene_name, speed, time_secs, ?tags, "lb_scene_start");
     Telekinesis::run_static(
         |lb| {
             let (handle, triggers) = process_triggers(lb, None, Some(scene_name), &tags);
             for trigger in triggers {
                 if let Trigger::Scene(scene) = trigger {
                     send_mod_event(ModEvent::new("Tele_Scene", &scene.description, 0.0));
-                    if scene.track_bones {
-                        start_bone_tracking(lb, actor_vec);
-                    }
                 }
             }
             handle
@@ -398,9 +526,13 @@ fn process_triggers(
     scene_tags: &Vec<String>,
 ) -> (i32, Vec<Trigger>) {
     debug!(?event_name, ?scene_name, ?scene_tags, "process_triggers");
-    let started = lb
-        .triggers
-        .start_events(&lb.variable_store, &lb.keyword_store, event_name, scene_name, scene_tags);
+    let started = lb.triggers.start_events(
+        &lb.variable_store,
+        &lb.keyword_store,
+        event_name,
+        scene_name,
+        scene_tags,
+    );
 
     let mut handle = -1;
     for trigger in started.iter() {
@@ -415,7 +547,9 @@ fn process_triggers(
         lb.triggers_running.insert(trigger.clone(), handle);
     }
 
-    let stop_iter = lb.triggers.stop_events(&lb.variable_store, &lb.keyword_store, event_name);
+    let stop_iter = lb
+        .triggers
+        .stop_events(&lb.variable_store, &lb.keyword_store, event_name);
     for trigger in stop_iter.into_iter() {
         if let Some(handle) = lb.triggers_running.get(&trigger) {
             lb.client.stop(*handle);
@@ -438,6 +572,7 @@ pub fn lb_update(handle: i32, speed: i32) -> bool {
 
 pub fn lb_stop(handle: i32) -> bool {
     info!(handle, "lb_stop");
+    // TODO: Stop listening
     Telekinesis::run_static(|lb| lb.client.stop(handle), false)
 }
 

@@ -20,20 +20,13 @@ set(RUST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/release/${CMAKE_STATIC_
 set(RUST_CXX_BRIDGE ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/lib.rs.cc 
                     ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/logging.rs.cc
                     ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/events.rs.cc
-                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/bridge.rs.cc
-                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/bones.rs.cc
-                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/mcm.rs.cc)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/${RUST_PKG_NAME}/src/mcm.rs.cc
+                    ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge/clibf4/src/bridge.rs.cc
+                )
 
 add_custom_command(
     OUTPUT ${RUST_CXX_BRIDGE} ${RUST_LIBRARY}
     COMMAND cargo build --manifest-path ${CMAKE_CURRENT_SOURCE_DIR}/rust/Cargo.toml --release
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/config.rs
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/events.rs
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/bones.rs
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/bridge.rs
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/lib.rs
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/logging.rs
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/settings.rs
     USES_TERMINAL
     COMMENT "Running cargo..."
 )
@@ -60,9 +53,8 @@ add_library(
 	SHARED
 	${CMAKE_CURRENT_BINARY_DIR}/version.rc
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Plugin.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Bridge.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Events.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/rust/src/Bones.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/rust/clibf4/src/Bridge.cpp
         ${RUST_CXX_BRIDGE}
 )
 
@@ -72,7 +64,7 @@ add_compile_options( /MP )
 target_precompile_headers(
         ${PROJECT_NAME} 
         PRIVATE
-        src/PCH.h)
+        rust/clibf4/src/PCH.h)
 
 target_include_directories(
         ${PROJECT_NAME}
@@ -80,6 +72,7 @@ target_include_directories(
         ${CMAKE_CURRENT_BINARY_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/rust/clibf4/src
         ${CMAKE_CURRENT_SOURCE_DIR}/rust/target/cxxbridge)     
 
 target_link_libraries(

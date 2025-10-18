@@ -69,12 +69,14 @@ Function StartScene(Var[] akArgs)
         Telekinesis.Stop(CurrentHandle)
     EndIf
     CurrentHandle = Telekinesis.Scene(sceneName, actors, tags, 100, -1)
+    Telekinesis.Monitor(actors, tags)
 EndFunction
 
 Function StopScene(Var[] akArgs)
     String sceneName = akArgs[2] as String
     String[] tags = Utility.VarToVarArray(akArgs[3]) as String[]         
     Telekinesis.Stop(CurrentHandle)
+    Telekinesis.StopMonitor()
     CurrentHandle = -1
 EndFunction
 

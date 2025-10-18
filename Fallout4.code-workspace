@@ -115,7 +115,13 @@
             "xstring": "cpp",
             "xtr1common": "cpp",
             "xtree": "cpp",
-            "xutility": "cpp"
+            "xutility": "cpp",
+            "*.rs": "rust",
+            "*.in": "cpp"
+        },
+        "files.exclude": {
+            "build-[0-9]*": true,
+            "extern": true
         }
     }
 }

@@ -543,3 +543,7 @@ deploy/**/*.pex
 
 ### Papyrus Sources for mod dependencies
 deploy/Dependencies/**.psc
+
+*.zip
+
+target*

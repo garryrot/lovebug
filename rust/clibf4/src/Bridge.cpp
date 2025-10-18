@@ -7,9 +7,11 @@
 const RE::Actor* PlayerCharacter_GetSingleton() {
     return RE::PlayerCharacter::GetSingleton();
 }
+
 bool IsPlayer(const RE::Actor *actor) {
     return actor == RE::PlayerCharacter::GetSingleton();
 }
+
 Sex GetSex(const RE::Actor *actor) {
     auto npc = actor->GetNPC();
     if (npc != NULL)
@@ -56,11 +58,12 @@ float GetPlayerActorValue(rust::Str editorId) {
         }
         else 
         {
-            lb_log_error(
-                std::format("Editor id {} with formID={:x} is not actor value, form type: {:x}", 
-                actorValueEditorId, 
-                form->formID, 
-                static_cast<unsigned>(formType)));
+            // TODO fixor
+            // lb_log_error(
+            //     std::format("Editor id {} with formID={:x} is not actor value, form type: {:x}", 
+            //     actorValueEditorId, 
+            //     form->formID, 
+            //     static_cast<unsigned>(formType)));
         }
     }
     return 0;
@@ -94,13 +97,16 @@ int ActorVec::Size() const {
 const RE::TESForm* RaceAsForm(const RE::TESRace* form) {
     return form;
 }
+
 const RE::TESForm* ActorAsForm(const RE::Actor* form) {
     return form;
 }
+
 const RE::TESForm* TESForm_GetFormByEditorID(rust::Str editorId) {
     std::string editorIdStr = (std::string) editorId;
     return RE::TESForm::GetFormByEditorID( editorIdStr );
 }
+
 std::uint32_t GetFormID(const RE::TESForm* form) {
     if (form == NULL)
     {
@@ -121,13 +127,33 @@ const RE::NiAVObject* GetBone(const RE::Actor *actor, rust::Str bone)
 {
     if (actor == NULL)
     {
-        lb_log_error("actor null");
+        // TODO; Fixor
+        // lb_log_error("actor null");
         return NULL;
     }
     if (actor->Get3D() == NULL)
     {
-        lb_log_error("3d null");
+        // TODO: Fixor
+        // lb_log_error("3d null");
         return NULL;
     }
     return actor->Get3D()->GetObjectByName( (std::string) bone );   
+}
+
+// Utility
+
+float GetDistance(
+    const RE::NiAVObject* boneA,
+    const RE::NiAVObject* boneB) {
+    if (boneA == NULL)
+    {
+        return 999999.0;
+    }
+    if (boneB == NULL)
+    {
+        return 999999.0;
+    }
+    return sqrtf(powf((boneA->world.translate.x - boneB->world.translate.x), 2) +
+                 powf((boneA->world.translate.y - boneB->world.translate.y), 2) +
+                 powf((boneA->world.translate.z - boneB->world.translate.z), 2));
 }

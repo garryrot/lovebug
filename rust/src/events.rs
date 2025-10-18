@@ -14,6 +14,7 @@ pub mod ffi_event {
     }
 
     unsafe extern "C++" {
+        include!("Events.h");
         fn AddTask_ModEvent(done: fn(ctx: ModEvent), ctx: ModEvent);
         unsafe fn SendEvent(event: ModEvent);
     }
