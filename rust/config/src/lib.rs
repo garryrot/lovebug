@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use bp_scheduler::config::actions::*;
 
-pub mod bodies;
 pub mod body_parts;
 pub mod events;
 pub mod triggers;

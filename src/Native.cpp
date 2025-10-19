@@ -9,8 +9,14 @@ void RegisterLovebugListener()
         {
             if (message->type == LB_SIGNAL_MAGIC)
             {
-                auto payloaded = (PenSignal*) message->data;
-                lb_recv_signal(*payloaded);
+                auto payload = (PenSignal*) message->data;
+                lb_recv_signal(*payload);
+            }
+            if (message->type == (LB_SIGNAL_MAGIC + 1))
+            {
+                // TODO: Is the rust string properly de-allocated?
+                auto payload = (TriggerSignal*) message->data;
+                lb_recv_trigger(*payload);
             }
         }, "Lovebug")) {
         lb_log_error("Failed to get messaging interface");

@@ -4,4 +4,3 @@ pub static TAG_NIPPLE: &str = "nipple";
 pub static TAG_ORAL: &str = "oral";
 pub static TAG_PENIS: &str = "penis";
 pub static TAG_VAGINAL: &str = "vaginal";
-// pub static TAG_SLOW: &str = "slow";

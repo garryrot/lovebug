@@ -17,6 +17,7 @@ use tokio::{
     task::JoinHandle,
     time::Instant,
 };
+use tracing_subscriber::field::debug;
 use variable_store::VariableStore;
 
 use std::{
@@ -44,7 +45,7 @@ use ::config::*;
 use events::{ffi_event::ModEvent, send_mod_event, start_outgoing_event_thread};
 use triggers::Triggers;
 
-use crate::signals::{BodyPartFlag, ffi_signal::{PenSignal, PenSignalType}};
+use crate::signals::{BodyPartFlag, ffi_signal::{PenSignal, PenSignalType, TriggerSignal}};
 
 pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2";
 pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Patterns";
@@ -72,7 +73,6 @@ pub struct Telekinesis {
     keyword_store: KeywordStore,
     triggers_running: HashMap<Trigger, i32>,
     keyword_update_thread: Option<JoinHandle<()>>,
-
     stroker_settings: StrokerSettings,
     sender: Option<UnboundedSender<TrackingSignal>>,
 }
@@ -180,6 +180,9 @@ mod ffi {
         type PenSignal;
         fn lb_recv_signal(sig: &PenSignal);
 
+        type TriggerSignal;
+        fn lb_recv_trigger(sig: &TriggerSignal);
+
         // direct commands
         fn lb_is_loaded() -> bool;
         fn lb_connect(
@@ -202,6 +205,10 @@ mod ffi {
         //     arg3: &CxxVector<CxxString>,
         // ) -> i32;
     }
+}
+
+pub fn lb_recv_trigger(trig: &TriggerSignal) {
+    debug!("lb_recv_trigger {}", trig.name, trig.);
 }
 
 pub fn lb_recv_signal(sig: &PenSignal) {

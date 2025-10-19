@@ -32,8 +32,9 @@ pub mod ffi_signal {
 
     struct TriggerSignal {
         version: u64,
-        starting: bool,
-        name: String
+        name: String,
+        duration_ms: u64,
+        end_trigger: bool,
     }
 
     struct VarSignal {

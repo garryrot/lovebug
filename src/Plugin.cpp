@@ -3,18 +3,16 @@
 #include <chrono>
 #include <codecvt>
 
-#include "Bridge.h"
-
 #include "tk2/src/lib.rs.h"
 #include "tk2/src/mcm.rs.h"
 #include "tk2/src/logging.rs.h"
-// #include "lb/src/lib.rs.h"
-
-#include "Version.h"
+#include "tk2/src/signals.rs.h"
 
 using namespace RE;
 using namespace RE::BSScript;
 
+#include "Bridge.h"
+#include "Version.h"
 #include "Logs.cpp"
 #include "MCM.cpp"
 #include "Native.cpp"

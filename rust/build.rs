@@ -4,6 +4,7 @@ fn main() {
         "src/lib.rs", 
         "src/logging.rs",  
         "src/events.rs", 
+        "src/signals.rs", 
         "src/mcm.rs"
     ];
     
@@ -11,5 +12,6 @@ fn main() {
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/logging.rs");
     println!("cargo:rerun-if-changed=src/events.rs");
+    println!("cargo:rerun-if-changed=src/signals.rs");
     println!("cargo:rerun-if-changed=src/mcm.rs");
 }
