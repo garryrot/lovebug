@@ -65,5 +65,12 @@ pub fn lb_init_logging(file_path: String) -> bool {
         eprintln!("Setting global tracing subscriber failed.");
         return false;
     }
+
+    // redirect STDERR panics to logging
+    std::panic::set_hook(Box::new(move |info| {
+        let backtrace = std::backtrace::Backtrace::capture();
+        error!("thread paniced! info:{:#?}. backtrace:{:#?}", info, backtrace);
+    }));
+
     true
 }

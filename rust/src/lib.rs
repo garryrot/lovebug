@@ -1,3 +1,4 @@
+use buttplug::core::message::ActuatorType;
 use clibf4::bridge::ffi_bridge::{
     ContainsKeyword, GetFormID, GetPlayerActorValue, PlayerCharacter_GetSingleton,
     TESForm_GetFormByEditorID,
@@ -43,7 +44,7 @@ use ::config::*;
 use events::{ffi_event::ModEvent, send_mod_event, start_outgoing_event_thread};
 use triggers::Triggers;
 
-use crate::ffi::{PenSignal, PenSignalType};
+use crate::signals::{BodyPartFlag, ffi_signal::{PenSignal, PenSignalType}};
 
 pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2";
 pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Patterns";
@@ -60,6 +61,7 @@ mod events;
 mod input;
 mod logging;
 mod mcm;
+mod signals;
 
 #[derive(Debug)]
 pub struct Telekinesis {
@@ -159,32 +161,8 @@ lazy_static! {
     };
 }
 
-// shared & must not be changed >>>>>>
-#[derive(Clone, Debug)]
-pub enum BodyPartFlag {
-    Oral = 1,
-    Anal = 2,
-    Vaginal = 4,
-    Penis = 8,
-}
 #[cxx::bridge]
 mod ffi {
-    enum PenSignalType {
-        Start,
-        Stop,
-        Penetration,
-        InnerTurn,
-        OuterTurn,
-    }
-    struct PenSignal {
-        signal_type: PenSignalType,
-        ts_ms: u64,
-        most_in: f64,
-        most_out: f64,
-        body_part_flags: u64,
-    }
-    // <<<<<<<<
-
     extern "Rust" {
         // legacy
         fn lb_process_actor_value(form_id: u32, value: f32);
@@ -199,7 +177,8 @@ mod ffi {
             time_sec: f32,
         ) -> i32;
 
-        fn lb_recv_signal(sig: PenSignal);
+        type PenSignal;
+        fn lb_recv_signal(sig: &PenSignal);
 
         // direct commands
         fn lb_is_loaded() -> bool;
@@ -225,7 +204,7 @@ mod ffi {
     }
 }
 
-pub fn lb_recv_signal(sig: PenSignal) {
+pub fn lb_recv_signal(sig: &PenSignal) {
     debug!("lb_recv_signal");
 
     Telekinesis::run_static_no_return(|lb| {
@@ -242,21 +221,25 @@ pub fn lb_recv_signal(sig: PenSignal) {
                 fn has_flag(sig: &PenSignal, with: BodyPartFlag) -> bool {
                     sig.body_part_flags | (with as u64) > 0
                 }
-                if has_flag(&sig, BodyPartFlag::Anal) {
+                if has_flag(sig, BodyPartFlag::Anal) {
                     tags.push(Box::new(Selector::Tag("anal".to_owned())));
                 }
-                if has_flag(&sig, BodyPartFlag::Oral) {
+                if has_flag(sig, BodyPartFlag::Oral) {
                     tags.push(Box::new(Selector::Tag("oral".to_owned())));
                 }
-                if has_flag(&sig, BodyPartFlag::Vaginal) {
+                if has_flag(sig, BodyPartFlag::Vaginal) {
                     tags.push(Box::new(Selector::Tag("vaginal".to_owned())));
                 }
-                if has_flag(&sig, BodyPartFlag::Penis) {
+                if has_flag(sig, BodyPartFlag::Penis) {
                     tags.push(Box::new(Selector::Tag("penis".to_owned())));
                 }
+
                 let (_, actuators) =
                     Filter::new(lb.client.device_settings.clone(), devices.as_slice())
                         .load_config(&mut lb.client.device_settings)
+                        .connected()
+                        .enabled()
+                        .with_actuator_types(&[ActuatorType::Position])
                         .with_selector(&Selector::Or(tags))
                         .result();
 
