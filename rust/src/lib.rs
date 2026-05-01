@@ -1,30 +1,24 @@
-use buttplug::core::message::ActuatorType;
-use clibf4::bridge::ffi_bridge::{
-    ContainsKeyword, GetFormID, GetPlayerActorValue, PlayerCharacter_GetSingleton,
-    TESForm_GetFormByEditorID,
-};
-use config::{
-    keyword_store::KeywordSource, triggers::Trigger, variable_store::VariableSource,
-    variables::ConfigVariable,
-};
-use cxx::{CxxString, CxxVector};
-use dd::start_kw_thread;
-use input::{read_input_duration, read_input_string};
-use keyword_store::KeywordStore;
+mod config;
+mod events;
+mod logging;
+mod mcm;
+mod signals;
+mod variable_store;
+mod body_parts;
+mod event_thread;
+
 use lazy_static::lazy_static;
+use std::{
+    collections::HashMap, sync::{Arc, Mutex}, time::Duration
+};
+
 use tokio::{
-    sync::mpsc::{unbounded_channel, UnboundedSender},
-    task::JoinHandle,
+    sync::mpsc::{UnboundedSender, unbounded_channel},
     time::Instant,
 };
-use tracing_subscriber::field::debug;
-use variable_store::VariableStore;
+use tracing::{debug, error, info, warn};
 
-use std::{
-    collections::HashMap,
-    sync::{atomic::AtomicI64, Arc, Mutex}
-};
-use tracing::{debug, error, info};
+use buttplug::core::message::ActuatorType;
 
 use bp_scheduler::{
     client::{BpClient, ExecutionResult},
@@ -35,46 +29,28 @@ use bp_scheduler::{
         util::{read::*, write::*},
     },
     dynamic_tracking::{
-        BoneTrackingStats, DynamicTracking, Margins, StrokerSettings, TrackingSignal,
+        *,
     },
     filter::Filter,
     speed::Speed,
 };
+use variable_store::VariableStore;
 
-use ::config::*;
-use events::{ffi_event::ModEvent, send_mod_event, start_outgoing_event_thread};
-use triggers::Triggers;
+use config::*;
+use events::{ffi_event::ModEvent, send_mod_event};
+use signals::{ BodyPartFlag, ffi_signal::*};
 
-use crate::signals::{BodyPartFlag, ffi_signal::{PenSignal, PenSignalType, TriggerSignal}};
-
-pub static CONFIG_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2";
-pub static PATTERNS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Patterns";
-pub static ACTIONS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Actions";
-pub static TRIGGERS_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Triggers";
-pub static VARIABLES_DIR: &str = "Data\\F4SE\\Plugins\\Telekinesis2\\Variables";
-
-pub static LOGGING_SETTINGS: &str = "Logging.json";
-pub static DEVICE_SETTINGS: &str = "Devices.json";
-pub static BONE_TRACKING: &str = "BoneTracking.json";
-
-mod dd;
-mod events;
-mod input;
-mod logging;
-mod mcm;
-mod signals;
+use event_thread::start_outgoing_event_thread;
 
 #[derive(Debug)]
 pub struct Telekinesis {
     client: BpClient,
-    triggers: Triggers,
     dynamic_task: BoneTrackingStats,
-    variable_store: VariableStore,
-    keyword_store: KeywordStore,
-    triggers_running: HashMap<Trigger, i32>,
-    keyword_update_thread: Option<JoinHandle<()>>,
-    stroker_settings: StrokerSettings,
     sender: Option<UnboundedSender<TrackingSignal>>,
+    stroker_settings: StrokerSettings,
+    variable_store: VariableStore,
+    trigger_actions: HashMap<String, TriggerAction>,
+    trigger_handles: HashMap<String, i32>
 }
 
 impl Telekinesis {
@@ -164,26 +140,6 @@ lazy_static! {
 #[cxx::bridge]
 mod ffi {
     extern "Rust" {
-        // legacy
-        fn lb_process_actor_value(form_id: u32, value: f32);
-        fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32;
-        fn lb_action(action: &str, speed: i32, time_sec: f32) -> i32;
-
-        // signal sinks
-        fn lb_scene_start(
-            scene: &str,
-            scene_tags: &CxxVector<CxxString>,
-            speed: i32,
-            time_sec: f32,
-        ) -> i32;
-
-        type PenSignal;
-        fn lb_recv_signal(sig: &PenSignal);
-
-        type TriggerSignal;
-        fn lb_recv_trigger(sig: &TriggerSignal);
-
-        // direct commands
         fn lb_is_loaded() -> bool;
         fn lb_connect(
             connection: i32,
@@ -194,9 +150,19 @@ mod ffi {
             serial: bool,
         ) -> bool;
         fn lb_disconnect();
-        fn lb_update(id: i32, speed: i32) -> bool;
-        fn lb_stop(id: i32) -> bool;
 
+        // --- signal sinks ---
+        type PenSignal;
+        fn lb_recv_signal(sig: &PenSignal);
+
+        type TriggerSignal;
+        fn lb_recv_trigger(sig: &TriggerSignal);
+
+        // --- direct commands ---
+        // TODO currently unused
+        fn lb_action(action_name_unsanitized: &str, speed: i32, time_secs: f32) -> i32;
+        // fn lb_update(id: i32, speed: i32) -> bool;
+        // fn lb_stop(id: i32) -> bool;
         // fn lb_control(
         //     qry: &str,
         //     arg0: i32,
@@ -207,8 +173,111 @@ mod ffi {
     }
 }
 
+pub fn lb_is_loaded() -> bool {
+    Telekinesis::is_loaded()
+}
+
+pub fn lb_disconnect() {
+    Telekinesis::run_static_destroy(|lb| {
+        lb.client.stop_all();
+        lb.client.disconnect();
+    });
+}
+
+pub fn lb_connect(
+    connection: i32,
+    port: &str,
+    host: &str,
+    bluetooth: bool,
+    xinput: bool,
+    serial: bool,
+) -> bool {
+    // TODO: Do this in to background thread to avoid small UI stutter
+    if let Ok(mut guard) = LB.state.try_lock() {
+        let settings = ClientSettings {
+            connection: match connection {
+                0 => ConnectionType::InProcess,
+                1 => ConnectionType::WebSocket(format!("{}:{}", host, port)),
+                _ => ConnectionType::Test,
+            },
+            in_process_features: InProcessFeatures {
+                bluetooth,
+                serial,
+                xinput,
+            },
+            pattern_path: String::from(PATTERNS_DIR),
+        };
+        info!(?settings, "lb_connect");
+        let client = BpClient::connect(
+            settings,
+            read_or_default::<ActuatorSettings>(CONFIG_DIR, DEVICE_SETTINGS),
+        );
+        if let Err(e) = client {
+            error!(?e, "connection error");
+            return false;
+        }
+
+        let bone_track = BoneTrackingStats::default();
+
+        let variable_store = VariableStore::init(vec![
+            (VAR_BONE_TRACKING_RATE.into(), bone_track.cur_avg_ms.clone()),
+            (VAR_BONE_TRACKING_DEPTH.into(), bone_track.cur_avg_depth.clone()),
+            (VAR_BONE_TRACKING_POS.into(), bone_track.cur_pos.clone()),
+        ]);
+
+        let mut trigger_actions = HashMap::new();
+        for trigger in read_trigger_actions(TRIGGERS_DIR).0 {
+            trigger_actions.insert(trigger.trigger.to_ascii_lowercase(), trigger);
+        }
+
+        let mut lb = Telekinesis {
+            client: client.unwrap(),
+            dynamic_task: bone_track,
+            variable_store,
+            stroker_settings: read_or_default(CONFIG_DIR, BONE_TRACKING),
+            sender: None,
+            trigger_actions,
+            trigger_handles: HashMap::new(),
+        };
+
+        lb.client.read_actions(ACTIONS_DIR);
+
+        start_outgoing_event_thread(&lb.client);
+
+        if lb.client.scan_for_devices() {
+            send_mod_event(ModEvent::new("Tele_ConnectionSuccess", "", 0.0));
+        } else {
+            send_mod_event(ModEvent::new("Tele_ConnectionError", "", 0.0));
+        };
+
+        guard.replace(lb);
+    } else {
+        error!("init failed");
+    }
+    true
+}
+
 pub fn lb_recv_trigger(trig: &TriggerSignal) {
-    debug!("lb_recv_trigger {}", trig.name, trig.);
+    info!("lb_recv_trigger {}", trig.name);
+    let evt_name = trig.name.to_ascii_lowercase();
+    let duration = if trig.duration_ms > 0 { Duration::from_millis(trig.duration_ms) } else { Duration::MAX };
+    let stop_event = trig.end_trigger;
+
+    Telekinesis::run_static_no_return(|lb| {
+        if let Some(trigger) = lb.trigger_actions.get(&evt_name) {
+            debug!(?trigger, "found trigger");
+            let action_refs = get_actions_from_refs(lb, trigger.actions.clone());
+            if !stop_event {
+                let result = lb.client.execute_actions(action_refs, vec![], Speed::max(), duration, -1);
+                lb.trigger_handles.insert(evt_name, result.handle);
+                send_action_events(&result);
+            } else if let Some(handle) = lb.trigger_handles.get(&evt_name) {
+                lb.client.stop(*handle);
+            }
+        } else {
+            warn!(evt_name, "trigger not found")
+        }
+    });
 }
 
 pub fn lb_recv_signal(sig: &PenSignal) {
@@ -317,263 +386,6 @@ pub fn lb_recv_signal(sig: &PenSignal) {
     });
 }
 
-pub struct Fo4KeywordSource {}
-
-impl KeywordSource for Fo4KeywordSource {
-    fn player_has_keyword(&self, editor_id: &str) -> bool {
-        unsafe { ContainsKeyword(PlayerCharacter_GetSingleton(), &editor_id) }
-    }
-}
-
-pub struct Fo4VariableSource {}
-
-impl VariableSource for Fo4VariableSource {
-    fn get_player_actor_value(&self, editor_id: &str) -> f32 {
-        unsafe { GetPlayerActorValue(editor_id) }
-    }
-    fn get_form_id(&self, editor_id: &str) -> u32 {
-        unsafe { GetFormID(TESForm_GetFormByEditorID(editor_id)) }
-    }
-}
-
-pub fn lb_connect(
-    connection: i32,
-    port: &str,
-    host: &str,
-    bluetooth: bool,
-    xinput: bool,
-    serial: bool,
-) -> bool {
-    // TODO: Do this in to background thread to avoid small UI stutter
-    if let Ok(mut guard) = LB.state.try_lock() {
-        let settings = ClientSettings {
-            connection: match connection {
-                0 => ConnectionType::InProcess,
-                1 => ConnectionType::WebSocket(format!("{}:{}", host, port)),
-                _ => ConnectionType::Test,
-            },
-            in_process_features: InProcessFeatures {
-                bluetooth,
-                serial,
-                xinput,
-            },
-            pattern_path: String::from(PATTERNS_DIR),
-        };
-        info!(?settings, "lb_connect");
-        let client = BpClient::connect(
-            settings,
-            read_or_default::<ActuatorSettings>(CONFIG_DIR, DEVICE_SETTINGS),
-        );
-        if let Err(a) = client {
-            error!(?a, "connection error");
-            return false;
-        }
-
-        let bone_track = BoneTrackingStats::default();
-
-        let mut actor_values = vec![];
-        let mut keywords = vec![];
-        for var in read_variables() {
-            match var {
-                ConfigVariable::PlayerActorValue(player_actor_value) => {
-                    actor_values.push(player_actor_value.clone())
-                }
-                ConfigVariable::PlayerKeyword(keyword) => keywords.push(keyword.clone()),
-                _ => {}
-            }
-        }
-        let variable_store = VariableStore::init(
-            Box::new(Fo4VariableSource {}),
-            actor_values,
-            vec![
-                ("BoneTrackingRate".into(), bone_track.cur_avg_ms.clone()),
-                ("BoneTrackingDepth".into(), bone_track.cur_avg_depth.clone()),
-            ],
-        );
-        let mut triggers = Triggers::default();
-        triggers.load_triggers(read_config_dir(TRIGGERS_DIR.into()));
-
-        let mut lb = Telekinesis {
-            client: client.unwrap(),
-            triggers,
-            dynamic_task: bone_track,
-            // bone_tracking_config: read_bone_tracking_settings(),
-            // tracking_counter: 0,
-            variable_store,
-            triggers_running: HashMap::new(),
-            keyword_store: KeywordStore::init(Box::new(Fo4KeywordSource {}), keywords),
-            keyword_update_thread: None,
-            stroker_settings: read_or_default(CONFIG_DIR, BONE_TRACKING),
-            sender: None,
-        };
-
-        lb.client.read_actions(ACTIONS_DIR);
-
-        start_outgoing_event_thread(&lb.client);
-
-        if lb.client.scan_for_devices() {
-            send_mod_event(ModEvent::new("Tele_ConnectionSuccess", "", 0.0));
-        } else {
-            send_mod_event(ModEvent::new("Tele_ConnectionError", "", 0.0));
-        };
-
-        let cloned_kws = lb.keyword_store.clone_keywords();
-        start_kw_thread(&mut lb, cloned_kws);
-        guard.replace(lb);
-    } else {
-        error!("init failed");
-    }
-    true
-}
-
-pub fn lb_is_loaded() -> bool {
-    Telekinesis::is_loaded()
-}
-
-fn read_variables() -> Vec<config::variables::ConfigVariable> {
-    let vars = read_config_dir(VARIABLES_DIR.into());
-    for var in &vars {
-        debug!(?var, "read variable");
-    }
-    info!("read {} variables...", vars.len());
-    vars
-}
-
-pub fn lb_disconnect() {
-    Telekinesis::run_static_destroy(|lb| {
-        lb.client.stop_all();
-        lb.client.disconnect();
-    });
-}
-
-fn lb_action(action_name_unsanitized: &str, speed: i32, time_secs: f32) -> i32 {
-    let action_name = action_name_unsanitized.to_ascii_lowercase();
-    info!(
-        action_name,
-        action_name_unsanitized, speed, time_secs, "lb_action"
-    );
-    Telekinesis::run_static(
-        |lb| {
-            let actions = get_actions_from_refs(
-                lb,
-                vec![ActionRef {
-                    action: action_name,
-                    strength: Stren::Constant(100),
-                }],
-            );
-            let results = lb.client.execute_actions(
-                actions,
-                vec![],
-                Speed::new(speed.into()),
-                read_input_duration(time_secs),
-                -1,
-            );
-            send_action_events(&results);
-            results.handle
-        },
-        -1,
-    );
-    -1
-}
-
-fn lb_scene_start(
-    scene_name: &str,
-    scene_tags: &CxxVector<CxxString>,
-    speed: i32,
-    time_secs: f32,
-) -> i32 {
-    let tags = read_input_string(scene_tags);
-    info!(scene_name, speed, time_secs, ?tags, "lb_scene_start");
-    Telekinesis::run_static(
-        |lb| {
-            let (handle, triggers) = process_triggers(lb, None, Some(scene_name), &tags);
-            for trigger in triggers {
-                if let Trigger::Scene(scene) = trigger {
-                    send_mod_event(ModEvent::new("Tele_Scene", &scene.description, 0.0));
-                }
-            }
-            handle
-        },
-        -1,
-    )
-}
-
-fn lb_process_event(event_name: &str, str_arg: &str, num_arg: f32) -> i32 {
-    info!(event_name, str_arg, num_arg, "lb_process_event");
-    Telekinesis::run_static(
-        |lb| {
-            let (handle, _) = process_triggers(lb, Some(event_name), None, &vec![]);
-            handle
-        },
-        -1,
-    )
-}
-
-fn lb_process_actor_value(form_id: u32, value: f32) {
-    Telekinesis::run_static_no_return(|lb| {
-        if lb.variable_store.update(form_id, value) {
-            process_triggers(lb, None, None, &vec![]);
-        }
-    });
-}
-
-fn process_triggers(
-    lb: &mut Telekinesis,
-    event_name: Option<&str>,
-    scene_name: Option<&str>,
-    scene_tags: &Vec<String>,
-) -> (i32, Vec<Trigger>) {
-    debug!(?event_name, ?scene_name, ?scene_tags, "process_triggers");
-    let started = lb.triggers.start_events(
-        &lb.variable_store,
-        &lb.keyword_store,
-        event_name,
-        scene_name,
-        scene_tags,
-    );
-
-    let mut handle = -1;
-    for trigger in started.iter() {
-        let actions = get_actions_from_refs(lb, trigger.actions());
-        let duration = trigger.duration();
-        let results = lb
-            .client
-            .execute_actions(actions, vec![], Speed::max(), duration, handle);
-        send_action_events(&results);
-        handle = results.handle;
-        debug!(handle, ?trigger, "started trigger");
-        lb.triggers_running.insert(trigger.clone(), handle);
-    }
-
-    let stop_iter = lb
-        .triggers
-        .stop_events(&lb.variable_store, &lb.keyword_store, event_name);
-    for trigger in stop_iter.into_iter() {
-        if let Some(handle) = lb.triggers_running.get(&trigger) {
-            lb.client.stop(*handle);
-            debug!(handle, ?trigger, "stopped trigger");
-        } else {
-            error!(?trigger, "no handle found")
-        }
-    }
-
-    (handle, started)
-}
-
-pub fn lb_update(handle: i32, speed: i32) -> bool {
-    info!(handle, speed, "lb_update");
-    Telekinesis::run_static(
-        |lb| lb.client.update(handle, Speed::new(speed.into())),
-        false,
-    )
-}
-
-pub fn lb_stop(handle: i32) -> bool {
-    info!(handle, "lb_stop");
-    // TODO: Stop listening
-    Telekinesis::run_static(|lb| lb.client.stop(handle), false)
-}
-
 fn send_action_events(results: &ExecutionResult) {
     for result in &results.actions {
         let action_name = result.0.clone();
@@ -614,19 +426,7 @@ fn get_actions_from_refs(
         {
             let strn = match action_ref.strength {
                 Stren::Constant(x) => Strength::Constant(x),
-                Stren::Variable(var) => Strength::Variable(match var {
-                    Variable::BoneTrackingRate => lb.dynamic_task.cur_avg_ms.clone(),
-                    Variable::BoneTrackingDepth => lb.dynamic_task.cur_avg_depth.clone(),
-                    Variable::BoneTrackingPos => lb.dynamic_task.cur_pos.clone(),
-                    Variable::PlayerActorValue(name) => {
-                        if let Some(var) = lb.variable_store.get_normalized(&name) {
-                            var.clone()
-                        } else {
-                            error!(name, "unknown player actor value");
-                            Arc::new(AtomicI64::new(0))
-                        }
-                    }
-                }),
+                Stren::Variable(var) => Strength::Variable(lb.variable_store.get(&var)),
                 Stren::Funscript(x, y) => Strength::Funscript(x, y),
                 Stren::RandomFunscript(x, y) => Strength::RandomFunscript(x, y),
             };
@@ -634,4 +434,38 @@ fn get_actions_from_refs(
         }
     }
     result
+}
+
+fn lb_action(action_name_unsanitized: &str, speed: i32, time_secs: f32) -> i32 {
+    let action_name = action_name_unsanitized.to_ascii_lowercase();
+    info!(
+        action_name,
+        action_name_unsanitized, speed, time_secs, "lb_action"
+    );
+    Telekinesis::run_static(
+        |lb| {
+            let actions = get_actions_from_refs(
+                lb,
+                vec![ActionRef {
+                    action: action_name,
+                    strength: Stren::Constant(100),
+                }],
+            );
+            let results = lb.client.execute_actions(
+                actions,
+                vec![],
+                Speed::new(speed.into()),
+                if time_secs > 0.0 {
+                        Duration::from_millis((time_secs * 1000.0) as u64)
+                    } else {
+                        Duration::MAX
+                    },
+                -1,
+            );
+            send_action_events(&results);
+            results.handle
+        },
+        -1,
+    );
+    -1
 }

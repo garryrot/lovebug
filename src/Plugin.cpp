@@ -17,37 +17,7 @@ using namespace RE::BSScript;
 #include "MCM.cpp"
 #include "Native.cpp"
 #include "Events.cpp"
-#include "ActorValueSink.cpp"
 
-void InitializeMessaging()
-{
-    const auto messaging = F4SE::GetMessagingInterface();
-    if (!messaging || !messaging->RegisterListener([](F4SE::MessagingInterface::Message *message)
-        {
-            switch (message->type) {
-                case F4SE::MessagingInterface::kGameDataReady: {
-                    lb_log_info("game data ready");
-                    GameVM* gameVm = RE::GameVM::GetSingleton();
-                    if (gameVm) {
-                        gameVm->GetVM()->RegisterForLogEvent(LogEventSink::GetSingleton());
-                    }
-                    break;
-                }
-                case F4SE::MessagingInterface::kGameLoaded: {
-                    lb_log_info("game loaded");
-                    auto playerValueSink = ActorValueSink::GetSingleton();
-                    RE::TESObjectREFR *player = RE::PlayerCharacter::GetSingleton();
-                    player->RegisterSink(playerValueSink);
-                    break;
-                }
-            }
-        })) {
-        lb_log_error("Failed to get messaging interface");
-        return;
-    } else {
-        lb_log_info("Registered messaging interface");
-    }
-}
 
 #ifdef F4SEPluginVersion
 F4SE_EXPORT constinit auto F4SEPlugin_Version = []() noexcept {
@@ -95,7 +65,6 @@ extern "C" __declspec(dllexport) bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadIn
 {
 	F4SE::Init(f4se);
 	lb_log_info("plugin loaded");
-    InitializeMessaging();
     InitializeNative();
 	return true;
 }

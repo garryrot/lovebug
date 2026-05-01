@@ -8,7 +8,6 @@ name = "telekinesis"
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]
-config = { path = "./config" }
 bp_scheduler = { path = "./bp_scheduler" }
 clibf4 = { path = "./clibf4" }
 

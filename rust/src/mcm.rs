@@ -1,9 +1,9 @@
-use bp_scheduler::actuator::*;
-use config::body_parts::*;
-use ffi_mcm::DevicePage;
 use tracing::{debug, error, info};
 
-use crate::Telekinesis;
+use bp_scheduler::actuator::*;
+use ffi_mcm::DevicePage;
+
+use crate::{Telekinesis, body_parts::*};
 
 #[cxx::bridge]
 mod ffi_mcm {
